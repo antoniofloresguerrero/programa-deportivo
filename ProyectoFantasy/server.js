@@ -380,6 +380,14 @@ app.delete('/api/partidos/eliminar/:id_partido', (req, res) => {
         });
     });
 });
+// 13. API NUEVA: OBTENER JUGADORES FILTRADOS POR ID DE EQUIPO DIRECTAMENTE DE MYSQL
+app.get('/api/jugadores/equipo/:id_equipo', (req, res) => {
+    const query = `SELECT * FROM jugadores WHERE id_equipo = ? ORDER BY posicion DESC, dorsal ASC`;
+    db.query(query, [req.params.id_equipo], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results || []);
+    });
+});
 
 
 app.listen(3000, () => {

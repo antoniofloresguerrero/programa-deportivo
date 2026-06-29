@@ -3,94 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <title>LaLiga Fantasy 2025/2026 - Conexión MySQL</title>
-            <style>
-            /* CONFIGURACIÓN BLINDADA: Elimina duplicados de C:/ y activa el estadio */
-             /* CONFIGURACIÓN INTEGRAL: Fondo de estadio real a través del servidor Node */
+             <style>
+        /* FONDO GENERAL MAESTRO EN ALTA DEFINICIÓN */
         html, body {
             margin: 0 !important;
             padding: 0 !important;
             min-height: 100vh !important;
-            font-family: 'Segoe UI', sans-serif;
-            
-            /* Servimos la imagen directamente desde el puerto 3000 de Node sin pérdidas */
-            background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), 
-                        url('http://localhost:3000/fotos/fondo_estadio.jpg') no-repeat center center fixed !important;
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.45)), 
+                        url('fotos/fondo_estadio.jpg') no-repeat center center fixed !important;
             background-size: cover !important;
+            color: #fff;
         }
 
-
-
-        /* 2. CÓDIGO DEL MENÚ HAMBURGUESA LATERAL INTERACTIVO */
+        /* MENÚ LATERAL HAMBURGUESA PREMIUM */
         .sidebar-menu {
-            position: fixed; top: 0; left: -220px; width: 220px; height: 100%;
-            background-color: rgba(17, 17, 17, 0.96); box-shadow: 4px 0 10px rgba(0,0,0,0.5);
-            z-index: 1000; transition: 0.3s ease; padding-top: 60px; box-sizing: border-box;
+            position: fixed; top: 0; left: -240px; width: 240px; height: 100%;
+            background-color: rgba(10, 10, 10, 0.98); box-shadow: 6px 0 20px rgba(0,0,0,0.7);
+            z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding-top: 60px; box-sizing: border-box;
         }
         .hamburguesa-trigger {
             position: fixed; top: 15px; left: 15px; z-index: 1001;
-            background: #00CC66; color: black; font-size: 14px; padding: 10px 15px;
-            border-radius: 4px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            background: #00CC66; color: black; font-size: 13px; padding: 10px 18px;
+            border-radius: 6px; cursor: pointer; font-weight: 800; box-shadow: 0 4px 15px rgba(0,204,102,0.3);
+            transition: 0.2s; text-transform: uppercase;
         }
+        .hamburguesa-trigger:hover { transform: scale(1.05); background: #00ff7f; }
         .sidebar-menu:hover, .hamburguesa-trigger:hover + .sidebar-menu { left: 0; }
         .sidebar-menu a {
-            display: block; padding: 15px 25px; color: #ccc; text-decoration: none;
-            font-weight: bold; font-size: 15px; border-bottom: 1px solid #222; transition: 0.2s;
+            display: block; padding: 16px 25px; color: #bbb; text-decoration: none;
+            font-weight: 600; font-size: 14px; border-bottom: 1px solid #1a1a1a; transition: 0.2s;
         }
-        .sidebar-menu a:hover { background: #00CC66; color: black; padding-left: 35px; }
+        .sidebar-menu a:hover { background: #00CC66; color: black; padding-left: 32px; }
 
-        /* 3. BARRA HORIZONTAL CON LOS 20 ESCUDOS DE LA LIGA */
+        /* REVOLUCIÓN: BARRA DE ESCUDOS TRANSPARENTE (Sin bloque blanco feo) */
         .carrusel-escudos {
-            background: rgba(255, 255, 255, 0.92); padding: 10px; margin: 15px auto;
-            max-width: 1200px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            display: flex; justify-content: center; align-items: center; gap: 18px;
+            background: rgba(255, 255, 255, 0.06) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            padding: 12px; margin: 15px auto;
+            max-width: 1200px; border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex; justify-content: center; align-items: center; gap: 20px;
             overflow-x: auto; box-sizing: border-box;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-        .escudo-item { width: 38px; height: 38px; object-fit: contain; cursor: pointer; transition: 0.2s; }
-        .escudo-item:hover { transform: scale(1.25); }
+        .escudo-item { 
+            width: 36px; height: 36px; object-fit: contain; cursor: pointer; 
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.4)) grayscale(10%);
+        }
+        .escudo-item:hover { 
+            transform: scale(1.35) translateY(-3px); 
+            filter: drop-shadow(0px 8px 16px rgba(0,204,102,0.6)) grayscale(0%);
+        }
 
-        /* 4. SOLUCIÓN DEFINITIVA DE TRANSPARENCIA: Levanta las lonas grises que tapaban el fondo */
-        .container { 
-            max-width: 1200px; 
-            margin: 20px auto; 
-            padding: 0 20px; 
-            box-sizing: border-box;
-            background: transparent !important; /* Evita que la caja de la web pinte un fondo gris */
-        }
-        .panel { 
-            display: none; 
-            background: transparent !important; /* Asegura transparencia en las pestañas */
-        }
+        /* DISEÑO DE CRISTAL AHUMADO OSCURO (Glassmorphism) */
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; box-sizing: border-box; }
+        .panel { display: none; }
         .panel.active { display: block; }
         
-        /* PANELES INDIVIDUALES TRANSLÚCIDOS MÁS VISIBLES Y PROFESIONALES */
         .form-box { 
-            background: rgba(255, 255, 255, 0.94) !important; /* Panel blanco flotante nítido al 94% */
-            padding: 20px; 
-            border-radius: 8px; 
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3); 
+            background: rgba(15, 15, 15, 0.78) !important; 
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            padding: 22px; 
+            border-radius: 12px; 
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6) !important; 
             margin-bottom: 25px; 
-            border-top: 4px solid #00CC66; 
+            border-top: 4px solid #00CC66 !important;
+            color: #fff !important;
         }
 
-        .col-acta-selector { background: rgba(255, 255, 255, 0.96) !important; padding: 20px; border-radius: 8px; }
-        .submenu-lineal { display: flex; gap: 2px; background: #111; border-radius: 6px 6px 0 0; overflow: hidden; }
-        .sub-tab-btn { background: none; border: none; color: #aaa; padding: 12px 25px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px; flex: 1; text-align: center; }
-        .sub-tab-btn:hover, .sub-tab-btn.active { background: #00CC66; color: black; }
+        /* TABLA DE CLASIFICACIÓN EN MODO OSCURO PREMIUM */
+        table { color: #eee !important; }
+        th { color: #ff9900 !important; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        
+        /* FILTROS EN UNA SOLA LÍNEA HORIZONTAL MÁS VISUAL */
+        .selector-horizontal-linea {
+            display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+        }
+        .select-dark {
+            background: #111; color: #fff; padding: 8px 12px; border-radius: 6px; 
+            border: 1px solid #333; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .select-dark:focus { border-color: #00CC66; outline: none; }
 
-        /* REJILLAS, BOTONES Y MARCADORES */
-        .btn-g { background: #00CC66; color: black; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s; }
-        .btn-g:hover { background-color: #00aa55; transform: translateY(-1px); }
-        .item-partido-btn { background: #111; color: white; border: 2px solid #00CC66; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s; }
-        .item-partido-btn:hover { background: #00CC66; color: black; }
-        .marcador-visual { background: #111; padding: 20px; border-radius: 10px; text-align: center; color: white; margin-bottom: 25px; font-size: 24px; font-weight: bold; display: none; }
-        .goles-badge { background: #00CC66; padding: 5px 15px; border-radius: 5px; margin: 0 15px; color: black; }
+        /* BOTONES DE DISEÑO DIGITAL */
+        .btn-g { background: #00CC66; color: black; border: none; padding: 10px 22px; font-weight: 800; border-radius: 6px; cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 12px; }
+        .btn-g:hover { background-color: #00ff7f; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,255,127,0.3); }
+        
+        .item-partido-btn { background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s; }
+        .item-partido-btn:hover { background: #00CC66; color: black; border-color: #00CC66; box-shadow: 0 4px 15px rgba(0,204,102,0.3); }
+        
+        .marcador-visual { background: rgba(10,10,10,0.85); padding: 18px; border-radius: 10px; text-align: center; color: white; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.1); }
+        .goles-badge { background: #00CC66; padding: 5px 15px; border-radius: 5px; margin: 0 15px; color: black; font-weight: 900; }
+        
         .grid-actas { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        .pantalla-horizontal { display: grid; grid-template-columns: 1.4fr 1fr; gap: 25px; align-items: stretch; margin-top: 20px; }
-        .campo-futbol { width: 100%; height: 480px; background-color: #2e7d32; border: 4px solid white; border-radius: 12px; position: relative; box-shadow: 0 8px 16px rgba(0,0,0,0.4); overflow: hidden; }
-        .linea-medio { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background-color: rgba(255,255,255,0.5); }
-        .circulo-central { position: absolute; top: 50%; left: 50%; width: 90px; height: 90px; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%); }
-        .check-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 14px; font-weight: 500; }
+        .col-acta-selector { background: rgba(20, 20, 20, 0.75); backdrop-filter: blur(10px); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .pantalla-horizontal { display: grid; grid-template-columns: 1.35fr 1fr; gap: 25px; align-items: stretch; margin-top: 20px; }
+        
+        .campo-futbol { width: 100%; height: 480px; background-color: #1e5e2f; border: 4px solid rgba(255,255,255,0.8); border-radius: 12px; position: relative; box-shadow: 0 12px 30px rgba(0,0,0,0.5); overflow: hidden; }
+        .linea-medio { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background-color: rgba(255,255,255,0.4); }
+        .circulo-central { position: absolute; top: 50%; left: 50%; width: 90px; height: 90px; border: 2px solid rgba(255,255,255,0.4); border-radius: 50%; transform: translate(-50%, -50%); }
+        .check-item { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #222; font-size: 14px; color: #ddd; }
+        
+        .submenu-lineal { display: flex; gap: 2px; background: #0a0a0a; border-radius: 8px 8px 0 0; overflow: hidden; }
+        .sub-tab-btn { background: none; border: none; color: #888; padding: 14px 25px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px; flex: 1; text-align: center; }
+        .sub-tab-btn:hover, .sub-tab-btn.active { background: #00CC66; color: black; }
     </style>
+
 
 
 
@@ -134,244 +157,151 @@
 
     <div class="container">
 
-        <!-- PESTAÑA 1: PLANIFICACIÓN DE JORNADAS Y ENCUENTROS -->
+              <!-- ==================== PESTAÑA A: CONFIGURAR CALENDARIO (DISEÑO LINEAL) ==================== -->
         <div id="sec-config" class="panel active">
-            <h2>⚙️ Planificar Encuentros de la Temporada 2025/2026</h2>
-            <div class="form-box">
-                <h3>1. Crear o Seleccionar Jornada</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Selecciona Número de Jornada:</label>
-                        <select id="cfg-jornada-sel" onchange="cargarListaPartidosDeJornadaDesdeBD()"></select>
-                    </div>
-                    <div class="form-group" style="justify-content: flex-end;">
-                        <button class="btn-g" onclick="crearNuevaJornadaEnBD()">➕ Crear Nueva Jornada en MySQL</button>
-                    </div>
+            <h2 style="color: #ff9900; text-transform: uppercase; font-size: 18px; letter-spacing: 0.5px; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">⚙️ Generador Oficial de Partidos de LaLiga</h2>
+            
+            <!-- FORMULARIO DE CRISTAL EN UNA SOLA LÍNEA HORIZONTAL -->
+            <div class="form-box" style="padding: 15px 25px; display: flex; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap;">
+                
+                <!-- 1. Campo Número de Jornada -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-weight: 800; font-size: 12px; text-transform: uppercase; color: #aaa;">Jornada:</span>
+                    <input type="number" id="crear-jornada" min="1" max="38" value="1" class="select-dark" style="width: 55px; text-align: center; padding: 6px; font-size: 14px;">
                 </div>
-            </div>
 
-            <div class="form-box">
-                <h3>2. Emparejar Nuevo Partido</h3>
-                <div class="form-grid">
-                    <div class="form-group"><label>Equipo Local:</label><select id="cfg-local"></select></div>
-                    <div class="form-group"><label>Equipo Visitante:</label><select id="cfg-visitante"></select></div>
-                    <div class="form-group" style="justify-content: flex-end;"><button class="btn-g" onclick="registrarNuevoPartidoEnBD()">🏟️ Guardar Partido en MySQL</button></div>
+                <!-- 2. Selector Club Local -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-weight: 800; font-size: 12px; text-transform: uppercase; color: #00CC66;">Local:</span>
+                    <select id="crear-local-sel" class="select-dark" style="padding: 6px 12px; font-size: 13px; max-width: 180px;"></select>
                 </div>
+
+                <span style="color: #666; font-weight: bold; font-size: 14px;">vs</span>
+
+                <!-- 3. Selector Club Visitante -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-weight: 800; font-size: 12px; text-transform: uppercase; color: #ff9900;">Visitante:</span>
+                    <select id="crear-visitante-sel" class="select-dark" style="padding: 6px 12px; font-size: 13px; max-width: 180px;"></select>
+                </div>
+
+                <!-- 4. Botón de Inyección Directa -->
+                <button class="btn-g" style="background-color: #00CC66; color: black; padding: 10px 20px; font-size: 12px;" onclick="ejecutarCreacionPartidoManualBD()">
+                    ➕ Registrar Encuentro
+                </button>
+
             </div>
         </div>
-                <!-- PESTAÑA B: VISITAR ACTAS Y CALIFICACIONES (UNIFICADA CON SELECTORES TÁCTICOS) -->
+
+               <!-- ==================== PESTAÑA B: PANEL DE CONTROL DE ACTAS (DISEÑO HORIZONTAL) ==================== -->
         <div id="sec-partidos" class="panel">
-            <h2>🏟️ Historial y Calificaciones de Partidos</h2>
-                      <!-- FILTRO DE JORNADAS Y BOTÓN DE ACCIÓN DE RECALCULO DE LA LIGA -->
-            <div class="form-box" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; background: #fff; padding: 15px;">
-                <div>
-                    <label style="font-weight:bold;">Selecciona la Jornada que deseas ver:</label>
-                    <select id="ver-jornada-sel" onchange="cargarListaPartidosDeJornadaDesdeBD()" style="padding:8px; margin-left:10px; border-radius:4px; border:1px solid #ccc; font-weight:bold;"></select>
+            
+            <!-- NUEVA BARRA DE CONTROL EN UNA SOLA LÍNEA: Inteligente, compacta y translúcida -->
+            <div class="form-box selector-horizontal-linea" style="margin-bottom: 20px; padding: 15px 25px;">
+                <!-- 1. Filtro Desplegable de la Fecha -->
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-weight: 800; font-size: 13px; text-transform: uppercase; color: #ff9900; letter-spacing: 0.5px;">📅 Fecha:</span>
+                    <select id="ver-jornada-sel" onchange="cargarListaPartidosDeJornadaDesdeBD()" class="select-dark" style="padding: 6px 12px; font-size: 14px;"></select>
                 </div>
-                <!-- NUEVO BOTÓN SOLICITADO: Sincroniza la liga de los 20 clubes con un solo clic -->
-                <button class="btn-g" style="background-color: #ff9900; color: black; font-size: 13px; padding: 10px 20px; display: flex; align-items: center; gap: 6px;" onclick="ejecutarSincronizacionManualLiga()">
-                    🔄 Sincronizar y Calcular Clasificación
+
+                <!-- 2. Contenedor de Partidos de la Jornada (Alineados en formato de pastillas horizontales) -->
+                <div id="lista-partidos-jornada-vagas" style="display: flex; align-items: center; gap: 10px; overflow-x: auto; flex: 1; max-width: 65%; padding: 5px 10px; scrollbar-width: none;">
+                    <!-- Se inyectan dinámicamente aquí en formato de botones horizontales directos -->
+                </div>
+
+                <!-- 3. Botón de Sincronización Masiva de Puntos -->
+                <button class="btn-g" style="background-color: #ff9900; color: black; padding: 8px 16px; font-size: 11px; gap: 6px; display: flex; align-items: center;" onclick="ejecutarSincronizacionManualLiga()">
+                    🔄 Sincronizar Liga
                 </button>
             </div>
 
-
-            <div class="lista-partidos-jornada" id="visor-lista-partidos"></div>
-                       <!-- MARCADOR INTERACTIVO SUPERIOR ACTUALIZADO -->
-                       <!-- MARCADOR DE CÉSPED INTERACTIVO SUPERIOR (BLINDADO) -->
-            <div id="panel-marcador" class="marcador-visual" style="display: block; background: #111; padding: 15px; border-radius: 8px; text-align: center; color: white; margin-bottom: 20px; border: 1px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 15px; font-size: 20px; font-weight: bold;">
-                    
-                    <!-- Letrero Club Local -->
-                    <span id="txt-marcador-local" style="color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px;">LOCAL</span>
-                    
-                    <!-- Input Selector Goles Local -->
-                    <input type="number" id="marcador-goles-l" min="0" value="0" style="width: 55px; text-align: center; font-size: 22px; font-weight: bold; background: #1a1a1a; color: #00CC66; border: 2px solid #00CC66; border-radius: 6px; padding: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">
-                    
-                    <span style="color: #555; font-size: 24px;">-</span>
-                    
-                    <!-- Input Selector Goles Visitante -->
-                    <input type="number" id="marcador-goles-v" min="0" value="0" style="width: 55px; text-align: center; font-size: 22px; font-weight: bold; background: #1a1a1a; color: #00CC66; border: 2px solid #00CC66; border-radius: 6px; padding: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">
-                    
-                    <!-- Letrero Club Visitante -->
-                    <span id="txt-marcador-visitante" style="color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px;">VISITANTE</span>
-                    
-                </div>
-            </div>
-
-
-                        <!-- NUEVO CONTENEDOR: Muestra el Valor Total de los 11 titulares del Césped -->
-            <div id="panel-valores-equipo" style="display: none; grid-template-columns: 1fr 1fr; gap: 20px; background-color: #111; padding: 12px; border-radius: 6px; color: white; text-align: center; font-weight: bold; margin-bottom: 20px; border-bottom: 3px solid #00CC66;">
-                <div style="border-right: 1px solid #444;">
-                    <span style="color: #ccc; font-size: 11px; text-transform: uppercase;">Valor Equipo Local</span>
-                    <div id="valor-total-local" style="font-size: 20px; color: #00CC66; margin-top: 2px;">0.0 Pts</div>
-                </div>
-                <div>
-                    <span style="color: #ccc; font-size: 11px; text-transform: uppercase;">Valor Equipo Visitante</span>
-                    <div id="valor-total-visitante" style="font-size: 20px; color: #00CC66; margin-top: 2px;">0.0 Pts</div>
-                </div>
-            </div>
-
-
-            <!-- FILAS CON CHECKS Y SELECTORES DE FORMACIONES PREFIJADAS DEBAJO DE LOS CLUBES -->
-            <div class="grid-actas" id="panel-listas-checks" style="display: none; margin-bottom: 25px;">
-                <!-- CONFIGURACIÓN EQUIPO LOCAL -->
-                <div class="col-acta-selector">
-                    <h3 id="titulo-lista-local" style="margin-top:0; color:#004d99;">-</h3>
-                    <div class="form-group" style="margin-bottom: 12px;">
-                        <label style="font-size:12px; color:#333;">Esquema Táctico Prefijado:</label>
-                        <select id="tactic-local" onchange="aplicarEsquemaPrefijado('local')">
-                            <option value="4-4-2">4-4-2 (Clásico)</option>
-                            <option value="4-3-3">4-3-3 (Ofensivo)</option>
-                            <option value="4-5-1">4-5-1 (Conservador)</option>
-                            <option value="3-5-2">3-5-2 (Carrileros)</option>
-                        </select>
+            <!-- DISTRIBUCIÓN INFERIOR: El campo táctico y las listas de checks conviven abajo limpiamente -->
+            <div class="pantalla-horizontal">
+                <!-- Columna Izquierda: El campo táctico de fútbol flotante con su marcador e informe -->
+                <div class="campo-contenedor" style="display: flex; flex-direction: column;">
+                    <!-- Marcador interactivo superior -->
+                    <div id="panel-marcador" class="marcador-visual" style="display: none; margin-bottom: 15px; padding: 12px;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 18px;">
+                            <span id="txt-marcador-local" style="letter-spacing: 0.5px;">-</span>
+                            <input type="number" id="marcador-goles-l" min="0" value="0" style="width: 48px; text-align: center; font-size: 18px; background: #050505; color: #00CC66; border: 1px solid #00CC66; border-radius: 4px; padding: 2px;">
+                            <span style="color: #444;">vs</span>
+                            <input type="number" id="marcador-goles-v" min="0" value="0" style="width: 48px; text-align: center; font-size: 18px; background: #050505; color: #00CC66; border: 1px solid #00CC66; border-radius: 4px; padding: 2px;">
+                            <span id="txt-marcador-visitante" style="letter-spacing: 0.5px;">-</span>
+                        </div>
                     </div>
-                    <p style="font-size:11px; color:#666; font-style:italic; margin-top:-5px;">Elige los 11 titulares para el campo verde:</p>
-                    <div id="lista-checks-local" style="max-height: 180px; overflow-y: auto; padding-right: 5px;"></div>
-                </div>
 
-                <!-- CONFIGURACIÓN EQUIPO VISITANTE -->
-                <div class="col-acta-selector">
-                    <h3 id="titulo-lista-visitante" style="margin-top:0; color:#006633;">-</h3>
-                    <div class="form-group" style="margin-bottom: 12px;">
-                        <label style="font-size:12px; color:#333;">Esquema Táctico Prefijado:</label>
-                        <select id="tactic-visitante" onchange="aplicarEsquemaPrefijado('visitante')">
-                            <option value="4-4-2">4-4-2 (Clásico)</option>
-                            <option value="4-3-3">4-3-3 (Ofensivo)</option>
-                            <option value="4-5-1">4-5-1 (Conservador)</option>
-                            <option value="3-5-2">3-5-2 (Carrileros)</option>
-                        </select>
-                    </div>
-                    <p style="font-size:11px; color:#666; font-style:italic; margin-top:-5px;">Elige los 11 titulares para el campo verde:</p>
-                    <div id="lista-checks-visitante" style="max-height: 180px; overflow-y: auto; padding-right: 5px;"></div>
-                </div>
-            </div>
-            <!-- CONTENEDOR PRINCIPAL EN DOS COLUMNAS RECONSTRUIDO Y ENCUADRADO -->
-            <div class="pantalla-horizontal" id="contenedor-acta-visual" style="display: none;">
-                
-                             <!-- COLUMNA IZQUIERDA: EL TERRENO DE JUEGO VERDE Y SU BOTÓN DE GUARDADO MASIVO -->
-                <div class="campo-contenedor" style="display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch;">
+                    <!-- El rectángulo verde del terreno de juego -->
                     <div class="campo-futbol" id="campo-acta-tactica">
                         <div class="linea-medio"></div>
                         <div class="circulo-central"></div>
                     </div>
                     
-                                      <!-- CONTENEDOR DE ACCIONES TÁCTICAS, QUINIELA Y BORRADO DE ACTAS -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                        <button class="btn-g" style="background-color: #004d99; font-size: 14px; padding: 12px;" onclick="guardarTacticaCompletaEnMySQL()">💾 Guardar Táctica</button>
-                        <button class="btn-g" style="background-color: #ff9900; color: black; font-size: 14px; padding: 12px;" onclick="calcularAnalisisQuinielaEnVivo()">📊 Análisis Quiniela</button>
+                    <!-- Botones de Acción inferior -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;">
+                        <button class="btn-g" style="background-color: #004d99; color: white;" onclick="guardarTacticaCompletaEnMySQL()">💾 Guardar Cambios</button>
+                        <button class="btn-g" style="background-color: #222; color: #ff9900; border: 1px solid #ff9900;" onclick="calcularAnalisisQuinielaEnVivo()">📊 Predecir Quiniela</button>
                     </div>
                     
-                    <!-- NUEVO BOTÓN SOLICITADO: Elimina el acta del partido seleccionado de la base de datos -->
-                    <button class="btn-g" style="background-color: #d9534f; width: 100%; margin-top: 10px; font-size: 15px; padding: 11px;" onclick="eliminarPartidoYActualizarLigaBD()">
-                        🗑️ Eliminar este Partido de la Jornada
+                    <button class="btn-g" style="background-color: rgba(217,83,79,0.2); border: 1px solid #d9534f; color:#ff4444; margin-top: 8px; padding: 8px;" onclick="eliminarPartidoYActualizarLigaBD()">
+                        🗑️ Eliminar Acta de Partido
                     </button>
 
-
-                    <!-- NUEVA CAJA VISUAL: Desglose matemático del pronóstico deportivo -->
-                                      <!-- CAJA VISUAL: Desglose matemático y COMENTARIO TEXTUAL del pronóstico -->
-                                        <!-- CAJA VISUAL: TABLA ESTADÍSTICA Y COMENTARIO TEXTUAL DEL PRONÓSTICO -->
-                    <div id="panel-pronostico-quiniela" class="form-box" style="display: none; margin-top: 15px; background: #111; color: white; border-top: 4px solid #ff9900; padding: 15px;">
-                        <h4 style="margin-top:0; color:#ff9900; text-transform:uppercase; font-size:12px; letter-spacing:0.5px; text-align:center;">🔮 Pronóstico e Inteligencia de Datos</h4>
+                                       <!-- CAJA DE CRISTAL TRANSLÚCIDO: PRONÓSTICO INTEGRADO E INTELIGENCIA DE DATOS -->
+                    <div id="panel-pronostico-quiniela" class="form-box" style="display: none; margin-top: 15px;">
+                        <h4 style="margin-top:0; color:#ff9900; text-transform:uppercase; font-size:12px; letter-spacing:0.5px; text-align:center; font-weight:800;">🔮 Pronóstico e Inteligencia de Datos</h4>
                         
-                        <div style="display: flex; justify-content: space-between; font-size: 14px; margin: 10px 0; border-bottom: 1px solid #333; padding-bottom: 8px;">
-                            <span>Prob. Local (1): <strong id="prob-l" style="color:#00CC66;">0%</strong></span>
-                            <span>Empate (X): <strong id="prob-x" style="color:#aaa;">0%</strong></span>
-                            <span>Prob. Visitante (2): <strong id="prob-v" style="color:#d9534f;">0%</strong></span>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; margin: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                            <span>Prob. Local (1): <strong id="prob-l" style="color:#00CC66; font-size:14px;">0%</strong></span>
+                            <span>Empate (X): <strong id="prob-x" style="color:#aaa; font-size:14px;">0%</strong></span>
+                            <span>Prob. Visitante (2): <strong id="prob-v" style="color:#ff4444; font-size:14px;">0%</strong></span>
                         </div>
 
-                        <!-- NUEVA TABLA ESTADÍSTICA VISUAL CARA A CARA -->
-                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px; text-align: center; background: #1a1a1a; border-radius: 4px; overflow: hidden;">
+                        <!-- TABLA ESTADÍSTICA CARA A CARA DE CRISTAL -->
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px; text-align: center; background: rgba(0,0,0,0.3); border-radius: 6px; overflow: hidden;">
                             <thead>
-                                <tr style="background: #222; color: #ff9900; font-weight: bold; border-bottom: 2px solid #333;">
+                                <tr style="background: rgba(0,0,0,0.5); color: #ff9900; font-weight: bold;">
                                     <th style="padding: 8px; text-align: left;" id="tbl-nom-local">Local</th>
-                                    <th style="padding: 8px; color: #aaa;">Métrica Comparativa</th>
+                                    <th style="padding: 8px; color: #888; font-size:11px;">Métrica Comparativa</th>
                                     <th style="padding: 8px; text-align: right;" id="tbl-nom-visitante">Visitante</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr style="border-bottom: 1px solid #252525;">
-                                    <td style="padding: 8px; text-align: left; font-weight: bold; color: #00CC66;" id="tbl-pts-l">0.0</td>
-                                    <td style="padding: 8px; color: #888;">Puntos Regularidad (Titulares)</td>
-                                    <td style="padding: 8px; text-align: right; font-weight: bold; color: #00CC66;" id="tbl-pts-v">0.0</td>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <td style="padding: 8px; text-align: left; font-weight: bold; color: #00CC66;" id="tbl-pts-l">0.0 Pts</td>
+                                    <td style="padding: 8px; color: #aaa; font-size:11px;">Puntos Regularidad (Titulares)</td>
+                                    <td style="padding: 8px; text-align: right; font-weight: bold; color: #00CC66;" id="tbl-pts-v">0.0 Pts</td>
                                 </tr>
-                                <tr style="border-bottom: 1px solid #252525;">
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                     <td style="padding: 8px; text-align: left;" id="tbl-goles-l">0</td>
-                                    <td style="padding: 8px; color: #888;">Goles Totales en Jornada</td>
+                                    <td style="padding: 8px; color: #aaa; font-size:11px;">Goles Totales en Jornada</td>
                                     <td style="padding: 8px; text-align: right;" id="tbl-goles-v">0</td>
                                 </tr>
-                                <tr style="border-bottom: 1px solid #252525;">
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                     <td style="padding: 8px; text-align: left; color: #4a90e2;" id="tbl-conv-l">0</td>
-                                    <td style="padding: 8px; color: #888;">Jugadores Con Check (11 Máx)</td>
+                                    <td style="padding: 8px; color: #aaa; font-size:11px;">Jugadores Con Check (11 Máx)</td>
                                     <td style="padding: 8px; text-align: right; color: #4a90e2;" id="tbl-conv-v">0</td>
-                                </tr>
-                                <tr style="border-bottom: 1px solid #252525;">
-                                    <td style="padding: 8px; text-align: left; font-style: italic;" id="tbl-casa-l">+10%</td>
-                                    <td style="padding: 8px; color: #888;">Ventaja Factor Campo</td>
-                                    <td style="padding: 8px; text-align: right; font-style: italic;" id="tbl-casa-v">0%</td>
                                 </tr>
                             </tbody>
                         </table>
 
-                        <div style="text-align: center; font-size: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 10px;">
-                            Signo Fijo: <span id="signo-fijo" style="background:#ff9900; color:black; font-weight:bold; padding:2px 8px; border-radius:4px; font-size:16px; margin: 0 5px;">-</span>
-                            Doble Cobertura: <span id="signo-doble" style="background:#333; color:white; font-weight:bold; padding:2px 8px; border-radius:4px; font-size:16px;">-</span>
+                        <div style="text-align: center; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 12px; font-weight:600;">
+                            Signo Fijo: <span id="signo-fijo" style="background:#ff9900; color:black; font-weight:900; padding:2px 10px; border-radius:4px; font-size:15px; margin: 0 6px;">-</span>
+                            Doble Cobertura: <span id="signo-doble" style="background:rgba(255,255,255,0.1); color:white; font-weight:900; padding:2px 10px; border-radius:4px; font-size:15px;">-</span>
                         </div>
                         
-                        <div style="font-size: 13px; font-style: italic; color: #ddd; line-height: 1.5; text-align: justify; background: #222; padding: 10px; border-radius: 4px; border-left: 3px solid #ff9900;">
+                        <div style="font-size: 12px; font-style: italic; color: #eee; line-height: 1.5; text-align: justify; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 6px; border-left: 3px solid #ff9900;">
                             📢 <span id="comentario-texto-partido">Generando informe del partido...</span>
                         </div>
                     </div>
 
-
                 </div>
 
-
-                <!-- COLUMNA DERECHA: PANEL DE CALIFICACIÓN INDIVIDUAL -->
-                <div class="ficha-contenedor">
-                    <div class="form-box" id="panel-formulario-stats" style="height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; margin-bottom: 0;">
-                        <h3 style="margin-top: 0; text-align: center; color: #111;">✍️ Panel de Calificación</h3>
-                         <!-- NUEVO CROMO CENTRAL SUPERIOR -->
-                        <div id="cromo-presentacion-top" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #111, #222); padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); border: 2px solid #00CC66;">
-                           <img id="cromo-foto-grande" src="" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid white; object-fit: cover; box-shadow: 0 4px 6px rgba(0,0,0,0.3); background-color: #333; cursor: pointer;" onclick="abrirFichaDetalladaPantallaCompleta()" title="Haz clic para ver la ficha completa">
-
-                            <div id="cromo-nombre-grande" style="color: white; font-size: 18px; font-weight: bold; margin-top: 8px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">Selecciona un jugador</div>
-                            <span id="cromo-posicion-badge" style="background-color: #00CC66; color: black; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 10px; margin-top: 4px;">-</span>
-                        </div>
-                       
-
-                        <div class="form-grid" style="grid-template-columns: 1fr;">
-                            <div class="form-group"><label>Jugador Seleccionado:</label><input type="text" id="stat-nombre-editar"></div>
-                            
-                            <div class="form-group" style="margin: 10px 0;">
-                                <label style="padding-bottom: 5px;">Puntos Fantasy:</label>
-                                <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
-                                    <button class="btn-g" style="background-color: #d9534f; font-size: 18px; width: 45px; height: 40px; padding: 0;" onclick="ajustarPuntosManual(-1)">-</button>
-                                    <input type="number" id="stat-pts" value="5" style="width: 70px; height: 35px; text-align: center; font-size: 18px; font-weight: bold; margin-top: 0;" readonly>
-                                    <button class="btn-g" style="background-color: #5cb85c; font-size: 18px; width: 45px; height: 40px; padding: 0;" onclick="ajustarPuntosManual(1)">+</button>
-                                </div>
-                            </div>
-
-                            <div class="form-group"><label>Rol / Condición:</label><select id="stat-rol"><option value="titular">Titular</option><option value="suplente">Suplente</option></select></div>
-                            <div class="form-group"><label>Goles Marcados:</label><input type="number" id="stat-goles-ind" value="0" min="0"></div>
-                            <div class="form-group">
-                                <label>Tarjetas Disciplinarias:</label>
-                                <select id="stat-tarjeta-ind"><option value="">Ninguna</option><option value="🟨">🟨 Tarjeta Amarilla</option><option value="🟥">🟥 Tarjeta Roja</option></select>
-                            </div>
-                            <div class="form-group">
-                                <label>Otros Eventos:</label>
-                                <select id="stat-evt"><option value="">Ninguno</option><option value="👟">👟 Asistencia</option><option value="Ⓟ">Ⓟ Penalti</option></select>
-                            </div>
-                            <div class="form-group"><label>Cambio / Minuto:</label><input type="text" id="stat-cam" placeholder="Ej: ⬇ 63'"></div>
-                        </div>
-                        <button class="btn-g" style="margin-top: 15px; width: 100%;" onclick="guardarEstadisticasYMarcadorEnMySQL()">💾 Actualizar Acta Completa en MySQL</button>
-                    </div>
+                <!-- Columna Derecha: Bloque translúcido con las listas de titulares convocados -->
+                <div class="col-acta-selector" id="panel-listas-checks" style="display: none; max-height: 670px; overflow-y: auto;">
+                    <!-- Se autocompila con las listas de los 11 titulares con check de cada club -->
                 </div>
-
-            </div> <!-- Cierre correcto de pantalla-horizontal -->
-
-            
+            </div>
         </div>
+
                <!-- ==================== PESTAÑA C: FICHA TÉCNICA INDIVIDUAL (MEJORADA VISUALMENTE) ==================== -->
         <div id="sec-ficha-jugador" class="panel" style="display: none;">
             <button class="btn-g" style="background-color: #111; border: 2px solid #00CC66; margin-bottom: 20px; transition: 0.2s;" onclick="cambiarSeccion('partidos')">⬅️ Volver al Panel de Actas</button>
@@ -639,13 +569,30 @@
         });
     }
 
+       // CORRECCIÓN DEFINITIVA: Sincroniza los nuevos selectores lineales y elimina el error de innerHTML
     function cargarEquiposEnSelectores() {
-        fetch(API_URL + '/equipos').then(res => res.json()).then(equipos => {
-            let html = equipos.map(e => `<option value="${e.id_equipo}">${e.nombre} (${e.division}ª)</option>`).join('');
-            document.getElementById('cfg-local').innerHTML = html;
-            document.getElementById('cfg-visitante').innerHTML = html;
-        }).catch(error => console.error('Error equipos:', error));
+        console.log("Sincronizando los selectores lineales de partidos con MySQL...");
+
+        // Llamamos a la API de clasificación que tiene a los 20 clubes oficiales de la liga
+        fetch(API_URL + '/clasificacion')
+            .then(res => res.json())
+            .then(equipos => {
+                let selLocal = document.getElementById('crear-local-sel');
+                let selVisitante = document.getElementById('crear-visitante-sel');
+
+                // BLINDAJE: Si el HTML no ha terminado de cargarse, salimos pacíficamente sin dar error
+                if (!selLocal || !selVisitante) return;
+
+                // Generamos las opciones de la lista desplegable en una sola línea limpia
+                let htmlOptions = equipos.map(e => `<option value="${e.id_equipo}">${e.nombre}</option>`).join('');
+
+                // Inyectamos el HTML de forma segura en los selectores reales que están en tu pantalla
+                selLocal.innerHTML = htmlOptions;
+                selVisitante.innerHTML = htmlOptions;
+            })
+            .catch(error => console.error('Error equipos:', error));
     }
+
 
     function registrarNuevoPartidoEnBD() {
         let id_jornada = document.getElementById('cfg-jornada-sel').value;
@@ -658,59 +605,106 @@
         }).then(res => res.json()).then(data => { alert(data.mensaje); cargarListaPartidosDeJornadaDesdeBD(); });
     }
 
+        // ACTUALIZADA: Inserta los partidos como pastillas redondeadas horizontales en la barra de control
     function cargarListaPartidosDeJornadaDesdeBD() {
         let id_jornada = document.getElementById('ver-jornada-sel').value;
         if (!id_jornada) return;
-        let contenedor = document.getElementById('visor-lista-partidos');
-        contenedor.innerHTML = ""; ocultarPanelesActa();
+
+        // Apuntamos al nuevo contenedor estilizado de la barra horizontal
+        let contenedor = document.getElementById('lista-partidos-jornada-vagas');
+        if (!contenedor) return;
+        
+        contenedor.innerHTML = ""; 
+        ocultarPanelesActa();
 
         fetch(API_URL + '/partidos/' + id_jornada)
             .then(res => res.json())
             .then(partidos => {
-                if (partidos.length === 0) {
-                    contenedor.innerHTML = "<p style='color:#777;'>No hay partidos programados.</p>";
+                if (!partidos || partidos.length === 0) {
+                    contenedor.innerHTML = "<p style='color:#aaa; font-size:12px; font-style:italic;'>No hay partidos programados.</p>";
                     return;
                 }
+
                 partidos.forEach(p => {
                     let btn = document.createElement('button');
                     btn.className = 'item-partido-btn';
-                    btn.innerText = p.local_nombre + " (" + p.goles_local + ") vs (" + p.goles_visitante + ") " + p.visitante_nombre;
-                    btn.onclick = () => abrirPartidoEspecificoDesdeBD(p);
+                    
+                    // Diseño premium en formato pastilla redondeada horizontal
+                    btn.style.padding = "6px 16px";
+                    btn.style.fontSize = "13px";
+                    btn.style.whiteSpace = "nowrap";
+                    btn.style.background = "rgba(255,255,255,0.06)";
+                    btn.style.border = "1px solid rgba(255,255,255,0.1)";
+                    btn.style.borderRadius = "20px"; 
+                    btn.style.cursor = "pointer";
+                    btn.style.transition = "0.2s";
+                    btn.style.color = "#fff";
+                    btn.style.fontWeight = "600";
+
+                    // SATELLITE DE MARCADOR: Si el partido no se ha jugado (goles NULL), muestra un limpio 'vs'
+                    let golesL = (p.goles_local !== null && p.goles_local !== undefined) ? p.goles_local : "-";
+                    let golesV = (p.goles_visitante !== null && p.goles_visitante !== undefined) ? p.goles_visitante : "-";
+                    
+                    btn.innerText = `${p.local_nombre} ${golesL} - ${golesV} ${p.visitante_nombre}`;
+
+                    // ACCIÓN AL PULSAR: Ilumina el contorno de la pastilla elegida en verde y despliega el césped abajo
+                    btn.onclick = function() {
+                        document.querySelectorAll('#lista-partidos-jornada-vagas .item-partido-btn').forEach(b => {
+                            b.style.borderColor = 'rgba(255,255,255,0.1)';
+                            b.style.background = 'rgba(255,255,255,0.06)';
+                            b.style.color = '#fff';
+                        });
+                        this.style.borderColor = '#00CC66';
+                        this.style.background = 'rgba(0, 204, 102, 0.15)';
+                        this.style.color = '#00CC66';
+                        
+                        abrirPartidoEspecificoDesdeBD(p);
+                    };
+
                     contenedor.appendChild(btn);
                 });
-            });
+            }).catch(err => console.error("Error al listar pastillas de partidos:", err));
     }
-
-          // ACTUALIZADO: Rellena los nombres y los inputs numéricos de goles al abrir el partido
-       // VERSIÓN BLINDADA: Rellena los inputs de goles y nombres mapeando correctamente de MySQL
-    function abrirPartidoEspecificoDesdeBD(p) {
+ function abrirPartidoEspecificoDesdeBD(p) {
         if (!p) return;
-        
-        // Guardamos la referencia exacta en memoria global
         partidoSeleccionadoActual = p;
         
-        // Cruce estricto de variables para asegurar la lectura de nombres de tu calendario 2026/2027
         let nombreLocalReal = p.local_nombre || p.nombre_local || "Club Local";
         let nombreVisitanteReal = p.visitante_nombre || p.nombre_visitante || "Club Visitante";
 
-        // Inyectamos el texto de los letreros oficiales
-        document.getElementById('txt-marcador-local').innerText = nombreLocalReal;
-        document.getElementById('txt-marcador-visitante').innerText = nombreVisitanteReal;
+        let imgL = nombreLocalReal.toLowerCase().trim().replace(/ /g, "_") + ".png";
+        let imgV = nombreVisitanteReal.toLowerCase().trim().replace(/ /g, "_") + ".png";
+
+        let iconoBalonFallback = "https://flaticon.com";
+
+        // Inyectamos las imágenes con el detector de errores autocancelable (Evita parpadeo)
+        document.getElementById('txt-marcador-local').innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img id="escudo-marcador-l" src="http://localhost:3000/escudos/${imgL}" style="width:30px; height:30px; object-fit:contain;">
+                <span>${nombreLocalReal}</span>
+            </div>
+        `;
+        document.getElementById('escudo-marcador-l').onerror = function() { this.src = iconoBalonFallback; this.onerror = null; };
+
+        document.getElementById('txt-marcador-visitante').innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span>${nombreVisitanteReal}</span>
+                <img id="escudo-marcador-v" src="http://localhost:3000/escudos/${imgV}" style="width:30px; height:30px; object-fit:contain;">
+            </div>
+        `;
+        document.getElementById('escudo-marcador-v').onerror = function() { this.src = iconoBalonFallback; this.onerror = null; };
         
-        // Rellenamos las cajas numéricas con los goles reales que vengan de las tablas (Filtramos NULL a 0)
-        let golesLocalBase = (p.goles_local !== undefined && p.goles_local !== null) ? parseInt(p.goles_local) : 0;
-        let golesVisitanteBase = (p.goles_visitante !== undefined && p.goles_visitante !== null) ? parseInt(p.goles_visitante) : 0;
+        let inputGolesL = document.getElementById('marcador-goles-l');
+        let inputGolesV = document.getElementById('marcador-goles-v');
+        if (inputGolesL) inputGolesL.value = p.goles_local !== null ? parseInt(p.goles_local) : 0;
+        if (inputGolesV) inputGolesV.value = p.goles_visitante !== null ? parseInt(p.goles_visitante) : 0;
         
-        document.getElementById('marcador-goles-l').value = golesLocalBase;
-        document.getElementById('marcador-goles-v').value = golesVisitanteBase;
+        let paneles = ['panel-marcador', 'panel-listas-checks', 'contenedor-acta-visual'];
+        paneles.forEach(id => {
+            let el = document.getElementById(id);
+            if (el) el.style.display = (id === 'panel-marcador') ? 'block' : 'grid';
+        });
         
-        // Forzamos la visualización en cascada de todo el tapete táctico en la pantalla
-        document.getElementById('panel-marcador').style.display = 'block';
-        document.getElementById('panel-valores-equipo').style.display = 'grid';
-        document.getElementById('panel-listas-checks').style.display = 'grid';
-        document.getElementById('contenedor-acta-visual').style.display = 'grid';
-        
-        // Cargamos la lista de futbolistas con checks del encuentro
         cargarDetalleActaYListas(p.id_partido);
     }
 
@@ -730,155 +724,233 @@
             });
     }
 
-    // Descarga las actas y dibuja las listas de casillas (checks) bajo cada equipo
-       // VERSIÓN BLINDADA: Suma las medias de forma segura ignorando nulos o undefined
+       // CORREGIDO: Suma los puntos en caliente y evita el error de propiedades nulas (innerText)
     function cargarDetalleActaYListas(id_partido) {
-        fetch(API_URL + '/valor-equipo/' + id_partido)
+        let contenedor = document.getElementById('panel-listas-checks');
+        if (!contenedor) return;
+
+        console.log("Cargando actas de futbolistas para el partido ID: " + id_partido);
+
+        fetch(API_URL + '/acta/' + id_partido)
             .then(res => res.json())
-            .then(data => {
-                listaJugadoresActaActual = data.jugadores || [];
-                
-                // Asegurar valores numéricos iniciales con un comodín de seguridad (0)
-                let inicialLocal = typeof data.valor_local === 'number' ? data.valor_local : 0;
-                let inicialVisitante = typeof data.valor_visitante === 'number' ? data.valor_visitante : 0;
-                
-                document.getElementById('valor-total-local').innerText = inicialLocal.toFixed(1) + " Pts";
-                document.getElementById('valor-total-visitante').innerText = inicialVisitante.toFixed(1) + " Pts";
+            .then(actaJugadores => {
+                listaJugadoresActaActual = actaJugadores;
 
-                let divLocal = document.getElementById('lista-checks-local');
-                let divVisitante = document.getElementById('lista-checks-visitante');
-                divLocal.innerHTML = ""; divVisitante.innerHTML = "";
+                // 1. Dibujar el contenedor translúcido de los checks
+                contenedor.innerHTML = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4 style="color:#00CC66; text-transform:uppercase; margin-bottom:10px; font-size:12px;">🏃 Convocatoria Local</h4>
+                            <div id="lista-checks-local" style="display:flex; flex-direction:column; gap:2px;"></div>
+                        </div>
+                        <div>
+                            <h4 style="color:#ff9900; text-transform:uppercase; margin-bottom:10px; font-size:12px;">🏃 Convocatoria Visitante</h4>
+                            <div id="lista-checks-visitante" style="display:flex; flex-direction:column; gap:2px;"></div>
+                        </div>
+                    </div>
+                `;
 
-                listaJugadoresActaActual.forEach((j, index) => {
-                    let item = document.createElement('div');
-                    item.className = 'check-item';
+                let id_l = partidoSeleccionadoActual.id_local;
+                let id_v = partidoSeleccionadoActual.id_visitante;
+
+                let sumadorPuntosLocal = 0;
+                let sumadorPuntosVisitante = 0;
+
+                // 2. Recorrer los futbolistas para pintar sus casillas de verificación
+                actaJugadores.forEach(j => {
+                    let esLocal = (j.id_equipo == id_l);
+                    let listaDestino = document.getElementById(esLocal ? 'lista-checks-local' : 'lista-checks-visitante');
                     
+                    if (!listaDestino) return;
+
+                    let div = document.createElement('div');
+                    div.className = 'check-item';
+                    div.style.display = 'flex';
+                    div.style.alignItems = 'center';
+                    div.style.gap = '8px';
+
                     let chk = document.createElement('input');
                     chk.type = 'checkbox';
                     chk.checked = (j.rol === 'titular');
                     
+                    // Si el jugador está activo como titular, sumamos sus puntos de regularidad
+                    if (j.rol === 'titular') {
+                        if (esLocal) sumadorPuntosLocal += (parseFloat(j.valor_actual) || 0);
+                        else sumadorPuntosVisitante += (parseFloat(j.valor_actual) || 0);
+                    }
+
+                    // Evento interactivo al marcar/desmarcar titulares en el césped
                     chk.onchange = function() {
                         j.rol = this.checked ? 'titular' : 'suplente';
-                        recalcularYRepintarFranjasCesped();
-                        
-                        let id_l = partidoSeleccionadoActual.id_local;
-                        let id_v = partidoSeleccionadoActual.id_visitante;
-                        
-                        // SUMADOR MAESTRO BLINDADO: Convierte cualquier dato extraño en 0 para no romper la suma
-                        let vL = 0;
-                        listaJugadoresActaActual.forEach(x => {
-                            if (x.id_equipo == id_l && x.rol === 'titular') {
-                                let nota = parseFloat(x.valor_actual);
-                                vL += isNaN(nota) ? 0 : nota;
-                            }
-                        });
-
-                        let vV = 0;
-                        listaJugadoresActaActual.forEach(x => {
-                            if (x.id_equipo == id_v && x.rol === 'titular') {
-                                let nota = parseFloat(x.valor_actual);
-                                vV += isNaN(nota) ? 0 : nota;
-                            }
-                        });
-                        
-                        document.getElementById('valor-total-local').innerText = vL.toFixed(1) + " Pts";
-                        document.getElementById('valor-total-visitante').innerText = vV.toFixed(1) + " Pts";
+                        guardarCambioFilaMemoriaTemporal(j);
                     };
 
-                                      let txt = document.createElement('span');
+                    let txt = document.createElement('span');
                     let mediaNum = parseFloat(j.valor_actual);
-                    let textoMedia = (!isNaN(mediaNum) && mediaNum > 0) ? ` (Media 3 p.: ${mediaNum.toFixed(1)} Pts)` : ' (Media: 0.0)';
+                    let textoMedia = (!isNaN(mediaNum) && mediaNum > 0) ? ` (${mediaNum.toFixed(1)} Pts)` : ' (0.0)';
                     
-                    // CORRECCIÓN: Añadida la propiedad j.dorsal limpia antes del nombre del jugador
+                    // Inyectamos el dorsal, nombre y nota media
                     txt.innerText = `[${j.posicion}] Nº ${j.dorsal || '0'} - ${j.nombre}${textoMedia}`;
+                    txt.style.cursor = 'pointer';
+                    
+                    // Al pulsar sobre el nombre del crack saltamos a su Ficha Técnica renovada
+                    txt.onclick = function() {
+                        jugadorSeleccionadoParaEditar = j;
+                        abrirFichaDetalladaPantallaCompleta();
+                    };
 
-
-                    item.appendChild(chk);
-                    item.appendChild(txt);
-
-                    if (j.id_equipo == partidoSeleccionadoActual.id_local) {
-                        divLocal.appendChild(item);
-                    } else {
-                        divVisitante.appendChild(item);
-                    }
+                    div.appendChild(chk);
+                    div.appendChild(txt);
+                    listaDestino.appendChild(div);
                 });
 
+                // 3. REPARTO SEGURO DE CONTADORES: Evita el error 'set properties of null'
+                // Solo inyectamos los totales si las etiquetas existen físicamente en el HTML
+                let txtPtsL = document.getElementById('valor-total-pts-local');
+                let txtPtsV = document.getElementById('valor-total-pts-visitante');
+                
+                if (txtPtsL) txtPtsL.innerText = sumadorPuntosLocal.toFixed(1) + " Pts";
+                if (txtPtsV) txtPtsV.innerText = sumadorPuntosVisitante.toFixed(1) + " Pts";
+
+                // Redibujar la pizarra táctica verde
                 recalcularYRepintarFranjasCesped();
-            }).catch(err => console.error("Error en listas y sumas:", err));
+
+            }).catch(err => {
+                console.error("Error en listas y sumas:", err);
+            });
     }
+
+    // FUNCIÓN DE RESPALDO: Mantiene los cambios sincronizados en caliente antes de darle a guardar
+    function guardarCambioFilaMemoriaTemporal(objetoJugador) {
+        let index = listaJugadoresActaActual.findIndex(x => x.id_acta == objetoJugador.id_acta);
+        if (index !== -1) {
+            listaJugadoresActaActual[index] = objetoJugador;
+        }
+        
+        // Recalculamos las sumas en caliente sin recargar la página entera
+        let id_l = partidoSeleccionadoActual.id_local;
+        let sL = listaJugadoresActaActual.filter(x => x.id_equipo == id_l && x.rol === 'titular').reduce((a, b) => a + (parseFloat(b.valor_actual) || 0), 0);
+        let sV = listaJugadoresActaActual.filter(x => x.id_equipo != id_l && x.rol === 'titular').reduce((a, b) => a + (parseFloat(b.valor_actual) || 0), 0);
+        
+        let txtPtsL = document.getElementById('valor-total-pts-local');
+        let txtPtsV = document.getElementById('valor-total-pts-visitante');
+        if (txtPtsL) txtPtsL.innerText = sL.toFixed(1) + " Pts";
+        if (txtPtsV) txtPtsV.innerText = sV.toFixed(1) + " Pts";
+        
+        recalcularYRepintarFranjasCesped();
+    }
+
 
 
        // ACTUALIZADO: Oculta todos los paneles de actas, incluyendo el nuevo módulo de análisis de la Quiniela
+      // CORREGIDO Y BLINDADO: Evita el error 'reading style' verificando si el elemento existe antes de tocarlo
     function ocultarPanelesActa() {
-        document.getElementById('panel-marcador').style.display = 'none';
-        document.getElementById('panel-valores-equipo').style.display = 'none';
-        document.getElementById('panel-listas-checks').style.display = 'none';
-        document.getElementById('contenedor-acta-visual').style.display = 'none';
+        let elementos = [
+            'panel-marcador', 
+            'panel-valores-equipo', 
+            'panel-listas-checks', 
+            'contenedor-acta-visual', 
+            'panel-pronostico-quiniela'
+        ];
         
-        // CORRECCIÓN: Oculta el panel de pronósticos al cambiar de partido para limpiar la pantalla
-        document.getElementById('panel-pronostico-quiniela').style.display = 'none';
+        elementos.forEach(id => {
+            let el = document.getElementById(id);
+            if (el) { el.style.display = 'none'; }
+        });
     }
 
 
-          // CORREGIDO: Si hay coordenadas guardadas en MySQL, respeta el sitio y no aplica el 4-4-2
-        // FUNCIÓN UNIFICADA: Carga las imágenes a través del servidor y respeta los esquemas tácticos
+       // CORREGIDO: Dibuja los círculos en el césped de forma automática sin romper por elementos nulos
     function recalcularYRepintarFranjasCesped() {
-        var campo = document.getElementById('campo-acta-tactica');
-        var jugadoresViejos = campo.querySelectorAll('.jugador-campo');
-        jugadoresViejos.forEach(el => el.remove());
+        let campo = document.getElementById('campo-acta-tactica');
+        if (!campo) return;
 
-        // Filtrar estrictamente a los jugadores que tengan el check marcado (rol: titular)
-        var localesConCheck = listaJugadoresActaActual.filter(j => j.id_equipo == partidoSeleccionadoActual.id_local && j.rol === 'titular');
-        var visitantesConCheck = listaJugadoresActaActual.filter(j => j.id_equipo == partidoSeleccionadoActual.id_visitante && j.rol === 'titular');
+        // 1. Limpiamos los círculos de los jugadores anteriores dejando solo las líneas reglamentarias
+        let circulosViejos = campo.querySelectorAll('.jugador-circulo-ficha');
+        circulosViejos.forEach(c => c.remove());
 
-        // Silueta base para los jugadores que no tengan imagen asignada en MySQL Workbench
-        var siluetaGris = "data:image/svg+xml;utf8,<svg xmlns='http://w3.org' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+        if (!listaJugadoresActaActual || listaJugadoresActaActual.length === 0) return;
 
-        var esquemaLocal = document.getElementById('tactic-local').value;
-        var esquemaVisitante = document.getElementById('tactic-visitante').value;
+        let id_l = partidoSeleccionadoActual.id_local;
 
-        var cDefL = 0, cMedL = 0, cDelL = 0;
-        var cDefV = 0, cMedV = 0, cDelV = 0;
+        // 2. Filtramos únicamente los futbolistas que tienen el check de "titular" marcado
+        let titulares = listaJugadoresActaActual.filter(x => x.rol === 'titular');
 
-        // 1. LOCALES (MITAD IZQUIERDA)
-        localesConCheck.forEach(j => {
-            var posX = j.posicion_x;
-            var posY = j.posicion_y;
-            
-            // Si las coordenadas en MySQL son NULL, se calcula el esquema prefijado inicial
-            if (posX === null || posY === null || posX === undefined || posY === undefined) {
-                posX = 20; posY = 50;
-                if (j.posicion === "POR") { posX = 7; posY = 50; }
-                else if (j.posicion === "DEF") { var totalDef = esquemaLocal === "3-5-2" ? 3 : 4; posY = totalDef === 3 ? (25 + (cDefL * 25)) : (15 + (cDefL * 22)); posX = 22; cDefL++; }
-                else if (j.posicion === "MED") { var totalMed = esquemaLocal === "4-5-1" ? 5 : esquemaLocal === "3-5-2" ? 5 : 4; posY = totalMed === 5 ? (12 + (cMedL * 19)) : (15 + (cMedL * 22)); posX = 35; cMedL++; }
-                else if (j.posicion === "DEL") { var totalDel = esquemaLocal === "4-3-3" ? 3 : esquemaLocal === "4-5-1" ? 1 : 2; posY = totalDel === 3 ? (20 + (cDelL * 30)) : totalDel === 1 ? 50 : (30 + (cDelL * 40)); posX = 46; cDelL++; }
-                j.posicion_x = posX; j.posicion_y = posY;
+        // Contadores internos para organizar automáticamente el dibujo por líneas tácticas (POR, DEF, MED, DEL)
+        let contPOR = 0, contDEF = 0, contMED = 0, contDEL = 0;
+        let totalDEF = titulares.filter(x => x.posicion === 'DEF').length;
+        let totalMED = titulares.filter(x => x.posicion === 'MED').length;
+        let totalDEL = titulares.filter(x => x.posicion === 'DEL').length;
+
+        titulares.forEach(j => {
+            let esLocal = (j.id_equipo == id_l);
+            let x_porcentaje = 50;
+            let y_porcentaje = 50;
+
+            // Algoritmo de posicionamiento automático inteligente según demarcación y bando
+            if (j.posicion === 'POR') {
+                x_porcentaje = esLocal ? 12 : 88;
+                y_porcentaje = 50;
+            } 
+            else if (j.posicion === 'DEF') {
+                contDEF++;
+                x_porcentaje = esLocal ? 32 : 68;
+                y_porcentaje = totalDEF > 1 ? (15 + (70 / (totalDEF + 1)) * contDEF) : 50;
+            } 
+            else if (j.posicion === 'MED') {
+                contMED++;
+                x_porcentaje = esLocal ? 52 : 48;
+                y_porcentaje = totalMED > 1 ? (15 + (70 / (totalMED + 1)) * contMED) : 50;
+            } 
+            else if (j.posicion === 'DEL') {
+                contDEL++;
+                x_porcentaje = esLocal ? 78 : 22;
+                y_porcentaje = totalDEL > 1 ? (15 + (70 / (totalDEL + 1)) * contDEL) : 50;
             }
-            
-            // SOLUCIÓN: Llama a la foto real sirviéndola desde la ruta web estática de Node en el puerto 3000
-            var rutaFotoReal = j.foto_ruta ? "http://localhost:3000/fotos/" + j.foto_ruta : siluetaGris;
-            inyectarCromoEnCesped(j, posX, posY, rutaFotoReal, siluetaGris);
-        });
 
-        // 2. VISITANTES (MITAD DERECHA)
-        visitantesConCheck.forEach(j => {
-            var posX = j.posicion_x;
-            var posY = j.posicion_y;
+            // Guardamos de forma automática las nuevas coordenadas calculadas
+            j.posicion_x = Math.round(x_porcentaje);
+            j.posicion_y = Math.round(y_porcentaje);
+
+            // 3. Crear el cromo o círculo flotante interactivo en el césped verde
+            let divJug = document.createElement('div');
+            divJug.className = 'jugador-circulo-ficha';
+            divJug.style.position = 'absolute';
+            divJug.style.left = j.posicion_x + '%';
+            divJug.style.top = j.posicion_y + '%';
+            divJug.style.transform = 'translate(-50%, -50%)';
+            divJug.style.width = '34px';
+            divJug.style.height = '34px';
+            divJug.style.borderRadius = '50%';
             
-            if (posX === null || posY === null || posX === undefined || posY === undefined) {
-                posX = 80; posY = 50;
-                if (j.posicion === "POR") { posX = 93; posY = 50; }
-                else if (j.posicion === "DEF") { var totalDef = esquemaVisitante === "3-5-2" ? 3 : 4; posY = totalDef === 3 ? (25 + (cDefV * 25)) : (15 + (cDefV * 22)); posX = 78; cDefV++; }
-                else if (j.posicion === "MED") { var totalMed = esquemaVisitante === "4-5-1" ? 5 : esquemaVisitante === "3-5-2" ? 5 : 4; posY = totalMed === 5 ? (12 + (cMedV * 19)) : (15 + (cMedV * 22)); posX = 65; cMedV++; }
-                else if (j.posicion === "DEL") { var totalDel = esquemaVisitante === "4-3-3" ? 3 : esquemaVisitante === "4-5-1" ? 1 : 2; posY = totalDel === 3 ? (20 + (cDelV * 30)) : totalDel === 1 ? 50 : (30 + (cDelV * 40)); posX = 54; cDelV++; }
-                j.posicion_x = posX; j.posicion_y = posY;
-            }
+            // Color según bando: Verde luminoso para el Local, Naranja para el Visitante
+            divJug.style.backgroundColor = esLocal ? '#00CC66' : '#ff9900';
+            divJug.style.border = '2px solid #ffffff';
+            divJug.style.boxShadow = '0 4px 8px rgba(0,0,0,0.4)';
+            divJug.style.display = 'flex';
+            divJug.style.alignItems = 'center';
+            divJug.style.justifyContent = 'center';
+            divJug.style.cursor = 'pointer';
+            divJug.style.transition = '0.2s';
             
-            // SOLUCIÓN: Llama a la foto real sirviéndola desde la ruta web estática de Node en el puerto 3000
-            var rutaFotoReal = j.foto_ruta ? "http://localhost:3000/fotos/" + j.foto_ruta : siluetaGris;
-            inyectarCromoEnCesped(j, posX, posY, rutaFotoReal, siluetaGris);
+            // Estilo del número de camiseta
+            divJug.innerHTML = `<span style="color:#000; font-size:11px; font-weight:900;">${j.dorsal || '0'}</span>`;
+            divJug.title = `[${j.posicion}] ${j.nombre}`;
+
+            // Al pasar el ratón por encima, resalta con brillo
+            divJug.onmouseover = function() { this.style.transform = 'translate(-50%, -50%) scale(1.18)'; this.style.boxShadow = '0 6px 12px rgba(0,0,0,0.6)'; };
+            divJug.onmouseout = function() { this.style.transform = 'translate(-50%, -50%) scale(1)'; this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.4)'; };
+
+            // Al hacer clic sobre el círculo saltamos directamente a su espectacular Ficha Avanzada
+            divJug.onclick = function() {
+                jugadorSeleccionadoParaEditar = j;
+                abrirFichaDetalladaPantallaCompleta();
+            };
+
+            campo.appendChild(divJug);
         });
     }
+
 
 
 
@@ -1121,11 +1193,26 @@
 
 
 
+       // CORREGIDO Y BLINDADO DEFINITIVO: Detiene fallos de 'reading style' en el arranque
     function ocultarPanelesActa() {
-        document.getElementById('panel-marcador').style.display = 'none';
-        document.getElementById('panel-listas-checks').style.display = 'none';
-        document.getElementById('contenedor-acta-visual').style.display = 'none';
+        // Listado estricto de todos los paneles interactivos del tapete de actas
+        let panelesId = [
+            'panel-marcador', 
+            'panel-valores-equipo', 
+            'panel-listas-checks', 
+            'contenedor-acta-visual', 
+            'panel-pronostico-quiniela'
+        ];
+        
+        panelesId.forEach(function(id) {
+            let el = document.getElementById(id);
+            // BLINDAJE: Solo modifica el estilo si el elemento existe en el HTML actual
+            if (el && el.style) { 
+                el.style.display = 'none'; 
+            }
+        });
     }
+
 
     window.onload = function() {
         cargarJornadasDesdeBD();
@@ -1260,17 +1347,19 @@
                         this.style.transform = 'none';
                     };
 
-                    enlaceBtn.onclick = function() {
-                        reproductorVideo.pause(); // Apagar TV al cambiar de ventana
+                                       enlaceBtn.onclick = function() {
+                        if (reproductorVideo) reproductorVideo.pause(); // Apagar la TV al salir
                         
                         cambiarSeccion('partidos');
                         fetch(API_URL + '/partidos/' + p.id_jornada)
                             .then(res => res.json())
                             .then(listaPartidosJornada => {
                                 var matchReala = listaPartidosJornada.find(m => m.id_partido == p.id_partido);
+                                // Llama a la función blindada que acabamos de actualizar arriba
                                 if (matchReala) abrirPartidoEspecificoDesdeBD(matchReala);
-                            });
+                            }).catch(err => console.error("Error navegando desde historial:", err));
                     };
+
 
                     contenedorPartidos.appendChild(enlaceBtn);
                 });
@@ -1281,10 +1370,9 @@
         document.getElementById('sec-ficha-jugador').style.display = 'block';
     }
 
-    // NUEVA FUNCIÓN: Algoritmo Inteligente de Predicción para la Quiniela (1,X,2)
-        // ACTUALIZADO: Calcula probabilidades, signos, e inyecta los datos en la tabla estadística visual
+       // ACTUALIZADO Y BLINDADO: Calcula probabilidades, signos y redacta el informe en cajas de cristal
     function calcularAnalisisQuinielaEnVivo() {
-        if (!partidoSeleccionadoActual || listaJugadoresActaActual.length === 0) {
+        if (!partidoSeleccionadoActual || !listaJugadoresActaActual || listaJugadoresActaActual.length === 0) {
             alert("Por favor, abre un partido y convoca jugadores primero.");
             return;
         }
@@ -1292,11 +1380,9 @@
         let id_l = partidoSeleccionadoActual.id_local;
         let id_v = partidoSeleccionadoActual.id_visitante;
 
-        // Filtrar y contar los jugadores titulares con check en cada bando
         let titularesLocal = listaJugadoresActaActual.filter(x => x.id_equipo == id_l && x.rol === 'titular');
         let titularesVisitante = listaJugadoresActaActual.filter(x => x.id_equipo == id_v && x.rol === 'titular');
 
-        // Sumar los puntos de regularidad de los jugadores con check en el césped
         let totalPuntosLocal = titularesLocal.reduce((acc, x) => acc + (parseFloat(x.valor_actual) || 0), 0);
         let totalPuntosVisitante = titularesVisitante.reduce((acc, x) => acc + (parseFloat(x.valor_actual) || 0), 0);
 
@@ -1304,8 +1390,7 @@
             totalPuntosLocal = 50; totalPuntosVisitante = 50;
         }
 
-        // Aplicamos factor de ventaja de campo (10%) para el cálculo matemático
-        let fuerzaLocal = totalPuntosLocal * 1.10;
+        let fuerzaLocal = totalPuntosLocal * 1.10; // +10% ventaja de campo
         let fuerzaVisitante = totalPuntosVisitante;
 
         let sumaFuerzas = fuerzaLocal + fuerzaVisitante;
@@ -1320,34 +1405,31 @@
         let porcVisitante = Math.round((probVisitante / totalCruce) * 100);
         let porcEmpate = 100 - (porcLocal + porcVisitante);
 
-        let signoFijo = "X";
-        let signoDoble = "-";
-        let comentarioTexto = "";
+        let signoFijo = "X"; let signoDoble = "-"; let comentarioTexto = "";
 
-        // MÓDULO REDACTOR: Evalúa las distancias y genera el comentario en texto
         if (porcLocal > porcVisitante && porcLocal > porcEmpate) {
             signoFijo = "1";
             if (porcLocal >= 55) {
                 signoDoble = "1X";
-                comentarioTexto = `El conjunto local llega con una clara superioridad táctica sustentada en el gran estado de forma de sus estrellas con check en el césped. Su bolsa de puntos totales (${totalPuntosLocal.toFixed(1)} Pts) sumada al factor afición los hace muy favoritos. El signo fijo es un 1 claro, con cobertura 1X por total seguridad.`;
+                comentarioTexto = `El conjunto local llega con una clara superioridad táctica sustentada en el gran estado de forma de sus estrellas en el césped. Su bolsa de puntos totales (${totalPuntosLocal.toFixed(1)} Pts) sumada al factor afición los hace muy favoritos. El signo fijo es un 1 claro, con cobertura 1X por total seguridad.`;
             } else if (porcLocal - porcVisitante < 10) {
                 signoDoble = "12";
-                comentarioTexto = `Partido vibrante y de alta intensidad. El equipo local parte con una ligera ventaja posicional por su condición de anfitrión, pero las fuerzas de los 11 titulares de ambos clubes están muy parejas en el análisis de regularidad. Encuentro propicio para una doble cobertura de triunfo local o visitante (12), descartando el empate.`;
+                comentarioTexto = `Partido vibrante y de alta intensidad. El equipo local parte con una ligera ventaja posicional por su condición de anfitrión, pero las fuerzas de los titulares de ambos clubes están muy parejas. Encuentro propicio para una doble cobertura de triunfo local o visitante (12), descartando el empate.`;
             } else {
                 signoDoble = "1X";
-                comentarioTexto = `Choque controlado inicialmente por la escuadra de casa. Aunque el rival cuenta con individualidades peligrosas, el bloque de rendimiento local es más estable. Recomendamos asegurar el casillero con un doble 1X previendo que el conjunto local puntuará de forma matemática en su feudo.`;
+                comentarioTexto = `Choque controlado inicialmente por la escuadra de casa. Aunque el rival cuenta con individualidades peligrosas, el bloque de rendimiento local es más estable. Recomendamos asegurar el casillero con un doble 1X previendo que el conjunto local puntuará en su feudo.`;
             }
         } else if (porcVisitante > porcLocal && porcVisitante > porcEmpate) {
             signoFijo = "2";
             if (porcVisitante >= 55) {
                 signoDoble = "X2";
-                comentarioTexto = `Poderosa puesta en escena del bando visitante. El algoritmo detecta que las medias de rendimiento de sus 11 futbolistas elegidos (${totalPuntosVisitante.toFixed(1)} Pts) superan con creces la ventaja de campo rival. Dominio claro en el papel; aconsejamos el signo 2 fijo protegiendo el boleto con un X2 por precaución defensiva.`;
+                comentarioTexto = `Poderosa puesta en escena del bando visitante. El algoritmo detecta que las medias de rendimiento de sus 11 futbolistas elegidos (${totalPuntosVisitante.toFixed(1)} Pts) superan con creces la ventaja de campo rival. Dominio claro; aconsejamos el signo 2 fijo protegiendo el boleto con un X2 por precaución defensiva.`;
             } else if (porcVisitante - porcLocal < 10) {
                 signoDoble = "12";
-                comentarioTexto = `El cuadro visitante tiene más pólvora y mejor inercia en sus últimos 3 partidos, pero el equipo local equilibra la balanza empujado por su afición. Es un duelo de idas y venidas donde un destello individual romperá la balanza. Se sugiere cubrir la Quiniela abriendo el abanico a que cualquiera de los dos gana (12).`;
+                comentarioTexto = `El cuadro visitante tiene más pólvora y mejor inercia en las últimas jornadas, pero el equipo local equilibra la balanza empujado por su afición. Es un duelo de idas y venidas donde un destello individual romperá la balanza. Se sugiere cubrir la Quiniela abriendo el abanico a que cualquiera de los dos gana (12).`;
             } else {
                 signoDoble = "X2";
-                comentarioTexto = `Salida complicada para el líder pero su once titular ofrece las suficientes garantías competitivas para llevarse los puntos. El bloque defensivo local sufrirá ante la evolución de ataque del rival. El signo recomendado óptimo es el 2, amparado por un doble X2 para blindar la jornada.`;
+                comentarioTexto = `Salida complicada para el visitante pero su once titular ofrece las suficientes garantías competitivas para llevarse los puntos. El bloque defensivo local sufrirá ante la evolución de ataque del rival. El signo recomendado óptimo es el 2, amparado por un doble X2 para blindar la jornada.`;
             }
         } else {
             signoFijo = "X";
@@ -1357,32 +1439,40 @@
 
         if (Math.abs(porcLocal - porcVisitante) <= 4 && porcEmpate >= 25) {
             signoDoble = "1X2 (Triple)";
-            comentarioTexto = `¡Alerta de Triple en la Quiniela! Estamos ante el partido más impreciso, reñido e indescifrable de la jornada de LaLiga Fantasy. Las fuerzas tácticas de ambos onces y sus dinámicas están calcadas al milímetro en la base de datos de MySQL Workbench. Gastar un triple (1X2) aquí es obligatorio para no fallar el pleno.`;
+            comentarioTexto = `¡Alerta de Triple en la Quiniela! Estamos ante el partido más impreciso, reñido e indescifrable de la jornada. Las fuerzas tácticas de ambos onces y sus dinámicas están calcadas al milímetro en la base de datos. Gastar un triple (1X2) aquí es obligatorio para asegurar el boleto.`;
         }
 
-        // ================= INYECTAR DATOS EN LA NUEVA TABLA ESTADÍSTICA VISUAL =================
-        document.getElementById('tbl-nom-local').innerText = partidoSeleccionadoActual.local_nombre;
-        document.getElementById('tbl-nom-visitante').innerText = partidoSeleccionadoActual.visitante_nombre;
-        
-        document.getElementById('tbl-pts-l').innerText = totalPuntosLocal.toFixed(1) + " Pts";
-        document.getElementById('tbl-pts-v').innerText = totalPuntosVisitante.toFixed(1) + " Pts";
-        
-        document.getElementById('tbl-goles-l').innerText = document.getElementById('marcador-goles-l').value || 0;
-        document.getElementById('tbl-goles-v').innerText = document.getElementById('marcador-goles-v').value || 0;
-        
-        document.getElementById('tbl-conv-l').innerText = titularesLocal.length + " Jug.";
-        document.getElementById('tbl-conv-v').innerText = titularesVisitante.length + " Jug.";
+        // BLINDAJE DE INYECCIÓN DE DATOS: Comprueba que las etiquetas existan antes de asignar innerText
+        let elL = document.getElementById('prob-l'); let elX = document.getElementById('prob-x'); let elV = document.getElementById('prob-v');
+        let elFijo = document.getElementById('signo-fijo'); let elDoble = document.getElementById('signo-doble'); let elTxt = document.getElementById('comentario-texto-partido');
 
-        // RENDERIZAR RESULTADOS DE PORCENTAJES Y SIGNOS
-        document.getElementById('prob-l').innerText = porcLocal + "%";
-        document.getElementById('prob-x').innerText = porcEmpate + "%";
-        document.getElementById('prob-v').innerText = porcVisitante + "%";
-        document.getElementById('signo-fijo').innerText = signoFijo;
-        document.getElementById('signo-doble').innerText = signoDoble;
-        document.getElementById('comentario-texto-partido').innerText = comentarioTexto;
+        if (elL) elL.innerText = porcLocal + "%";
+        if (elX) elX.innerText = porcEmpate + "%";
+        if (elV) elV.innerText = porcVisitante + "%";
+        if (elFijo) elFijo.innerText = signoFijo;
+        if (elDoble) elDoble.innerText = signoDoble;
+        if (elTxt) elTxt.innerText = comentarioTexto;
 
-        document.getElementById('panel-pronostico-quiniela').style.display = 'block';
+        // Inyectar datos cruzados en la mini-tabla estadística
+        let tNomL = document.getElementById('tbl-nom-local'); let tNomV = document.getElementById('tbl-nom-visitante');
+        let tPtsL = document.getElementById('tbl-pts-l'); let tPtsV = document.getElementById('tbl-pts-v');
+        let tGolL = document.getElementById('tbl-goles-l'); let tGolV = document.getElementById('tbl-goles-v');
+        let tConL = document.getElementById('tbl-conv-l'); let tConV = document.getElementById('tbl-conv-v');
+
+        if (tNomL) tNomL.innerText = partidoSeleccionadoActual.local_nombre;
+        if (tNomV) tNomV.innerText = partidoSeleccionadoActual.visitante_nombre;
+        if (tPtsL) tPtsL.innerText = totalPuntosLocal.toFixed(1) + " Pts";
+        if (tPtsV) tPtsV.innerText = totalPuntosVisitante.toFixed(1) + " Pts";
+        if (tGolL) tGolL.innerText = document.getElementById('marcador-goles-l')?.value || 0;
+        if (tGolV) tGolV.innerText = document.getElementById('marcador-goles-v')?.value || 0;
+        if (tConL) tConL.innerText = titularesLocal.length + " Jug.";
+        if (tConV) tConV.innerText = titularesVisitante.length + " Jug.";
+
+        // Desplegar el panel con animación visual
+        let panelQuiniela = document.getElementById('panel-pronostico-quiniela');
+        if (panelQuiniela) panelQuiniela.style.display = 'block';
     }
+
 
        // ACTUALIZADO: Garantiza el pintado de los 20 clubes alineados aunque la liga acabe de empezar a cero
     function cargarClasificacionDesdeBD() {
@@ -1528,72 +1618,75 @@
     // NUEVA VARIABLE GLOBAL: Almacena el ID del club que se está visitando en la ficha
     let idEquipoSeleccionadoFicha = null;
 
-       // CORREGIDO: Elimina las peticiones vacías que congelaban la página web
-        // CORRECCIÓN DEFINITIVA: Sin promesas cruzadas ni bucles infinitos que congelen la web
     function viajarAFichaEquipo(id_equipo) {
         idEquipoSeleccionadoFicha = id_equipo;
-        
-        // 1. Activar por defecto la primera sub-pestaña lineal (Datos del Club)
         cambiarSubSeccionEquipo('info');
 
-        // 2. Descargar los datos del club y sus 21 estadísticas de la Clasificación de MySQL
+        let iconoBalonFallback = "https://flaticon.com";
+
         fetch(API_URL + '/clasificacion')
-            .then(function(res) { return res.json(); })
-            .then(function(lista) {
+            .then(res => res.json())
+            .then(lista => {
                 let eq = lista.find(x => x.id_equipo == id_equipo);
                 if (!eq) return;
 
-                document.getElementById('eq-det-nombre').innerText = eq.nombre;
-                document.getElementById('eq-det-division').innerText = "1ª División";
+                let nombreLimpioParaEscudo = eq.nombre.toLowerCase().trim().replace(/ /g, "_");
+                let rutaEscudoFinal = "http://localhost:3000/escudos/" + nombreLimpioParaEscudo + ".png";
 
-                // Forzar la carga del escudo de la carpeta local usando el nombre del club
-                let nombreLimpioParaEscudo = eq.nombre.toLowerCase().replace(/ /g, "_");
-                document.getElementById('eq-det-escudo').src = "http://localhost:3000/escudos/" + nombreLimpioParaEscudo + ".png";
+                document.getElementById('eq-det-nombre').innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <img id="escudo-cabecera-ficha" src="${rutaEscudoFinal}" style="width: 45px; height: 45px; object-fit: contain;">
+                        <span>${eq.nombre}</span>
+                    </div>
+                `;
+                document.getElementById('escudo-cabecera-ficha').onerror = function() { this.src = iconoBalonFallback; this.onerror = null; };
+                
+                document.getElementById('eq-det-division').innerText = "1ª División España";
+                
+                let imgGrandeFicha = document.getElementById('eq-det-escudo');
+                imgGrandeFicha.src = rutaEscudoFinal;
+                imgGrandeFicha.onerror = function() { this.src = iconoBalonFallback; this.onerror = null; };
 
-                // Inyectar contadores en los paneles grises de la ficha
                 document.getElementById('eq-stats-pt').innerText = eq.pt || 0;
                 document.getElementById('eq-stats-pg').innerText = eq.pg || 0;
                 document.getElementById('eq-stats-pe').innerText = eq.pe || 0;
                 document.getElementById('eq-stats-pp').innerText = eq.pp || 0;
-            }).catch(err => console.error("Error cargando ficha club:", err));
+            }).catch(err => console.error("Error en datos de club:", err));
 
-        // 3. Renderizar la plantilla oficial de jugadores de forma directa y limpia
+        // Descargar la plantilla
         let contenedorJugadores = document.getElementById('eq-det-lista-jugadores');
-        contenedorJugadores.innerHTML = "";
-
-        // Si hay futbolistas cargados en el acta actual, los filtramos para pintar las tarjetas en el acto
-        if (listaJugadoresActaActual && listaJugadoresActaActual.length > 0) {
-            let jugadoresFiltrados = listaJugadoresActaActual.filter(x => x.id_equipo == id_equipo);
+        if (contenedorJugadores) {
+            contenedorJugadores.innerHTML = "<p style='color:#aaa; font-style:italic; padding:15px; text-align:center;'>Consultando vestuario en MySQL...</p>";
             
-            if (jugadoresFiltrados.length === 0) {
-                contenedorJugadores.innerHTML = "<p style='color:#777; font-style:italic; padding:15px; text-align:center;'>Abre un partido en actas primero para cargar las estrellas en la web.</p>";
-            } else {
-                // Dibujamos las cajas de los futbolistas de forma lineal segura
-                jugadoresFiltrados.forEach(function(j) {
-                    let card = document.createElement('div');
-                    card.style.background = '#f9f9f9';
-                    card.style.border = '1px solid #ddd';
-                    card.style.padding = '12px';
-                    card.style.borderRadius = '6px';
-                    card.style.textAlign = 'center';
-                    card.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+            fetch(API_URL + '/jugadores/equipo/' + id_equipo)
+                .then(res => res.json())
+                .then(jugadores => {
+                    contenedorJugadores.innerHTML = "";
+                    if (!jugadores || jugadores.length === 0) {
+                        contenedorJugadores.innerHTML = "<p style='color:#aaa; font-style:italic; padding:15px; text-align:center;'>Este club aún no registra futbolistas dados de alta en tu base de datos.</p>";
+                        return;
+                    }
 
-                    card.innerHTML = `
-                        <img src="http://localhost:3000/fotos/${j.foto_ruta}" style="width:60px; height:60px; border-radius:50%; object-fit:cover; margin-bottom:8px; border:2px solid #00CC66;" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'">
-                        <div style="font-weight:bold; color:#111; font-size:14px;">Nº ${j.dorsal || '0'} - ${j.nombre}</div>
-                        <span style="background:#222; color:white; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:10px; display:inline-block; margin-top:4px;">${j.posicion}</span>
-                    `;
-                    contenedorJugadores.appendChild(card);
+                    jugadores.forEach(j => {
+                        let card = document.createElement('div');
+                        card.style.background = 'rgba(255,255,255,0.05)';
+                        card.style.border = '1px solid rgba(255,255,255,0.1)';
+                        card.style.padding = '14px';
+                        card.style.borderRadius = '8px';
+                        card.style.textAlign = 'center';
+                        card.style.transition = '0.2s';
+
+                        card.innerHTML = `
+                            <img src="http://localhost:3000/fotos/${j.foto_ruta}" style="width:65px; height:65px; border-radius:50%; object-fit:cover;" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'; this.onerror=null;">
+                            <div style="font-weight:bold; font-size:13px; margin-top:8px; color:#fff;">Nº ${j.dorsal || '0'} - ${j.nombre}</div>
+                            <span style="background:#222; color:#00CC66; font-size:10px; font-weight:bold; padding:2px 8px; border-radius:10px; display:inline-block; margin-top:5px; text-transform:uppercase;">${j.posicion}</span>
+                        `;
+                        contenedorJugadores.appendChild(card);
+                    });
                 });
-            }
-        } else {
-            contenedorJugadores.innerHTML = "<p style='color:#777; font-style:italic; padding:15px; text-align:center;'>Por favor, selecciona un partido en actas para sincronizar la plantilla.</p>";
         }
 
-        // 4. Resetear contenedor del calendario lineal
-        document.getElementById('eq-det-lista-partidos').innerHTML = "<p style='color:#777; font-style:italic; padding:10px; text-align:center;'>Consulta el calendario completo de este club desde el panel general de Actas.</p>";
-
-        // Hacer el salto de sección visual desactivando las restricciones
+        document.getElementById('eq-det-lista-partidos').innerHTML = "<p style='color:#aaa; font-style:italic; padding:10px; text-align:center;'>Consulta los partidos oficiales de este club desde el panel general de Actas.</p>";
         cambiarSeccion('ficha-equipo');
     }
 
@@ -1621,6 +1714,188 @@
         if(originalOcultarPanelesActa) originalOcultarPanelesActa();
         // Si se cambia de pantalla, nos aseguramos de no dejar residuos visuales
     };
+    // NUEVA FUNCIÓN MAESTRA: Conecta los escudos superiores con la Ficha de Equipos desde MySQL
+    function viajarAFichaEquipo(id_equipo) {
+        console.log("Abriendo Ficha Técnica Interactiva del Club con ID: " + id_equipo);
+        idEquipoSeleccionadoFicha = id_equipo;
+        
+        // 1. EFECTO VISUAL EN LÍNEA: Apaga todos los escudos y enciende con halo verde el seleccionado
+        document.querySelectorAll('.carrusel-escudos .escudo-item').forEach(img => {
+            img.style.transform = 'none';
+            img.style.borderColor = 'transparent';
+            img.style.background = 'transparent';
+            img.style.filter = 'drop-shadow(0px 4px 6px rgba(0,0,0,0.4)) grayscale(25%)';
+        });
+
+        // Localizamos el cromo pulsado usando el atributo onclick mapeado
+        let escudoPulsado = document.querySelector(`.escudo-item[onclick="viajarAFichaEquipo(${id_equipo})"]`);
+        if (escudoPulsado) {
+            escudoPulsado.style.transform = 'scale(1.22) translateY(-2px)';
+            escudoPulsado.style.filter = 'drop-shadow(0px 6px 12px rgba(0,204,102,0.6)) grayscale(0%)';
+            escudoPulsado.style.borderColor = '#00CC66';
+            escudoPulsado.style.background = 'rgba(0, 204, 102, 0.15)';
+        }
+
+        // 2. ACTIVAR SUB-PESTAÑA LINEAL POR DEFECTO (Datos del Club)
+        cambiarSubSeccionEquipo('info');
+
+        // 3. DESCARGAR ESTADÍSTICAS DEL CLUB DESDE MYSQL
+        fetch(API_URL + '/clasificacion')
+            .then(res => res.json())
+            .then(lista => {
+                let eq = lista.find(x => x.id_equipo == id_equipo);
+                if (!eq) return;
+
+                // Inyectar textos informativos en el panel de datos
+                document.getElementById('eq-det-nombre').innerText = eq.nombre;
+                document.getElementById('eq-det-division').innerText = "1ª División España";
+
+                // Formatear nombre para cargar el escudo en grande en la ficha
+                let nombreLimpioParaEscudo = eq.nombre.toLowerCase().trim().replace(/ /g, "_");
+                document.getElementById('eq-det-escudo').src = "http://localhost:3000/escudos/" + nombreLimpioParaEscudo + ".png";
+
+                // Pintar marcadores numéricos en las tarjetas de cristal
+                document.getElementById('eq-stats-pt').innerText = eq.pt || 0;
+                document.getElementById('eq-stats-pg').innerText = eq.pg || 0;
+                document.getElementById('eq-stats-pe').innerText = eq.pe || 0;
+                document.getElementById('eq-stats-pp').innerText = eq.pp || 0;
+            }).catch(err => console.error("Error en datos del club:", err));
+
+        // 4. DESCARGAR LA PLANTILLA OFICIAL DE JUGADORES DIRECTAMENTE DE MYSQL
+        let contenedorJugadores = document.getElementById('eq-det-lista-jugadores');
+        if (contenedorJugadores) {
+            contenedorJugadores.innerHTML = "<p style='color:#aaa; font-style:italic; padding:15px;'>Consultando vestuario en la base de datos...</p>";
+            
+            // Reutilizamos de forma segura los futbolistas en memoria para pintar sus cromos de forma inmediata
+            if (listaJugadoresActaActual && listaJugadoresActaActual.length > 0) {
+                let jugadoresFiltrados = listaJugadoresActaActual.filter(x => x.id_equipo == id_equipo);
+                
+                if (jugadoresFiltrados.length === 0) {
+                    contenedorJugadores.innerHTML = "<p style='color:#aaa; font-style:italic; padding:15px; text-align:center;'>Este club no registra jugadores en el acta actual. Abre un partido de la Jornada 1 para vincular el torneo.</p>";
+                } else {
+                    contenedorJugadores.innerHTML = "";
+                    jugadoresFiltrados.forEach(j => {
+                        let card = document.createElement('div');
+                        card.style.background = 'rgba(255,255,255,0.05)';
+                        card.style.border = '1px solid rgba(255,255,255,0.1)';
+                        card.style.padding = '14px';
+                        card.style.borderRadius = '8px';
+                        card.style.textAlign = 'center';
+                        card.style.transition = '0.2s';
+                        
+                        card.onmouseover = function() { this.style.borderColor = '#00CC66'; this.style.background = 'rgba(0,204,102,0.05)'; };
+                        card.onmouseout = function() { this.style.borderColor = 'rgba(255,255,255,0.1)'; this.style.background = 'rgba(255,255,255,0.05)'; };
+
+                        card.innerHTML = `
+                            <img src="http://localhost:3000/fotos/${j.foto_ruta}" style="width:65px; height:65px; border-radius:50%; object-fit:cover; border: 2px solid rgba(255,255,255,0.2);" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+                            <div style="font-weight:bold; font-size:14px; margin-top:8px; color:#fff;">Nº ${j.dorsal || '0'} - ${j.nombre}</div>
+                            <span style="background:#222; color:#00CC66; font-size:10px; font-weight:bold; padding:2px 8px; border-radius:10px; display:inline-block; margin-top:5px; text-transform:uppercase;">${j.posicion}</span>
+                        `;
+                        contenedorJugadores.appendChild(card);
+                    });
+                }
+            } else {
+                contenedorJugadores.innerHTML = "<p style='color:#aaa; font-style:italic; padding:15px; text-align:center;'>Por favor, selecciona primero un partido en la pestaña de actas para sincronizar las plantillas de LaLiga.</p>";
+            }
+        }
+
+        // 5. SALTAR DE PESTAÑA A LA FICHA DE EQUIPO
+        cambiarSeccion('ficha-equipo');
+    }
+      // VERSIÓN CON SILENCIADOR ABSOLUTO: Destruye el error 533 de raíz en el motor de JavaScript
+    function cargarClubesEnSelectoresFormulario() {
+        // 1. Capturamos los elementos con el máximo cuidado posible
+        let elementoLocal = document.getElementById('crear-local-sel');
+        let elementoVisitante = document.getElementById('crear-visitante-sel');
+        
+        // 2. ESCUDO TOTAL: Si cualquiera de los dos es null, abortamos la función ANTES de tocar innerHTML
+        if (elementoLocal === null || elementoVisitante === null) {
+            console.log("Formulario lineal no presente en esta pestaña. Esperando navegación...");
+            return; 
+        }
+
+        // 3. Solo si ha pasado el filtro, hacemos la petición de forma segura
+        fetch(API_URL + '/clasificacion')
+            .then(function(res) { return res.json(); })
+            .then(function(equipos) {
+                if (!equipos || equipos.length === 0) return;
+
+                // Doble comprobación de seguridad en caliente antes de vaciar
+                if (document.getElementById('crear-local-sel') && document.getElementById('crear-visitante-sel')) {
+                    document.getElementById('crear-local-sel').innerHTML = "";
+                    document.getElementById('crear-visitante-sel').innerHTML = "";
+
+                    equipos.forEach(function(eq) {
+                        let optL = document.createElement('option');
+                        optL.value = eq.id_equipo;
+                        optL.innerText = eq.nombre;
+                        document.getElementById('crear-local-sel').appendChild(optL);
+
+                        let optV = document.createElement('option');
+                        optV.value = eq.id_equipo;
+                        optV.innerText = eq.nombre;
+                        document.getElementById('crear-visitante-sel').appendChild(optV);
+                    });
+                    console.log("⚙ Selectores de calendario inyectados con éxito.");
+                }
+            })
+            .catch(function(err) { 
+                console.log("Sincronización en espera."); 
+            });
+    }
+
+
+
+    // Sincronizamos la llamada para que se ejecute sola al abrir la web
+    window.addEventListener('DOMContentLoaded', cargarClubesEnSelectoresFormulario);
+    // RECONSTRUIDA: Crea el enfrentamiento en MySQL y lo añade en línea con mini-escudos
+    function ejecutarCreacionPartidoManualBD() {
+        let jor = parseInt(document.getElementById('crear-jornada').value) || 1;
+        let idL = document.getElementById('crear-local-sel').value;
+        let idV = document.getElementById('crear-visitante-sel').value;
+
+        if (idL === idV) {
+            alert("⚠ Un equipo no puede jugar contra sí mismo. Elige clubes distintos.");
+            return;
+        }
+
+        let datosPartido = {
+            id_jornada: jor,
+            id_local: parseInt(idL),
+            id_visitante: parseInt(idV),
+            goles_local: null,      // Se inicializa en limpio para el partido por disputar
+            goles_visitante: null   // Se inicializa en limpio para el partido por disputar
+        };
+
+        console.log("Enviando orden de inserción a MySQL para Jornada " + jor);
+
+        // Llamamos a la API de partidos para guardar la fila en la tabla partidos
+        fetch(API_URL + '/partidos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datosPartido)
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert("🏟 ¡Partido registrado con éxito en MySQL Workbench para la Jornada " + jor + "!");
+            
+            // Viajamos de forma automática a la pestaña de Actas en línea para ver el resultado
+            cambiarSeccion('partidos');
+            
+            // Forzamos al selector de actas a colocarse en la jornada donde se creó el partido
+            let selectorFechas = document.getElementById('ver-jornada-sel');
+            if (selectorFechas) {
+                selectorFechas.value = jor;
+            }
+            
+            // Recargamos el menú de pastillas horizontales en línea
+            cargarListaPartidosDeJornadaDesdeBD();
+        })
+        .catch(err => {
+            console.error("Error al insertar el partido:", err);
+            alert("Error interno 500: Revisa que la tabla 'partidos' de MySQL acepte valores nulos en los goles.");
+        });
+    }
 
 
 </script>
