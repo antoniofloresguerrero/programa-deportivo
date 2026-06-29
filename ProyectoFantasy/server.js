@@ -104,7 +104,7 @@ app.get('/api/acta/:id_partido', (req, res) => {
 
 
 
-// 6. ACTUALIZADO: GUARDA MARCADORES Y RECALCULA LA CLASIFICACIÓN COMPLETA (TOTALES, CASA Y FUERA)
+// 6. VERSIÓN ULTRA-SEGURO: GUARDA MARCADORES Y JUGADORES FILTRANDO CAMPOS VACÍOS (EVITA ERROR 500)
 app.post('/api/acta/guardar', (req, res) => {
     const { 
         id_partido, id_acta, id_jugador, nuevo_nombre, 
@@ -112,33 +112,60 @@ app.post('/api/acta/guardar', (req, res) => {
         posicion_x, posicion_y 
     } = req.body;
 
+    // Convertir estrictamente los goles a números enteros para MySQL
+    const gLocal = parseInt(goles_local) || 0;
+    const gVisitante = parseInt(goles_visitante) || 0;
+
+    // Calcular puntos extras por goles individuales metidos por el jugador
     let puntosGolesExtra = 0;
     if (evento === "⚽") puntosGolesExtra = 2;
     else if (evento === "⚽⚽" || evento === "⚽⚽⚽") puntosGolesExtra = 3;
 
-    const puntosTotalesPartido = (puntos !== null) ? (parseInt(puntos) + puntosGolesExtra) : null;
-
-    // 1. Guardar goles del encuentro en curso
-    db.query('UPDATE partidos SET goles_local = ?, goles_visitante = ? WHERE id_partido = ?', [goles_local, goles_visitante, id_partido], (err) => {
-        if (err) console.error("Error goles:", err);
-        
-        // 2. FUNCIÓN MAESTRA: Recalcular la tabla de posiciones con los datos reales guardados
-        recalcularClasificacionGeneralMySQL();
-    });
-
-    // 3. Guardar datos individuales del futbolista
-    db.query('UPDATE jugadores SET nombre = ? WHERE id_jugador = ?', [nuevo_nombre, id_jugador]);
+    // FILTRO DE SEGURIDAD: Convertimos la nota a un número limpio para evitar fallos de NaN en MySQL
+    let notaLimpia = parseInt(puntos);
+    let puntosTotalesPartido = null;
     
-    const queryActa = `
-        UPDATE acta_partido 
-        SET rol = ?, puntos = ?, evento = ?, cambio = ?, posicion_x = ?, posicion_y = ? 
-        WHERE id_acta = ?`;
+    if (!isNaN(notaLimpia)) {
+        puntosTotalesPartido = notaLimpia + puntosGolesExtra;
+    }
+
+    // 1. Actualizar los goles del partido en la tabla general de encuentros
+    db.query('UPDATE partidos SET goles_local = ?, goles_visitante = ? WHERE id_partido = ?', [gLocal, gVisitante, id_partido], (err) => {
+        if (err) {
+            console.error("Error crítico de MySQL al actualizar goles en partidos:", err);
+            return res.status(500).json({ error: "Fallo al guardar goles en la tabla partidos: " + err.message });
+        }
         
-    db.query(queryActa, [rol, puntosTotalesPartido, evento, cambio, posicion_x, posicion_y, id_acta], (err) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ estatus: "OK", mensaje: "Marcadores guardados y clasificación actualizada en MySQL" });
+        // 2. FUNCIÓN MAESTRA AUTOMÁTICA: Recalcula y actualiza la tabla de la clasificación general
+        recalcularClasificacionGeneralMySQL();
+        
+        // 3. Actualizar el nombre del futbolista si ha cambiado por edición
+        db.query('UPDATE jugadores SET nombre = ? WHERE id_jugador = ?', [nuevo_nombre, id_jugador], (errJug) => {
+            if (errJug) console.error("Error al actualizar nombre del jugador:", errJug);
+
+            // 4. Actualizar el acta táctica individual con las coordenadas y notas limpias
+            const queryActa = `
+                UPDATE acta_partido 
+                SET rol = ?, puntos = ?, evento = ?, cambio = ?, posicion_x = ?, posicion_y = ? 
+                WHERE id_acta = ?`;
+                
+            // Convertimos las coordenadas a enteros o NULL si vienen vacías para que MySQL no salte
+            const pX = posicion_x !== undefined && posicion_x !== null ? parseInt(posicion_x) : null;
+            const pY = posicion_y !== undefined && posicion_y !== null ? parseInt(posicion_y) : null;
+
+            db.query(queryActa, [rol, puntosTotalesPartido, evento || "", cambio || "", pX, pY, id_acta], (errActa) => {
+                if (errActa) {
+                    console.error("Error crítico de MySQL en acta_partido:", errActa);
+                    return res.status(500).json({ error: "Fallo al guardar el acta_partido: " + errActa.message });
+                }
+                
+                // Si todo entra sin problemas, devolvemos confirmación limpia en verde a la web
+                res.json({ estatus: "OK", mensaje: "Marcadores guardados y clasificación recalculada de forma exitosa." });
+            });
+        });
     });
 });
+
 
 // NUEVA FUNCIÓN INTERNA: Recorre todos los partidos de la BD y computa los 21 parámetros de la clasificación
 function recalcularClasificacionGeneralMySQL() {
