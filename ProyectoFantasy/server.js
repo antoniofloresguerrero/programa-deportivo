@@ -12,6 +12,8 @@ const path = require('path'); // Pon esta línea arriba del todo si no la tienes
 app.use('/fotos', express.static(path.join(__dirname, 'fotos')));
 // INDICA A NODE QUE SIVRA TU CARPETA DE VÍDEOS DE FORMA SEGURA EN EL PUERTO 3000
 app.use('/videos', express.static(path.join(__dirname, 'videos')));
+// INDICA A NODE QUE SIRVA TU CARPETA DE ESCUDOS DE FORMA SEGURA EN EL PUERTO 3000
+app.use('/escudos', express.static(path.join(__dirname, 'escudos')));
 
 
 

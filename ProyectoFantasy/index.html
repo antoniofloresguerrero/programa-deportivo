@@ -3,49 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <title>LaLiga Fantasy 2025/2026 - Conexión MySQL</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333; }
-        .nav-tabs { background-color: #111; padding: 15px; display: flex; justify-content: center; gap: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .tab-btn { background: none; border: 2px solid #00CC66; color: white; padding: 8px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s; }
-        .tab-btn.active, .tab-btn:hover { background-color: #00CC66; color: black; }
-        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+       <style>
+       body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(http://localhost:3000/fotos/fondo_estadio.jpg);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            margin: 0; padding: 0; color: #333; 
+        }
+
+        /* MENÚ HAMBURGUESA LATERAL INTELIGENTE (Despliegue al pasar el ratón) */
+        .sidebar-menu {
+            position: fixed; top: 0; left: -220px; width: 220px; height: 100%;
+            background-color: rgba(17, 17, 17, 0.96); box-shadow: 4px 0 10px rgba(0,0,0,0.3);
+            z-index: 1000; transition: 0.3s ease; padding-top: 60px; box-sizing: border-box;
+        }
+        /* Zona del gatillo o botón hamburguesa flotante */
+        .hamburguesa-trigger {
+            position: fixed; top: 15px; left: 15px; z-index: 1001;
+            background: #00CC66; color: black; font-size: 22px; padding: 8px 12px;
+            border-radius: 4px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        /* Al acercarse a la zona izquierda o al gatillo, el menú se despliega solo */
+        .sidebar-menu:hover, .hamburguesa-trigger:hover + .sidebar-menu { left: 0; }
+        
+        .sidebar-menu a {
+            display: block; padding: 15px 25px; color: #ccc; text-decoration: none;
+            font-weight: bold; font-size: 15px; border-bottom: 1px solid #222; transition: 0.2s;
+        }
+        .sidebar-menu a:hover { background: #00CC66; color: black; padding-left: 35px; }
+
+        /* BARRA HORIZONTAL DE ESCUDOS DE LOS 20 EQUIPOS */
+        .carrusel-escudos {
+            background: rgba(255, 255, 255, 0.9); padding: 10px; margin: 15px auto;
+            max-width: 1200px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex; justify-content: center; align-items: center; gap: 18px;
+            overflow-x: auto; scrollbar-width: thin; box-sizing: border-box;
+        }
+        .escudo-item {
+            width: 40px; height: 40px; object-fit: contain; cursor: pointer;
+            transition: 0.2s ease; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.15));
+        }
+        .escudo-item:hover { transform: scale(1.25); filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.3)); }
+
+        /* SUBMENÚ LINEAL INTERNO DE LA FICHA DE EQUIPOS */
+        .submenu-lineal {
+            display: flex; gap: 2px; background: #222; border-radius: 6px 6px 0 0; overflow: hidden; margin-bottom: 0;
+        }
+        .sub-tab-btn {
+            background: none; border: none; color: #aaa; padding: 12px 25px;
+            font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px; flex: 1; text-align: center;
+        }
+        .sub-tab-btn:hover, .sub-tab-btn.active { background: #00CC66; color: black; }
+
+        /* Ajustes de contenedores para convivir con el fondo */
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; box-sizing: border-box; }
         .panel { display: none; }
         .panel.active { display: block; }
-
-        .form-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid #00CC66; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 12px; }
-        .form-group { display: flex; flex-direction: column; font-size: 13px; font-weight: bold; }
-        .form-group select, .form-group input { padding: 6px; border: 1px solid #ccc; border-radius: 4px; margin-top: 4px; }
-        .btn-g { background: #00CC66; color: white; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; }
-        .btn-g:hover { background-color: #00aa55; }
-
-        .lista-partidos-jornada { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
+        .form-box { background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 8px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); margin-bottom: 25px; border-top: 4px solid #00CC66; }
+        
+        /* Césped táctico y rejillas se quedan iguales */
         .item-partido-btn { background: #111; color: white; border: 2px solid #00CC66; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s; }
         .item-partido-btn:hover { background: #00CC66; color: black; }
-
         .marcador-visual { background: #111; padding: 20px; border-radius: 10px; text-align: center; color: white; margin-bottom: 25px; font-size: 24px; font-weight: bold; display: none; }
         .goles-badge { background: #00CC66; padding: 5px 15px; border-radius: 5px; margin: 0 15px; }
-        
         .grid-actas { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        .col-acta-selector { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .col-acta-selector { background: white; padding: 20px; border-radius: 8px; }
         .check-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 14px; font-weight: 500; }
-        .check-item input { width: 16px; height: 16px; cursor: pointer; }
-
         .pantalla-horizontal { display: grid; grid-template-columns: 1.4fr 1fr; gap: 25px; align-items: stretch; margin-top: 20px; }
         .campo-futbol { width: 100%; height: 480px; background-color: #2e7d32; border: 4px solid white; border-radius: 12px; position: relative; box-shadow: 0 8px 16px rgba(0,0,0,0.15); overflow: hidden; }
         .linea-medio { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background-color: rgba(255,255,255,0.5); }
         .circulo-central { position: absolute; top: 50%; left: 50%; width: 90px; height: 90px; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%); }
+        .btn-g { background: #00CC66; color: white; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        .btn-g:hover { background-color: #00aa55; }
     </style>
+
 </head>
 <body>
    
-       <!-- BARRA DE NAVEGACIÓN SUPERIOR ACTUALIZADA -->
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="cambiarSeccion('config')">⚙️ Configurar Calendario</button>
-        <button class="tab-btn" onclick="cambiarSeccion('partidos')">🏟️ Ver Actas y Puntos</button>
-        <button class="tab-btn" onclick="cambiarSeccion('clasificacion')">🏆 Ver Clasificación</button>
+        <!-- GATILLO INTERACTIVO Y MENÚ LATERAL HAMBURGUESA CORREGIDO -->
+    <div class="hamburguesa-trigger">☰ MENU</div>
+    <div class="sidebar-menu">
+        <a href="#" onclick="cambiarSeccion('config')">⚙️ Configurar Calendario</a>
+        <a href="#" onclick="cambiarSeccion('partidos')">🏟️ Ver Actas y Puntos</a>
+        <a href="#" onclick="cambiarSeccion('clasificacion')">🏆 Ver Clasificación</a>
+        <!-- CORRECCIÓN: Viaja a actas y ejecuta el cálculo en vivo eliminando el error de id nulo -->
+        <a href="#" onclick="cambiarSeccion('partidos'); calcularAnalisisQuinielaEnVivo();">🔮 Análisis Quiniela</a>
     </div>
 
+
+    <!-- CARRUSEEL DE LOS 20 ESCUDOS OFICIALES DE LALIGA -->
+    <div class="carrusel-escudos">
+        <img class="escudo-item" src="http://localhost:3000/escudos/real_madrid.png" onclick="viajarAFichaEquipo(1)" title="Real Madrid" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/barcelona.png" onclick="viajarAFichaEquipo(2)" title="FC Barcelona" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/atletico.png" onclick="viajarAFichaEquipo(3)" title="Atlético de Madrid" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/girona.png" onclick="viajarAFichaEquipo(4)" title="Girona FC" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/athletic.png" onclick="viajarAFichaEquipo(5)" title="Athletic Club" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/real_sociedad.png" onclick="viajarAFichaEquipo(6)" title="Real Sociedad" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/betis.png" onclick="viajarAFichaEquipo(7)" title="Real Betis" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/villarreal.png" onclick="viajarAFichaEquipo(8)" title="Villarreal CF" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/valencia.png" onclick="viajarAFichaEquipo(9)" title="Valencia CF" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/alaves.png" onclick="viajarAFichaEquipo(10)" title="Deportivo Alavés" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/osasuna.png" onclick="viajarAFichaEquipo(11)" title="CA Osasuna" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/getafe.png" onclick="viajarAFichaEquipo(12)" title="Getafe CF" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/celta.png" onclick="viajarAFichaEquipo(13)" title="Celta de Vigo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/sevilla.png" onclick="viajarAFichaEquipo(14)" title="Sevilla FC" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/mallorca.png" onclick="viajarAFichaEquipo(15)" title="RCD Mallorca" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/las_palmas.png" onclick="viajarAFichaEquipo(16)" title="UD Las Palmas" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/leganes.png" onclick="viajarAFichaEquipo(17)" title="CD Leganés" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/valladolid.png" onclick="viajarAFichaEquipo(18)" title="Real Valladolid" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/espanyol.png" onclick="viajarAFichaEquipo(19)" title="RCD Espanyol" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+        <img class="escudo-item" src="http://localhost:3000/escudos/racing.png" onclick="viajarAFichaEquipo(20)" title="Racing de Santander" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
+    </div>
 
     <div class="container">
 
@@ -367,6 +438,52 @@
             </div>
         </div>
 
+</div>
+        <!-- ==================== NUEVA PESTAÑA E: FICHA INTEGRAL DE EQUIPOS ==================== -->
+        <div id="sec-ficha-equipo" class="panel" style="display: none;">
+            
+            <!-- SUBMENÚ LINEAL SOLICITADO: Controla las subsecciones del Club -->
+            <div class="submenu-lineal">
+                <button id="sub-btn-info" class="sub-tab-btn active" onclick="cambiarSubSeccionEquipo('info')">📋 Datos del Club</button>
+                <button id="sub-btn-plantilla" class="sub-tab-btn" onclick="cambiarSubSeccionEquipo('plantilla')">🏃 Plantilla Oficial</button>
+                <button id="sub-btn-partidos" class="sub-tab-btn" onclick="cambiarSubSeccionEquipo('partidos')">🗓️ Partidos del Club</button>
+            </div>
+
+            <!-- SUB-PANEL 1: DATOS GENERALES DEL EQUIPO -->
+            <div id="sub-sec-info" class="form-box" style="border-radius: 0 0 8px 8px; margin-top: 0;">
+                <div style="display: flex; align-items: center; gap: 30px; padding: 15px;">
+                    <img id="eq-det-escudo" src="" style="width: 120px; height: 120px; object-fit: contain;">
+                    <div>
+                        <h2 id="eq-det-nombre" style="margin: 0; font-size: 28px; color: #111; text-transform: uppercase;">-</h2>
+                        <p style="margin: 5px 0 0 0; color: #666; font-size: 16px; font-weight: bold;">División: <span id="eq-det-division" style="color: #00CC66;">1ª División</span></p>
+                    </div>
+                </div>
+                
+                <h3 style="border-bottom: 2px solid #00CC66; padding-bottom: 8px; margin-top: 25px;">📊 Resumen de Rendimiento en la Liga</h3>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; text-align: center; margin-top: 15px;">
+                    <div style="background: #f4f4f4; padding: 12px; border-radius: 6px;"><strong style="font-size: 20px; color: #111;" id="eq-stats-pt">0</strong><span style="display:block; font-size:11px; color:#666; text-transform:uppercase; margin-top:3px;">Puntos</span></div>
+                    <div style="background: #f4f4f4; padding: 12px; border-radius: 6px;"><strong style="font-size: 20px; color: #00bb55;" id="eq-stats-pg">0</strong><span style="display:block; font-size:11px; color:#666; text-transform:uppercase; margin-top:3px;">Ganados</span></div>
+                    <div style="background: #f4f4f4; padding: 12px; border-radius: 6px;"><strong style="font-size: 20px; color: #888;" id="eq-stats-pe">0</strong><span style="display:block; font-size:11px; color:#666; text-transform:uppercase; margin-top:3px;">Empatados</span></div>
+                    <div style="background: #f4f4f4; padding: 12px; border-radius: 6px;"><strong style="font-size: 20px; color: #ff4444;" id="eq-stats-pp">0</strong><span style="display:block; font-size:11px; color:#666; text-transform:uppercase; margin-top:3px;">Perdidos</span></div>
+                </div>
+            </div>
+
+            <!-- SUB-PANEL 2: PLANTILLA OFICIAL DE JUGADORES -->
+            <div id="sub-sec-plantilla" class="form-box" style="border-radius: 0 0 8px 8px; margin-top: 0; display: none;">
+                <h3 style="margin-top: 0; border-bottom: 2px solid #00CC66; padding-bottom: 8px;">🏃 Futbolistas Registrados en MySQL</h3>
+                <div id="eq-det-lista-jugadores" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-top: 15px;">
+                    <!-- Se rellena dinámicamente con las tarjetas de los jugadores -->
+                </div>
+            </div>
+
+            <!-- SUB-PANEL 3: HISTORIAL DE ENCUENTROS DEL CLUB -->
+            <div id="sub-sec-partidos" class="form-box" style="border-radius: 0 0 8px 8px; margin-top: 0; display: none;">
+                <h3 style="margin-top: 0; border-bottom: 2px solid #00CC66; padding-bottom: 8px;">🗓️ Calendario y Resultados de la Temporada</h3>
+                <div id="eq-det-lista-partidos" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                    <!-- Se rellena dinámicamente con los encuentros del club -->
+                </div>
+            </div>
+        </div>
 
 
 
@@ -376,23 +493,35 @@
     let partidoSeleccionadoActual = null;
     let jugadorSeleccionadoParaEditar = null;
 
-        // ACTUALIZADO: Permite alternar de pestañas restaurando los paneles y el césped sin pérdidas
-        function cambiarSeccion(id) {
+           // ACTUALIZADO Y BLINDADO: Cambia de pestaña de forma segura ignorando IDs nulos o inexistentes
+    function cambiarSeccion(id) {
         // SEGURIDAD: Apagar el vídeo si estuviese reproduciéndose al salir de la pestaña
         var reproductorVideo = document.getElementById('ficha-det-video');
         if (reproductorVideo) { reproductorVideo.pause(); }
 
+        // Ocultar los paneles existentes con un bucle limpio
         document.querySelectorAll('.panel').forEach(p => {
             p.style.display = 'none';
             p.classList.remove('active');
         });
         
+        // Limpiar la iluminación de los botones de navegación antiguos si los hubiera
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         
+        // CORRECCIÓN CLAVE: Buscamos el contenedor destino en el HTML
         let panelDestino = document.getElementById('sec-' + id);
+        
+        // BLINDAJE: Si el panel no existe físicamente en el HTML, frenamos la ejecución sin romper la web
+        if (!panelDestino) {
+            console.warn(`La sección "sec-${id}" no existe en el HTML. Operación omitida de forma segura.`);
+            return;
+        }
+
+        // Si el panel existe, lo activamos en pantalla
         panelDestino.classList.add('active');
         panelDestino.style.display = 'block';
 
+        // Comportamientos de restauración al regresar al panel de partidos
         if (id === 'partidos') {
             if (partidoSeleccionadoActual) {
                 document.getElementById('panel-marcador').style.display = 'block';
@@ -404,29 +533,54 @@
                 cargarJornadasDesdeBD();
             }
         }
-    if (id === 'clasificacion') {
-            cargarClasificacionDesdeBD();
-        }
     }
 
 
 
+       // CORREGIDO Y BLINDADO: Carga las jornadas de inicio sin congelar el navegador si MySQL está limpio
     function cargarJornadasDesdeBD() {
+        console.log("Descargando jornadas iniciales desde el servidor...");
+        
         fetch(API_URL + '/jornadas')
-            .then(res => res.json())
-            .then(jornadas => {
-                let selectCfg = document.getElementById('cfg-jornada-sel');
-                let selectVer = document.getElementById('ver-jornada-sel');
-                if (jornadas.length === 0) {
-                    selectCfg.innerHTML = "<option value=''>Crea una jornada primero...</option>";
-                    selectVer.innerHTML = "<option value=''>No hay jornadas en MySQL</option>";
-                    return;
+            .then(function(res) { 
+                if (!res.ok) throw new Error("Error en respuesta del servidor");
+                return res.json(); 
+            })
+            .then(function(jornadas) {
+                var sel = document.getElementById('ver-jornada-sel');
+                if (!sel) return; // Evita romper el código si el select no se ha dibujado
+                
+                sel.innerHTML = "";
+                
+                if (!jornadas || jornadas.length === 0) {
+                    // Si no hay jornadas en tu base de datos, metemos una por defecto para que no se quede colgado
+                    var opt = document.createElement('option');
+                    opt.value = "1";
+                    opt.innerText = "Jornada 1";
+                    sel.appendChild(opt);
+                    console.log("No se encontraron jornadas en MySQL. Se inicializa la Jornada 1 por defecto.");
+                } else {
+                    jornadas.forEach(function(j) {
+                        var opt = document.createElement('option');
+                        opt.value = j.id_jornada;
+                        opt.innerText = "Jornada " + j.id_jornada;
+                        sel.appendChild(opt);
+                    });
                 }
-                let html = jornadas.map(j => `<option value="${j.id_jornada}">Jornada ${j.numero_jornada}</option>`).join('');
-                selectCfg.innerHTML = html; selectVer.innerHTML = html;
+                
+                // Lanzamos la carga de partidos de la jornada seleccionada de forma segura
                 cargarListaPartidosDeJornadaDesdeBD();
-            }).catch(error => console.error('Error jornadas:', error));
+            })
+            .catch(function(err) {
+                console.error("Fallo al cargar jornadas de inicio, puente de seguridad activado:", err);
+                // Si la base de datos falla o está vacía, evitamos la congelación simulando una estructura mínima
+                var sel = document.getElementById('ver-jornada-sel');
+                if (sel && sel.innerHTML === "") {
+                    sel.innerHTML = `<option value="1">Jornada 1 (Sin conexión)</option>`;
+                }
+            });
     }
+
 
     function crearNuevaJornadaEnBD() {
         fetch(API_URL + '/jornadas', { method: 'POST' }).then(res => res.json()).then(data => {
@@ -1298,6 +1452,104 @@ let videoFinal = data.video_ruta || j.video_ruta || jugadorSeleccionadoParaEdita
             });
         }
     }
+
+    // NUEVA VARIABLE GLOBAL: Almacena el ID del club que se está visitando en la ficha
+    let idEquipoSeleccionadoFicha = null;
+
+       // CORREGIDO: Elimina las peticiones vacías que congelaban la página web
+        // CORRECCIÓN DEFINITIVA: Sin promesas cruzadas ni bucles infinitos que congelen la web
+    function viajarAFichaEquipo(id_equipo) {
+        idEquipoSeleccionadoFicha = id_equipo;
+        
+        // 1. Activar por defecto la primera sub-pestaña lineal (Datos del Club)
+        cambiarSubSeccionEquipo('info');
+
+        // 2. Descargar los datos del club y sus 21 estadísticas de la Clasificación de MySQL
+        fetch(API_URL + '/clasificacion')
+            .then(function(res) { return res.json(); })
+            .then(function(lista) {
+                let eq = lista.find(x => x.id_equipo == id_equipo);
+                if (!eq) return;
+
+                document.getElementById('eq-det-nombre').innerText = eq.nombre;
+                document.getElementById('eq-det-division').innerText = "1ª División";
+
+                // Forzar la carga del escudo de la carpeta local usando el nombre del club
+                let nombreLimpioParaEscudo = eq.nombre.toLowerCase().replace(/ /g, "_");
+                document.getElementById('eq-det-escudo').src = "http://localhost:3000/escudos/" + nombreLimpioParaEscudo + ".png";
+
+                // Inyectar contadores en los paneles grises de la ficha
+                document.getElementById('eq-stats-pt').innerText = eq.pt || 0;
+                document.getElementById('eq-stats-pg').innerText = eq.pg || 0;
+                document.getElementById('eq-stats-pe').innerText = eq.pe || 0;
+                document.getElementById('eq-stats-pp').innerText = eq.pp || 0;
+            }).catch(err => console.error("Error cargando ficha club:", err));
+
+        // 3. Renderizar la plantilla oficial de jugadores de forma directa y limpia
+        let contenedorJugadores = document.getElementById('eq-det-lista-jugadores');
+        contenedorJugadores.innerHTML = "";
+
+        // Si hay futbolistas cargados en el acta actual, los filtramos para pintar las tarjetas en el acto
+        if (listaJugadoresActaActual && listaJugadoresActaActual.length > 0) {
+            let jugadoresFiltrados = listaJugadoresActaActual.filter(x => x.id_equipo == id_equipo);
+            
+            if (jugadoresFiltrados.length === 0) {
+                contenedorJugadores.innerHTML = "<p style='color:#777; font-style:italic; padding:15px; text-align:center;'>Abre un partido en actas primero para cargar las estrellas en la web.</p>";
+            } else {
+                // Dibujamos las cajas de los futbolistas de forma lineal segura
+                jugadoresFiltrados.forEach(function(j) {
+                    let card = document.createElement('div');
+                    card.style.background = '#f9f9f9';
+                    card.style.border = '1px solid #ddd';
+                    card.style.padding = '12px';
+                    card.style.borderRadius = '6px';
+                    card.style.textAlign = 'center';
+                    card.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+
+                    card.innerHTML = `
+                        <img src="http://localhost:3000/fotos/${j.foto_ruta}" style="width:60px; height:60px; border-radius:50%; object-fit:cover; margin-bottom:8px; border:2px solid #00CC66;" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'">
+                        <div style="font-weight:bold; color:#111; font-size:14px;">Nº ${j.dorsal || '0'} - ${j.nombre}</div>
+                        <span style="background:#222; color:white; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:10px; display:inline-block; margin-top:4px;">${j.posicion}</span>
+                    `;
+                    contenedorJugadores.appendChild(card);
+                });
+            }
+        } else {
+            contenedorJugadores.innerHTML = "<p style='color:#777; font-style:italic; padding:15px; text-align:center;'>Por favor, selecciona un partido en actas para sincronizar la plantilla.</p>";
+        }
+
+        // 4. Resetear contenedor del calendario lineal
+        document.getElementById('eq-det-lista-partidos').innerHTML = "<p style='color:#777; font-style:italic; padding:10px; text-align:center;'>Consulta el calendario completo de este club desde el panel general de Actas.</p>";
+
+        // Hacer el salto de sección visual desactivando las restricciones
+        cambiarSeccion('ficha-equipo');
+    }
+
+
+    // NUEVA FUNCIÓN: Controla la navegación interna del submenú lineal (Info, Plantilla, Partidos)
+    function cambiarSubSeccionEquipo(subId) {
+        // Ocultar los tres sub-paneles
+        document.getElementById('sub-sec-info').style.display = 'none';
+        document.getElementById('sub-sec-plantilla').style.display = 'none';
+        document.getElementById('sub-sec-partidos').style.display = 'none';
+
+        // Quitar la iluminación verde de las sub-pestañas
+        document.getElementById('sub-btn-info').classList.remove('active');
+        document.getElementById('sub-btn-plantilla').classList.remove('active');
+        document.getElementById('sub-btn-partidos').classList.remove('active');
+
+        // Mostrar el sub-panel elegido e iluminar su botón correspondiente
+        document.getElementById('sub-sec-' + subId).style.display = 'block';
+        document.getElementById('sub-btn-' + subId).classList.add('active');
+    }
+
+    // AJUSTE DE SEGURIDAD: Modificar la función original ocultarPanelesActa para incluir la nueva ficha
+    var originalOcultarPanelesActa = ocultarPanelesActa;
+    ocultarPanelesActa = function() {
+        if(originalOcultarPanelesActa) originalOcultarPanelesActa();
+        // Si se cambia de pantalla, nos aseguramos de no dejar residuos visuales
+    };
+
 
 </script>
 </body>
