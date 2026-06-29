@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>LaLiga Fantasy 2025/2026 - Conexión MySQL</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333; }
+        .nav-tabs { background-color: #111; padding: 15px; display: flex; justify-content: center; gap: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .tab-btn { background: none; border: 2px solid #00CC66; color: white; padding: 8px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        .tab-btn.active, .tab-btn:hover { background-color: #00CC66; color: black; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        .form-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid #00CC66; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 12px; }
+        .form-group { display: flex; flex-direction: column; font-size: 13px; font-weight: bold; }
+        .form-group select, .form-group input { padding: 6px; border: 1px solid #ccc; border-radius: 4px; margin-top: 4px; }
+        .btn-g { background: #00CC66; color: white; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        .btn-g:hover { background-color: #00aa55; }
+
+        .lista-partidos-jornada { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
+        .item-partido-btn { background: #111; color: white; border: 2px solid #00CC66; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s; }
+        .item-partido-btn:hover { background: #00CC66; color: black; }
+
+        .marcador-visual { background: #111; padding: 20px; border-radius: 10px; text-align: center; color: white; margin-bottom: 25px; font-size: 24px; font-weight: bold; display: none; }
+        .goles-badge { background: #00CC66; padding: 5px 15px; border-radius: 5px; margin: 0 15px; }
+        
+        .pantalla-horizontal { display: grid; grid-template-columns: 1.4fr 1fr; gap: 25px; align-items: stretch; margin-top: 20px; }
+        .campo-futbol { width: 100%; height: 460px; background-color: #2e7d32; border: 4px solid white; border-radius: 12px; position: relative; box-shadow: 0 8px 16px rgba(0,0,0,0.15); overflow: hidden; }
+        .linea-medio { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background-color: rgba(255,255,255,0.5); }
+        .circulo-central { position: absolute; top: 50%; left: 50%; width: 90px; height: 90px; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%); }
+    </style>
+</head>
+<body>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="cambiarSeccion('config')">⚙️ Configurar Calendario</button>
+        <button class="tab-btn" onclick="cambiarSeccion('partidos')">🏟️ Ver Actas y Puntos</button>
+    </div>
+
+    <div class="container">
+
+        <!-- PESTAÑA A: CONFIGURAR JORNADAS -->
+        <div id="sec-config" class="panel active">
+            <h2>⚙️ Planificar Encuentros de la Temporada 2025/2026</h2>
+            <div class="form-box">
+                <h3>1. Crear o Seleccionar Jornada</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Selecciona Número de Jornada:</label>
+                        <select id="cfg-jornada-sel" onchange="cargarListaPartidosDeJornadaDesdeBD()"></select>
+                    </div>
+                    <div class="form-group" style="justify-content: flex-end;">
+                        <button class="btn-g" onclick="crearNuevaJornadaEnBD()">➕ Crear Nueva Jornada en MySQL</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-box">
+                <h3>2. Emparejar Nuevo Partido</h3>
+                <div class="form-grid">
+                    <div class="form-group"><label>Equipo Local:</label><select id="cfg-local"></select></div>
+                    <div class="form-group"><label>Equipo Visitante:</label><select id="cfg-visitante"></select></div>
+                    <div class="form-group" style="justify-content: flex-end;"><button class="btn-g" onclick="registrarNuevoPartidoEnBD()">🏟️ Guardar Partido en MySQL</button></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA B: VISITAR ACTAS Y CALIFICACIONES -->
+        <div id="sec-partidos" class="panel">
+            <h2>🏟️ Historial y Calificaciones de Partidos</h2>
+            <div class="form-box">
+                <label style="font-weight:bold;">Selecciona la Jornada que deseas ver:</label>
+                <select id="ver-jornada-sel" onchange="cargarListaPartidosDeJornadaDesdeBD()" style="padding:6px; margin-left:10px;"></select>
+            </div>
+
+            <div class="lista-partidos-jornada" id="visor-lista-partidos"></div>
+            <div class="marcador-visual" id="panel-marcador"></div>
+
+            <div class="pantalla-horizontal" id="contenedor-acta-visual" style="display: none;">
+                <!-- COLUMNA IZQUIERDA: EL TERRENO DE JUEGO VERDE -->
+                <div class="campo-contenedor" style="display: flex; justify-content: center; align-items: center;">
+                    <div class="campo-futbol" id="campo-acta-tactica">
+                        <div class="linea-medio"></div>
+                        <div class="circulo-central"></div>
+                    </div>
+                </div>
+
+                <!-- COLUMNA DERECHA: PANEL DE CALIFICACIÓN -->
+                <div class="ficha-contenedor">
+                    <div class="form-box" id="panel-formulario-stats" style="height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; margin-bottom: 0;">
+                        <h3 style="margin-top: 0; text-align: center; color: #111;">✍️ Panel de Calificación</h3>
+                        
+                        <div class="form-grid" style="background-color:#f9f9f9; padding:10px; border-radius:6px; margin-bottom:15px; border-left:4px solid #00CC66;">
+                            <div class="form-group"><label>Goles Local:</label><input type="number" id="marcador-goles-l" value="0" min="0" onchange="actualizarGolesMarcadorEnPantalla()"></div>
+                            <div class="form-group"><label>Goles Visitante:</label><input type="number" id="marcador-goles-v" value="0" min="0" onchange="actualizarGolesMarcadorEnPantalla()"></div>
+                        </div>
+
+                        <div class="form-grid" style="grid-template-columns: 1fr;">
+                            <div class="form-group"><label>Jugador Seleccionado:</label><input type="text" id="stat-nombre-editar"></div>
+                            
+                            <div class="form-group" style="margin: 10px 0;">
+                                <label style="padding-bottom: 5px;">Puntos Fantasy:</label>
+                                <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
+                                    <button class="btn-g" style="background-color: #d9534f; font-size: 18px; width: 45px; height: 40px; padding: 0;" onclick="ajustarPuntosManual(-1)">-</button>
+                                    <input type="number" id="stat-pts" value="5" style="width: 70px; height: 35px; text-align: center; font-size: 18px; font-weight: bold; margin-top: 0;" readonly>
+                                    <button class="btn-g" style="background-color: #5cb85c; font-size: 18px; width: 45px; height: 40px; padding: 0;" onclick="ajustarPuntosManual(1)">+</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group"><label>Rol / Condición:</label><select id="stat-rol"><option value="titular">Titular</option><option value="suplente">Suplente</option></select></div>
+                            <div class="form-group"><label>Goles Marcados:</label><input type="number" id="stat-goles-ind" value="0" min="0"></div>
+                            <div class="form-group">
+                                <label>Tarjetas Disciplinarias:</label>
+                                <select id="stat-tarjeta-ind"><option value="">Ninguna</option><option value="🟨">🟨 Tarjeta Amarilla</option><option value="🟥">🟥 Tarjeta Roja</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Otros Eventos (Asistencia/Penalti):</label>
+                                <select id="stat-evt"><option value="">Ninguno</option><option value="👟">👟 Asistencia</option><option value="Ⓟ">Ⓟ Penalti Parado/Marcado</option></select>
+                            </div>
+                            <div class="form-group"><label>Cambio / Minuto:</label><input type="text" id="stat-cam" placeholder="Ej: ⬇ 63'"></div>
+                        </div>
+                        <button class="btn-g" style="margin-top: 15px; width: 100%;" onclick="guardarEstadisticasYMarcadorEnMySQL()">💾 Actualizar Acta Completa en MySQL</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<script>
+        const API_URL = 'http://localhost:3000/api';
+    let listaJugadoresActaActual = [];
+    let partidoSeleccionadoActual = null;
+    let jugadorSeleccionadoParaEditar = null;
+
+    function cambiarSeccion(id) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('sec-' + id).classList.add('active');
+        if (event && event.target) event.target.classList.add('active');
+        if (id === 'partidos') { cargarJornadasDesdeBD(); }
+    }
+
+    function cargarJornadasDesdeBD() {
+        fetch(API_URL + '/jornadas')
+            .then(res => res.json())
+            .then(jornadas => {
+                let selectCfg = document.getElementById('cfg-jornada-sel');
+                let selectVer = document.getElementById('ver-jornada-sel');
+                if (jornadas.length === 0) {
+                    selectCfg.innerHTML = "<option value=''>Crea una jornada primero...</option>";
+                    selectVer.innerHTML = "<option value=''>No hay jornadas en MySQL</option>";
+                    return;
+                }
+                let html = jornadas.map(j => `<option value="${j.id_jornada}">Jornada ${j.numero_jornada}</option>`).join('');
+                selectCfg.innerHTML = html; selectVer.innerHTML = html;
+                cargarListaPartidosDeJornadaDesdeBD();
+            }).catch(error => console.error('Error jornadas:', error));
+    }
+
+    function crearNuevaJornadaEnBD() {
+        fetch(API_URL + '/jornadas', { method: 'POST' }).then(res => res.json()).then(data => {
+            alert(data.mensaje); cargarJornadasDesdeBD();
+        });
+    }
+
+    function cargarEquiposEnSelectores() {
+        fetch(API_URL + '/equipos').then(res => res.json()).then(equipos => {
+            let html = equipos.map(e => `<option value="${e.id_equipo}">${e.nombre} (${e.division}ª)</option>`).join('');
+            document.getElementById('cfg-local').innerHTML = html;
+            document.getElementById('cfg-visitante').innerHTML = html;
+        }).catch(error => console.error('Error equipos:', error));
+    }
+
+    function registrarNuevoPartidoEnBD() {
+        let id_jornada = document.getElementById('cfg-jornada-sel').value;
+        let id_local = document.getElementById('cfg-local').value;
+        let id_visitante = document.getElementById('cfg-visitante').value;
+        if (id_local === id_visitante) return alert("Un equipo no puede jugar contra sí mismo.");
+        fetch(API_URL + '/partidos', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_jornada, id_local, id_visitante })
+        }).then(res => res.json()).then(data => { alert(data.mensaje); cargarListaPartidosDeJornadaDesdeBD(); });
+    }
+
+    function cargarListaPartidosDeJornadaDesdeBD() {
+        let id_jornada = document.getElementById('ver-jornada-sel').value;
+        if (!id_jornada) return;
+        let contenedor = document.getElementById('visor-lista-partidos');
+        contenedor.innerHTML = ""; ocultarPanelesActa();
+
+        fetch(API_URL + '/partidos/' + id_jornada)
+            .then(res => res.json())
+            .then(partidos => {
+                if (partidos.length === 0) {
+                    contenedor.innerHTML = "<p style='color:#777;'>No hay partidos programados.</p>";
+                    return;
+                }
+                partidos.forEach(p => {
+                    let btn = document.createElement('button');
+                    btn.className = 'item-partido-btn';
+                    btn.innerText = p.local_nombre + " (" + p.goles_local + ") vs (" + p.goles_visitante + ") " + p.visitante_nombre;
+                    btn.onclick = () => abrirPartidoEspecificoDesdeBD(p);
+                    contenedor.appendChild(btn);
+                });
+            });
+    }
+
+    function abrirPartidoEspecificoDesdeBD(p) {
+        partidoSeleccionadoActual = p;
+        document.getElementById('marcador-goles-l').value = p.goles_local;
+        document.getElementById('marcador-goles-v').value = p.goles_visitante;
+        let marcador = document.getElementById('panel-marcador');
+        marcador.innerHTML = p.local_nombre + " <span class='goles-badge'>" + p.goles_local + " - " + p.goles_visitante + "</span> " + p.visitante_nombre;
+        marcador.style.display = 'block';
+        document.getElementById('contenedor-acta-visual').style.display = 'grid';
+        cargarDetalleActaYCampoTactico(p.id_partido);
+    }
+
+    function cargarDetalleActaYCampoTactico(id_partido) {
+        fetch(API_URL + '/acta/' + id_partido)
+            .then(res => res.json())
+            .then(acta => {
+                listaJugadoresActaActual = acta;
+                var campo = document.getElementById('campo-acta-tactica');
+                var jugadoresViejos = campo.querySelectorAll('.jugador-campo');
+                jugadoresViejos.forEach(el => el.remove());
+
+                var todosLocales = acta.filter(j => j.id_equipo == partidoSeleccionadoActual.id_local);
+                var todosVisitantes = acta.filter(j => j.id_equipo == partidoSeleccionadoActual.id_visitante);
+
+                // Corte estricto a los 11 jugadores reglamentarios por equipo
+                var locales = todosLocales.slice(0, 11);
+                var visitantes = todosVisitantes.slice(0, 11);
+
+                var avatarGenerico = "data:image/svg+xml;utf8,<svg xmlns='http://w3.org' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23004d99' stroke='%23fff' stroke-width='3'/><path d='M50 20c8 0 15 7 15 15s-7 15-15 15-15-7-15-15 7-15 15-15zm0 35c15 0 28 8 28 20v2H22v-2c0-12 13-20 28-20z' fill='%23fff'/></svg>";
+
+                var cuentaDefL = 0, cuentaMedL = 0, cuentaDelL = 0;
+                var cuentaDefV = 0, cuentaMedV = 0, cuentaDelV = 0;
+
+                locales.forEach(j => {
+                    var posX = 20, posY = 50;
+                    if (j.posicion === "POR") { posX = 7; posY = 50; }
+                    else if (j.posicion === "DEF") { posX = 22; posY = 15 + (cuentaDefL * 22); cuentaDefL++; }
+                    else if (j.posicion === "MED") { posX = 35; posY = 15 + (cuentaMedL * 22); cuentaMedL++; } 
+                    else if (j.posicion === "DEL") { posX = 46; posY = 20 + (cuentaDelL * 30); cuentaDelL++; }
+                    inyectarCromoEnCesped(j, posX, posY, avatarGenerico);
+                });
+
+                visitantes.forEach(j => {
+                    var posX = 80, posY = 50;
+                    if (j.posicion === "POR") { posX = 93; posY = 50; }
+                    else if (j.posicion === "DEF") { posX = 78; posY = 15 + (cuentaDefV * 22); cuentaDefV++; }
+                    else if (j.posicion === "MED") { posX = 65; posY = 15 + (cuentaMedV * 22); cuentaMedV++; } 
+                    else if (j.posicion === "DEL") { posX = 54; posY = 20 + (cuentaDelV * 30); cuentaDelV++; }
+                    inyectarCromoEnCesped(j, posX, posY, avatarGenerico);
+                });
+
+                if(locales.length > 0) { activarFormularioEdicionJugador(locales[0]); }
+            });
+    }
+    // Dibuja los iconos, medallas y tarjetas flotantes sobre el campo de fútbol verde
+    function inyectarCromoEnCesped(j, x, y, avatar) {
+        var campo = document.getElementById('campo-acta-tactica');
+        
+        var divJ = document.createElement('div');
+        divJ.className = 'jugador-campo';
+        divJ.style.position = 'absolute';
+        divJ.style.left = x + '%';
+        divJ.style.top = y + '%';
+        divJ.style.transform = 'translate(-50%, -50%)';
+        divJ.style.textAlign = 'center';
+        divJ.style.cursor = 'pointer';
+        divJ.style.zIndex = '10';
+
+        divJ.onclick = function() { activarFormularioEdicionJugador(j); };
+
+        var img = document.createElement('img');
+        img.src = avatar;
+        img.style.width = '44px'; img.style.height = '44px'; img.style.borderRadius = '50%';
+        img.style.border = '2px solid white'; img.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
+
+        var nombreBox = document.createElement('div');
+        nombreBox.innerText = j.nombre;
+        nombreBox.style.background = 'rgba(0,0,0,0.75)'; nombreBox.style.color = 'white';
+        nombreBox.style.fontSize = '9px'; nombreBox.style.fontWeight = 'bold';
+        nombreBox.style.padding = '1px 4px'; nombreBox.style.borderRadius = '3px';
+        nombreBox.style.marginTop = '2px'; nombreBox.style.whiteSpace = 'nowrap';
+
+        // 1. Medalla de puntos a la derecha
+        if (j.puntos !== null) {
+            var ptsBadge = document.createElement('span');
+            ptsBadge.innerText = j.puntos;
+            ptsBadge.style.position = 'absolute'; ptsBadge.style.top = '-5px'; ptsBadge.style.right = '-5px';
+            ptsBadge.style.background = j.puntos >= 10 ? '#4a90e2' : j.puntos >= 6 ? '#5cb85c' : '#f0ad4e';
+            ptsBadge.style.color = 'white'; ptsBadge.style.fontSize = '9px'; ptsBadge.style.fontWeight = 'bold';
+            ptsBadge.style.padding = '1px 4px'; ptsBadge.style.borderRadius = '3px';
+            divJ.appendChild(ptsBadge);
+        }
+
+        // 2. Balones de goles o tarjetas a la izquierda (Estilo Fantasy)
+        var iconosExtra = "";
+        if (j.evento && j.evento.indexOf('⚽') !== -1) iconosExtra += j.evento;
+        if (j.evento && j.evento.indexOf('🟨') !== -1) iconosExtra += "🟨";
+        if (j.evento && j.evento.indexOf('🟥') !== -1) iconosExtra += "🟥";
+
+        if (iconosExtra !== "") {
+            var evtBadge = document.createElement('span');
+            evtBadge.innerText = iconosExtra;
+            evtBadge.style.position = 'absolute'; evtBadge.style.top = '-5px'; evtBadge.style.left = '-5px';
+            evtBadge.style.fontSize = '10px'; divJ.appendChild(evtBadge);
+        }
+
+        divJ.appendChild(img);
+        divJ.appendChild(nombreBox);
+        campo.appendChild(divJ);
+    }
+
+    // Rellena la ficha lateral al pulsar sobre un jugador
+    function activarFormularioEdicionJugador(j) {
+        if (!j) return;
+        jugadorSeleccionadoParaEditar = j;
+        document.getElementById('stat-nombre-editar').value = j.nombre || '';
+        document.getElementById('stat-rol').value = j.rol || 'titular';
+        document.getElementById('stat-pts').value = j.puntos !== null ? j.puntos : 5;
+        document.getElementById('stat-cam').value = j.cambio || '';
+
+        // Separar estadísticas individuales limpiando selectores
+        var golesContar = 0;
+        if (j.evento === "⚽") golesContar = 1;
+        if (j.evento === "⚽⚽") golesContar = 2;
+        document.getElementById('stat-goles-ind').value = golesContar;
+
+        var tarjetaContar = "";
+        if (j.evento === "🟨" || j.evento === "🟥") tarjetaContar = j.evento;
+        document.getElementById('stat-tarjeta-ind').value = tarjetaContar;
+
+        document.getElementById('stat-evt').value = (j.evento !== "⚽" && j.evento !== "⚽⚽" && j.evento !== "🟨" && j.evento !== "🟥") ? j.evento : "";
+    }
+
+    // Sumar o restar las notas del Fantasy con los botones (+) y (-)
+    function ajustarPuntosManual(valor) {
+        var inputPts = document.getElementById('stat-pts');
+        var actual = parseInt(inputPts.value) || 0;
+        var nuevo = actual + valor;
+        if (nuevo >= -5 && nuevo <= 30) { inputPts.value = nuevo; }
+    }
+
+    function actualizarGolesMarcadorEnPantalla() {
+        var gl = document.getElementById('marcador-goles-l').value || 0;
+        var gv = document.getElementById('marcador-goles-v').value || 0;
+        document.getElementById('panel-marcador').innerHTML = partidoSeleccionadoActual.local_nombre + " <span class='goles-badge'>" + gl + " - " + gv + "</span> " + partidoSeleccionadoActual.visitante_nombre;
+    }
+
+    // Guardar cambios directamente en tu MySQL Workbench
+    function guardarEstadisticasYMarcadorEnMySQL() {
+        if (!jugadorSeleccionadoParaEditar || !partidoSeleccionadoActual) return;
+
+        var numGoles = parseInt(document.getElementById('stat-goles-ind').value) || 0;
+        var iconoGol = numGoles === 1 ? "⚽" : numGoles >= 2 ? "⚽⚽" : "";
+        var iconoTarjeta = document.getElementById('stat-tarjeta-ind').value;
+        var eventoOtros = document.getElementById('stat-evt').value;
+
+        // Centralizamos los iconos en la columna de eventos de la BD
+        var eventoFinal = iconoGol || iconoTarjeta || eventoOtros || "";
+
+        var datosGuardar = {
+            id_partido: partidoSeleccionadoActual.id_partido,
+            id_acta: jugadorSeleccionadoParaEditar.id_acta,
+            id_jugador: jugadorSeleccionadoParaEditar.id_jugador,
+            nuevo_nombre: document.getElementById('stat-nombre-editar').value.trim(),
+            goles_local: parseInt(document.getElementById('marcador-goles-l').value) || 0,
+            goles_visitante: parseInt(document.getElementById('marcador-goles-v').value) || 0,
+            rol: document.getElementById('stat-rol').value,
+            puntos: parseInt(document.getElementById('stat-pts').value),
+            evento: eventoFinal,
+            cambio: document.getElementById('stat-cam').value
+        };
+
+        fetch(API_URL + '/acta/guardar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datosGuardar)
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            alert(data.mensaje);
+            partidoSeleccionadoActual.goles_local = datosGuardar.goles_local;
+            partidoSeleccionadoActual.goles_visitante = datosGuardar.goles_visitante;
+            abrirPartidoEspecificoDesdeBD(partidoSeleccionadoActual);
+        });
+    }
+
+    function ocultarPanelesActa() {
+        document.getElementById('panel-marcador').style.display = 'none';
+        document.getElementById('contenedor-acta-visual').style.display = 'none';
+    }
+
+    window.onload = function() {
+        cargarJornadasDesdeBD();
+        cargarEquiposEnSelectores();
+    };
+</script>
+</body>
+</html>
+
+

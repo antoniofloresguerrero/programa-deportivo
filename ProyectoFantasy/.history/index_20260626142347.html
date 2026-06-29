@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>LaLiga Fantasy 2025/2026 - Conexión MySQL</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333; }
+        .nav-tabs { background-color: #111; padding: 15px; display: flex; justify-content: center; gap: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .tab-btn { background: none; border: 2px solid #00CC66; color: white; padding: 8px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        .tab-btn.active, .tab-btn:hover { background-color: #00CC66; color: black; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        .form-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid #00CC66; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 12px; }
+        .form-group { display: flex; flex-direction: column; font-size: 13px; font-weight: bold; }
+        .form-group select, .form-group input { padding: 6px; border: 1px solid #ccc; border-radius: 4px; margin-top: 4px; }
+        .btn-g { background: #00CC66; color: white; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        .btn-g:hover { background-color: #00aa55; }
+
+        .lista-partidos-jornada { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
+        .item-partido-btn { background: #111; color: white; border: 2px solid #00CC66; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s; }
+        .item-partido-btn:hover { background: #00CC66; color: black; }
+
+        .marcador-visual { background: #111; padding: 20px; border-radius: 10px; text-align: center; color: white; margin-bottom: 25px; font-size: 24px; font-weight: bold; display: none; }
+        .goles-badge { background: #00CC66; padding: 5px 15px; border-radius: 5px; margin: 0 15px; }
+        
+        .grid-actas { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .col-acta-selector { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .check-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 14px; font-weight: 500; }
+        .check-item input { width: 16px; height: 16px; cursor: pointer; }
+
+        .pantalla-horizontal { display: grid; grid-template-columns: 1.4fr 1fr; gap: 25px; align-items: stretch; margin-top: 20px; }
+        .campo-futbol { width: 100%; height: 480px; background-color: #2e7d32; border: 4px solid white; border-radius: 12px; position: relative; box-shadow: 0 8px 16px rgba(0,0,0,0.15); overflow: hidden; }
+        .linea-medio { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background-color: rgba(255,255,255,0.5); }
+        .circulo-central { position: absolute; top: 50%; left: 50%; width: 90px; height: 90px; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%); }
+    </style>
+</head>
+<body>
+    <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="cambiarSeccion('config')">⚙️ Configurar Calendario</button>
+        <button class="tab-btn" onclick="cambiarSeccion('partidos')">🏟️ Ver Actas y Puntos</button>
+    </div>
+
+    <div class="container">
+
+        <!-- PESTAÑA 1: PLANIFICACIÓN DE JORNADAS Y ENCUENTROS -->
+        <div id="sec-config" class="panel active">
+            <h2>⚙️ Planificar Encuentros de la Temporada 2025/2026</h2>
+            <div class="form-box">
+                <h3>1. Crear o Seleccionar Jornada</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Selecciona Número de Jornada:</label>
+                        <select id="cfg-jornada-sel" onchange="cargarListaPartidosDeJornadaDesdeBD()"></select>
+                    </div>
+                    <div class="form-group" style="justify-content: flex-end;">
+                        <button class="btn-g" onclick="crearNuevaJornadaEnBD()">➕ Crear Nueva Jornada en MySQL</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-box">
+                <h3>2. Emparejar Nuevo Partido</h3>
+                <div class="form-grid">
+                    <div class="form-group"><label>Equipo Local:</label><select id="cfg-local"></select></div>
+                    <div class="form-group"><label>Equipo Visitante:</label><select id="cfg-visitante"></select></div>
+                    <div class="form-group" style="justify-content: flex-end;"><button class="btn-g" onclick="registrarNuevoPartidoEnBD()">🏟️ Guardar Partido en MySQL</button></div>
+                </div>
+            </div>
+        </div>
+                <!-- PESTAÑA B: VISITAR ACTAS Y CALIFICACIONES (UNIFICADA CON SELECTORES TÁCTICOS) -->
+        <div id="sec-partidos" class="panel">
+            <h2>🏟️ Historial y Calificaciones de Partidos</h2>
+            <div class="form-box">
+                <label style="font-weight:bold;">Selecciona la Jornada que deseas ver:</label>
+                <select id="ver-jornada-sel" onchange="cargarListaPartidosDeJornadaDesdeBD()" style="padding:6px; margin-left:10px;"></select>
+            </div>
+
+            <div class="lista-partidos-jornada" id="visor-lista-partidos"></div>
+            <div class="marcador-visual" id="panel-marcador"></div>
+                        <!-- NUEVO CONTENEDOR: Muestra el Valor Total de los 11 titulares del Césped -->
+            <div id="panel-valores-equipo" style="display: none; grid-template-columns: 1fr 1fr; gap: 20px; background-color: #111; padding: 12px; border-radius: 6px; color: white; text-align: center; font-weight: bold; margin-bottom: 20px; border-bottom: 3px solid #00CC66;">
+                <div style="border-right: 1px solid #444;">
+                    <span style="color: #ccc; font-size: 11px; text-transform: uppercase;">Valor Equipo Local</span>
+                    <div id="valor-total-local" style="font-size: 20px; color: #00CC66; margin-top: 2px;">0.0 Pts</div>
+                </div>
+                <div>
+                    <span style="color: #ccc; font-size: 11px; text-transform: uppercase;">Valor Equipo Visitante</span>
+                    <div id="valor-total-visitante" style="font-size: 20px; color: #00CC66; margin-top: 2px;">0.0 Pts</div>
+                </div>
+            </div>
+
+
+            <!-- FILAS CON CHECKS Y SELECTORES DE FORMACIONES PREFIJADAS DEBAJO DE LOS CLUBES -->
+            <div class="grid-actas" id="panel-listas-checks" style="display: none; margin-bottom: 25px;">
+                <!-- CONFIGURACIÓN EQUIPO LOCAL -->
+                <div class="col-acta-selector">
+                    <h3 id="titulo-lista-local" style="margin-top:0; color:#004d99;">-</h3>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="font-size:12px; color:#333;">Esquema Táctico Prefijado:</label>
+                        <select id="tactic-local" onchange="aplicarEsquemaPrefijado('local')">
+                            <option value="4-4-2">4-4-2 (Clásico)</option>
+                            <option value="4-3-3">4-3-3 (Ofensivo)</option>
+                            <option value="4-5-1">4-5-1 (Conservador)</option>
+                            <option value="3-5-2">3-5-2 (Carrileros)</option>
+                        </select>
+                    </div>
+                    <p style="font-size:11px; color:#666; font-style:italic; margin-top:-5px;">Elige los 11 titulares para el campo verde:</p>
+                    <div id="lista-checks-local" style="max-height: 180px; overflow-y: auto; padding-right: 5px;"></div>
+                </div>
+
+                <!-- CONFIGURACIÓN EQUIPO VISITANTE -->
+                <div class="col-acta-selector">
+                    <h3 id="titulo-lista-visitante" style="margin-top:0; color:#006633;">-</h3>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="font-size:12px; color:#333;">Esquema Táctico Prefijado:</label>
+                        <select id="tactic-visitante" onchange="aplicarEsquemaPrefijado('visitante')">
+                            <option value="4-4-2">4-4-2 (Clásico)</option>
+                            <option value="4-3-3">4-3-3 (Ofensivo)</option>
+                            <option value="4-5-1">4-5-1 (Conservador)</option>
+                            <option value="3-5-2">3-5-2 (Carrileros)</option>
+                        </select>
+                    </div>
+                    <p style="font-size:11px; color:#666; font-style:italic; margin-top:-5px;">Elige los 11 titulares para el campo verde:</p>
+                    <div id="lista-checks-visitante" style="max-height: 180px; overflow-y: auto; padding-right: 5px;"></div>
+                </div>
+            </div>
+            <!-- CONTENEDOR PRINCIPAL EN DOS COLUMNAS RECONSTRUIDO Y ENCUADRADO -->
+            <div class="pantalla-horizontal" id="contenedor-acta-visual" style="display: none;">
+                
+                <!-- COLUMNA IZQUIERDA: EL TERRENO DE JUEGO VERDE Y SU BOTÓN DE GUARDADO MASIVO -->
+                <div class="campo-contenedor" style="display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch;">
+                    <div class="campo-futbol" id="campo-acta-tactica">
+                        <div class="linea-medio"></div>
+                        <div class="circulo-central"></div>
+                    </div>
+                    
+                    <!-- BOTÓN CORREGIDO: Empaquetado dentro de la columna izquierda para mantener el diseño simétrico -->
+                    <button class="btn-g" style="background-color: #004d99; width: 100%; margin-top: 10px; font-size: 16px; padding: 12px;" onclick="guardarTacticaCompletaEnMySQL()">💾 Guardar Posiciones y Checks de la Alineación</button>
+                </div>
+
+                <!-- COLUMNA DERECHA: PANEL DE CALIFICACIÓN INDIVIDUAL -->
+                <div class="ficha-contenedor">
+                    <div class="form-box" id="panel-formulario-stats" style="height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; margin-bottom: 0;">
+                        <h3 style="margin-top: 0; text-align: center; color: #111;">✍️ Panel de Calificación</h3>
+                        
+                        <div class="form-grid" style="background-color:#f9f9f9; padding:10px; border-radius:6px; margin-bottom:15px; border-left:4px solid #00CC66;">
+                            <div class="form-group"><label>Goles Local:</label><input type="number" id="marcador-goles-l" value="0" min="0" onchange="actualizarGolesMarcadorEnPantalla()"></div>
+                            <div class="form-group"><label>Goles Visitante:</label><input type="number" id="marcador-goles-v" value="0" min="0" onchange="actualizarGolesMarcadorEnPantalla()"></div>
+                        </div>
+
+                        <div class="form-grid" style="grid-template-columns: 1fr;">
+                            <div class="form-group"><label>Jugador Seleccionado:</label><input type="text" id="stat-nombre-editar"></div>
+                            
+                            <div class="form-group" style="margin: 10px 0;">
+                                <label style="padding-bottom: 5px;">Puntos Fantasy:</label>
+                                <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
+                                    <button class="btn-g" style="background-color: #d9534f; font-size: 18px; width: 45px; height: 40px; padding: 0;" onclick="ajustarPuntosManual(-1)">-</button>
+                                    <input type="number" id="stat-pts" value="5" style="width: 70px; height: 35px; text-align: center; font-size: 18px; font-weight: bold; margin-top: 0;" readonly>
+                                    <button class="btn-g" style="background-color: #5cb85c; font-size: 18px; width: 45px; height: 40px; padding: 0;" onclick="ajustarPuntosManual(1)">+</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group"><label>Rol / Condición:</label><select id="stat-rol"><option value="titular">Titular</option><option value="suplente">Suplente</option></select></div>
+                            <div class="form-group"><label>Goles Marcados:</label><input type="number" id="stat-goles-ind" value="0" min="0"></div>
+                            <div class="form-group">
+                                <label>Tarjetas Disciplinarias:</label>
+                                <select id="stat-tarjeta-ind"><option value="">Ninguna</option><option value="🟨">🟨 Tarjeta Amarilla</option><option value="🟥">🟥 Tarjeta Roja</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Otros Eventos:</label>
+                                <select id="stat-evt"><option value="">Ninguno</option><option value="👟">👟 Asistencia</option><option value="Ⓟ">Ⓟ Penalti</option></select>
+                            </div>
+                            <div class="form-group"><label>Cambio / Minuto:</label><input type="text" id="stat-cam" placeholder="Ej: ⬇ 63'"></div>
+                        </div>
+                        <button class="btn-g" style="margin-top: 15px; width: 100%;" onclick="guardarEstadisticasYMarcadorEnMySQL()">💾 Actualizar Acta Completa en MySQL</button>
+                    </div>
+                </div>
+
+            </div> <!-- Cierre correcto de pantalla-horizontal -->
+
+            
+        </div>
+
+
+<script>
+    const API_URL = 'http://localhost:3000/api';
+    let listaJugadoresActaActual = [];
+    let partidoSeleccionadoActual = null;
+    let jugadorSeleccionadoParaEditar = null;
+
+    function cambiarSeccion(id) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('sec-' + id).classList.add('active');
+        if (event && event.target) event.target.classList.add('active');
+        if (id === 'partidos') { cargarJornadasDesdeBD(); }
+    }
+
+    function cargarJornadasDesdeBD() {
+        fetch(API_URL + '/jornadas')
+            .then(res => res.json())
+            .then(jornadas => {
+                let selectCfg = document.getElementById('cfg-jornada-sel');
+                let selectVer = document.getElementById('ver-jornada-sel');
+                if (jornadas.length === 0) {
+                    selectCfg.innerHTML = "<option value=''>Crea una jornada primero...</option>";
+                    selectVer.innerHTML = "<option value=''>No hay jornadas en MySQL</option>";
+                    return;
+                }
+                let html = jornadas.map(j => `<option value="${j.id_jornada}">Jornada ${j.numero_jornada}</option>`).join('');
+                selectCfg.innerHTML = html; selectVer.innerHTML = html;
+                cargarListaPartidosDeJornadaDesdeBD();
+            }).catch(error => console.error('Error jornadas:', error));
+    }
+
+    function crearNuevaJornadaEnBD() {
+        fetch(API_URL + '/jornadas', { method: 'POST' }).then(res => res.json()).then(data => {
+            alert(data.mensaje); cargarJornadasDesdeBD();
+        });
+    }
+
+    function cargarEquiposEnSelectores() {
+        fetch(API_URL + '/equipos').then(res => res.json()).then(equipos => {
+            let html = equipos.map(e => `<option value="${e.id_equipo}">${e.nombre} (${e.division}ª)</option>`).join('');
+            document.getElementById('cfg-local').innerHTML = html;
+            document.getElementById('cfg-visitante').innerHTML = html;
+        }).catch(error => console.error('Error equipos:', error));
+    }
+
+    function registrarNuevoPartidoEnBD() {
+        let id_jornada = document.getElementById('cfg-jornada-sel').value;
+        let id_local = document.getElementById('cfg-local').value;
+        let id_visitante = document.getElementById('cfg-visitante').value;
+        if (id_local === id_visitante) return alert("Un equipo no puede jugar contra sí mismo.");
+        fetch(API_URL + '/partidos', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_jornada, id_local, id_visitante })
+        }).then(res => res.json()).then(data => { alert(data.mensaje); cargarListaPartidosDeJornadaDesdeBD(); });
+    }
+
+    function cargarListaPartidosDeJornadaDesdeBD() {
+        let id_jornada = document.getElementById('ver-jornada-sel').value;
+        if (!id_jornada) return;
+        let contenedor = document.getElementById('visor-lista-partidos');
+        contenedor.innerHTML = ""; ocultarPanelesActa();
+
+        fetch(API_URL + '/partidos/' + id_jornada)
+            .then(res => res.json())
+            .then(partidos => {
+                if (partidos.length === 0) {
+                    contenedor.innerHTML = "<p style='color:#777;'>No hay partidos programados.</p>";
+                    return;
+                }
+                partidos.forEach(p => {
+                    let btn = document.createElement('button');
+                    btn.className = 'item-partido-btn';
+                    btn.innerText = p.local_nombre + " (" + p.goles_local + ") vs (" + p.goles_visitante + ") " + p.visitante_nombre;
+                    btn.onclick = () => abrirPartidoEspecificoDesdeBD(p);
+                    contenedor.appendChild(btn);
+                });
+            });
+    }
+
+        // NUEVA FUNCIÓN: Abre el partido y calcula el valor financiero/táctico del equipo en vivo
+    function abrirPartidoEspecificoDesdeBD(p) {
+        partidoSeleccionadoActual = p;
+        document.getElementById('marcador-goles-l').value = p.goles_local;
+        document.getElementById('marcador-goles-v').value = p.goles_visitante;
+        
+        let marcador = document.getElementById('panel-marcador');
+        marcador.innerHTML = p.local_nombre + " <span class='goles-badge'>" + p.goles_local + " - " + p.goles_visitante + "</span> " + p.visitante_nombre;
+        marcador.style.display = 'block';
+
+        // Mostrar el nuevo panel superior con la tasación de los clubes
+        document.getElementById('panel-valores-equipo').style.display = 'grid';
+        document.getElementById('panel-listas-checks').style.display = 'grid';
+        document.getElementById('contenedor-acta-visual').style.display = 'grid';
+        
+        // Llamar primero a la API de valores para calcular las medias e inicializar el césped
+        actualizarValoresTotalesEquipoYMedias(p.id_partido);
+    }
+
+    // NUEVA LÓGICA: Llama al backend de Node para actualizar la bolsa de puntos de los 11 titulares
+    function actualizarValoresTotalesEquipoYMedias(id_partido) {
+        fetch(API_URL + '/valor-equipo/' + id_partido)
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                // Inyectar la suma de los valores de los 11 con check en los letreros de arriba
+                document.getElementById('valor-total-local').innerText = data.valor_local.toFixed(1) + " Pts";
+                document.getElementById('valor-total-visitante').innerText = data.valor_visitante.toFixed(1) + " Pts";
+                
+                // Guardar las medias asociadas en nuestra lista global y refrescar los nombres en el panel
+                cargarDetalleActaYListas(id_partido);
+            });
+    }
+
+    // Descarga las actas y dibuja las listas de casillas (checks) bajo cada equipo
+        // ACTUALIZADO: Carga el acta inyectando la media de los 3 últimos partidos en la fila del check
+    function cargarDetalleActaYListas(id_partido) {
+        fetch(API_URL + '/valor-equipo/' + id_partido)
+            .then(res => res.json())
+            .then(data => {
+                listaJugadoresActaActual = data.jugadores;
+                
+                // Actualizar de paso los contadores superiores de valor de los 11 titulares
+                document.getElementById('valor-total-local').innerText = data.valor_local.toFixed(1) + " Pts";
+                document.getElementById('valor-total-visitante').innerText = data.valor_visitante.toFixed(1) + " Pts";
+
+                let divLocal = document.getElementById('lista-checks-local');
+                let divVisitante = document.getElementById('lista-checks-visitante');
+                divLocal.innerHTML = ""; divVisitante.innerHTML = "";
+
+                listaJugadoresActaActual.forEach((j, index) => {
+                    let item = document.createElement('div');
+                    item.className = 'check-item';
+                    
+                    let chk = document.createElement('input');
+                    chk.type = 'checkbox';
+                    chk.checked = (j.rol === 'titular');
+                    
+                    // Al cambiar un check, recalculamos las medias de los 11 titulares en tiempo real
+                    chk.onchange = function() {
+                        j.rol = this.checked ? 'titular' : 'suplente';
+                        recalcularYRepintarFranjasCesped();
+                        
+                        // Recalcular la suma de valores superiores del césped de inmediato
+                        let id_l = partidoSeleccionadoActual.id_local;
+                        let id_v = partidoSeleccionadoActual.id_visitante;
+                        
+                        let vL = listaJugadoresActaActual.filter(x => x.id_equipo == id_l && x.rol === 'titular').reduce((acc, x) => acc + x.valor_actual, 0);
+                        let vV = listaJugadoresActaActual.filter(x => x.id_equipo == id_v && x.rol === 'titular').reduce((acc, x) => acc + x.valor_actual, 0);
+                        
+                        document.getElementById('valor-total-local').innerText = vL.toFixed(1) + " Pts";
+                        document.getElementById('valor-total-visitante').innerText = vV.toFixed(1) + " Pts";
+                    };
+
+                    let txt = document.createElement('span');
+                    // INTERFAZ SOLICITADA: Muestra el nombre y su media de valoración actual en la lista de checks
+                    let textoMedia = j.valor_actual > 0 ? ` (Media 3 p.: ${j.valor_actual} Pts)` : ' (Media: 0.0)';
+                    txt.innerText = `[${j.posicion}] ${j.nombre}${textoMedia}`;
+
+                    item.appendChild(chk);
+                    item.appendChild(txt);
+
+                    if (j.id_equipo == partidoSeleccionadoActual.id_local) {
+                        divLocal.appendChild(item);
+                    } else {
+                        divVisitante.appendChild(item);
+                    }
+                });
+
+                recalcularYRepintarFranjasCesped();
+                if(listaJugadoresActaActual.length > 0 && !jugadorSeleccionadoParaEditar) { 
+                    activarFormularioEdicionJugador(listaJugadoresActaActual[0]); 
+                }
+            });
+    }
+
+    // MODIFICACIÓN DE SEGURIDAD: Fuerza la actualización de valores tras guardar en la BD
+    function ocultarPanelesActa() {
+        document.getElementById('panel-marcador').style.display = 'none';
+        document.getElementById('panel-valores-equipo').style.display = 'none';
+        document.getElementById('panel-listas-checks').style.display = 'none';
+        document.getElementById('contenedor-acta-visual').style.display = 'none';
+    }
+
+          // CORREGIDO: Si hay coordenadas guardadas en MySQL, respeta el sitio y no aplica el 4-4-2
+    function recalcularYRepintarFranjasCesped() {
+        var campo = document.getElementById('campo-acta-tactica');
+        var jugadoresViejos = campo.querySelectorAll('.jugador-campo');
+        jugadoresViejos.forEach(el => el.remove());
+
+        // Filtrar estrictamente a los jugadores que tengan el check marcado (rol: titular)
+        var localesConCheck = listaJugadoresActaActual.filter(j => j.id_equipo == partidoSeleccionadoActual.id_local && j.rol === 'titular');
+        var visitantesConCheck = listaJugadoresActaActual.filter(j => j.id_equipo == partidoSeleccionadoActual.id_visitante && j.rol === 'titular');
+
+        var siluetaGris = "data:image/svg+xml;utf8,<svg xmlns='http://w3.org' viewBox='0 0 24 24' fill='%23ccc'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+
+        var esquemaLocal = document.getElementById('tactic-local').value;
+        var esquemaVisitante = document.getElementById('tactic-visitante').value;
+
+        var cDefL = 0, cMedL = 0, cDelL = 0;
+        var cDefV = 0, cMedV = 0, cDelV = 0;
+
+        // LOCALES
+        localesConCheck.forEach(j => {
+            var posX = j.posicion_x;
+            var posY = j.posicion_y;
+            
+            // CORRECCIÓN: Solo si las coordenadas en MySQL son NULL, se calcula el esquema prefijado
+            if (posX === null || posY === null || posX === undefined || posY === undefined) {
+                posX = 20; posY = 50;
+                if (j.posicion === "POR") { posX = 7; posY = 50; }
+                else if (j.posicion === "DEF") { var totalDef = esquemaLocal === "3-5-2" ? 3 : 4; posY = totalDef === 3 ? (25 + (cDefL * 25)) : (15 + (cDefL * 22)); posX = 22; cDefL++; }
+                else if (j.posicion === "MED") { var totalMed = esquemaLocal === "4-5-1" ? 5 : esquemaLocal === "3-5-2" ? 5 : 4; posY = totalMed === 5 ? (12 + (cMedL * 19)) : (15 + (cMedL * 22)); posX = 35; cMedL++; }
+                else if (j.posicion === "DEL") { var totalDel = esquemaLocal === "4-3-3" ? 3 : esquemaLocal === "4-5-1" ? 1 : 2; posY = totalDel === 3 ? (20 + (cDelL * 30)) : totalDel === 1 ? 50 : (30 + (cDelL * 40)); posX = 46; cDelL++; }
+                j.posicion_x = posX; j.posicion_y = posY;
+            }
+            var imgRuta = j.foto_ruta ? "fotos/" + j.foto_ruta : siluetaGris;
+            inyectarCromoEnCesped(j, posX, posY, imgRuta, siluetaGris);
+        });
+
+        // VISITANTES
+        visitantesConCheck.forEach(j => {
+            var posX = j.posicion_x;
+            var posY = j.posicion_y;
+            
+            if (posX === null || posY === null || posX === undefined || posY === undefined) {
+                posX = 80; posY = 50;
+                if (j.posicion === "POR") { posX = 93; posY = 50; }
+                else if (j.posicion === "DEF") { var totalDef = esquemaVisitante === "3-5-2" ? 3 : 4; posY = totalDef === 3 ? (25 + (cDefV * 25)) : (15 + (cDefV * 22)); posX = 78; cDefV++; }
+                else if (j.posicion === "MED") { var totalMed = esquemaVisitante === "4-5-1" ? 5 : esquemaVisitante === "3-5-2" ? 5 : 4; posY = totalMed === 5 ? (12 + (cMedV * 19)) : (15 + (cMedV * 22)); posX = 65; cMedV++; }
+                else if (j.posicion === "DEL") { var totalDel = esquemaVisitante === "4-3-3" ? 3 : esquemaVisitante === "4-5-1" ? 1 : 2; posY = totalDel === 3 ? (20 + (cDelV * 30)) : totalDel === 1 ? 50 : (30 + (cDelV * 40)); posX = 54; cDelV++; }
+                j.posicion_x = posX; j.posicion_y = posY;
+            }
+            var imgRuta = j.foto_ruta ? "fotos/" + j.foto_ruta : siluetaGris;
+            inyectarCromoEnCesped(j, posX, posY, imgRuta, siluetaGris);
+        });
+    }
+
+
+
+       // NUEVA LÓGICA: Fabrica cromos que se pueden arrastrar libremente por el césped verde
+    function inyectarCromoEnCesped(j, x, y, avatar, siluetaRespaldo) {
+        var campo = document.getElementById('campo-acta-tactica');
+        var divJ = document.createElement('div');
+        divJ.className = 'jugador-campo';
+        divJ.style.position = 'absolute'; 
+        divJ.style.left = x + '%'; 
+        divJ.style.top = y + '%';
+        divJ.style.transform = 'translate(-50%, -50%)'; 
+        divJ.style.textAlign = 'center';
+        divJ.style.cursor = 'move'; // Icono de mover al pasar el ratón
+        divJ.style.zIndex = '10';
+
+        // Al hacer clic, abre su ficha de edición a la derecha
+        divJ.addEventListener('click', function() { activarFormularioEdicionJugador(j); });
+
+        // PROGRAMACIÓN DRAG AND DROP MANUAL SOBRE EL CÉSPED EN PORCENTAJES
+        divJ.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            // Evitar que el clic de arrastre interfiera con la ficha lateral si solo se pulsa rápido
+            let movido = false; 
+
+            function alMoverRaton(ev) {
+                movido = true;
+                var rectCampo = campo.getBoundingClientRect();
+                // Calcular la posición relativa en píxeles dentro del campo verde
+                var pixelX = ev.clientX - rectCampo.left;
+                var pixelY = ev.clientY - rectCampo.top;
+
+                // Transformar los píxeles a porcentaje exacto (0% a 100%) para que sea elástico
+                var pctX = Math.round((pixelX / rectCampo.width) * 100);
+                var pctY = Math.round((pixelY / rectCampo.height) * 100);
+
+                // Límites de seguridad para que el cromo no se salga de las bandas blancas
+                if (pctX >= 1 && pctX <= 99) { divJ.style.left = pctX + '%'; j.posicion_x = pctX; }
+                if (pctY >= 1 && pctY <= 99) { divJ.style.top = pctY + '%'; j.posicion_y = pctY; }
+            }
+
+                       function alSoltarRaton() {
+                window.removeEventListener('mousemove', alMoverRaton);
+                window.removeEventListener('mouseup', alSoltarRaton);
+                
+                // Forzar que la ficha lateral se entere de las nuevas coordenadas al soltar el cromo
+                var indexEnLista = listaJugadoresActaActual.findIndex(x => x.id_acta == j.id_acta);
+                if (indexEnLista !== -1) {
+                    listaJugadoresActaActual[indexEnLista].posicion_x = j.posicion_x;
+                    listaJugadoresActaActual[indexEnLista].posicion_y = j.posicion_y;
+                }
+            }
+
+
+            window.addEventListener('mousemove', alMoverRaton);
+            window.addEventListener('mouseup', alSoltarRaton);
+        });
+
+        // 1. Dibujar imagen del jugador
+        var img = document.createElement('img');
+        img.src = avatar; img.style.width = '44px'; img.style.height = '44px'; img.style.borderRadius = '50%';
+        img.style.border = '2px solid white'; img.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
+        img.style.objectFit = 'cover';
+        img.onerror = function() { this.src = siluetaRespaldo; };
+
+        // 2. Dibujar caja de texto con el nombre
+        var nombreBox = document.createElement('div');
+        nombreBox.innerText = j.nombre;
+        nombreBox.style.background = 'rgba(0,0,0,0.75)'; nombreBox.style.color = 'white';
+        nombreBox.style.fontSize = '9px'; nombreBox.style.fontWeight = 'bold';
+        nombreBox.style.padding = '1px 4px'; nombreBox.style.borderRadius = '3px';
+        nombreBox.style.marginTop = '2px'; nombreBox.style.whiteSpace = 'nowrap';
+
+        // 3. Medalla de puntos a la derecha
+        if (j.puntos !== null) {
+            var ptsBadge = document.createElement('span');
+            ptsBadge.innerText = j.puntos;
+            ptsBadge.style.position = 'absolute'; ptsBadge.style.top = '-5px'; ptsBadge.style.right = '-5px';
+            ptsBadge.style.background = j.puntos >= 10 ? '#4a90e2' : j.puntos >= 6 ? '#5cb85c' : '#f0ad4e';
+            ptsBadge.style.color = 'white'; ptsBadge.style.fontSize = '9px'; ptsBadge.style.fontWeight = 'bold';
+            ptsBadge.style.padding = '1px 4px'; ptsBadge.style.borderRadius = '3px';
+            divJ.appendChild(ptsBadge);
+        }
+
+        // 4. Balones o tarjetas a la izquierda
+        var iconosExtra = "";
+        if (j.evento && j.evento.indexOf('⚽') !== -1) iconosExtra += j.evento;
+        if (j.evento && j.evento.indexOf('🟨') !== -1) iconosExtra += "🟨";
+        if (j.evento && j.evento.indexOf('🟥') !== -1) iconosExtra += "🟥";
+
+        if (iconosExtra !== "") {
+            var evtBadge = document.createElement('span');
+            evtBadge.innerText = iconosExtra;
+            evtBadge.style.position = 'absolute'; evtBadge.style.top = '-5px'; evtBadge.style.left = '-5px';
+            evtBadge.style.fontSize = '10px'; divJ.appendChild(evtBadge);
+        }
+
+        divJ.appendChild(img);
+        divJ.appendChild(nombreBox);
+        campo.appendChild(divJ);
+    }
+
+    function activarFormularioEdicionJugador(j) {
+        if (!j) return;
+        jugadorSeleccionadoParaEditar = j;
+        document.getElementById('stat-nombre-editar').value = j.nombre || '';
+        document.getElementById('stat-rol').value = j.rol || 'titular';
+        document.getElementById('stat-pts').value = j.puntos !== null ? j.puntos : 5;
+        document.getElementById('stat-cam').value = j.cambio || '';
+
+        var golesContar = 0;
+        if (j.evento === "⚽") golesContar = 1;
+        if (j.evento === "⚽⚽") golesContar = 2;
+        document.getElementById('stat-goles-ind').value = golesContar;
+
+        var tarjetaContar = "";
+        if (j.evento === "🟨" || j.evento === "🟥") tarjetaContar = j.evento;
+        document.getElementById('stat-tarjeta-ind').value = tarjetaContar;
+        document.getElementById('stat-evt').value = (j.evento !== "⚽" && j.evento !== "⚽⚽" && j.evento !== "🟨" && j.evento !== "🟥") ? j.evento : "";
+    }
+
+    function ajustarPuntosManual(valor) {
+        var inputPts = document.getElementById('stat-pts');
+        var actual = parseInt(inputPts.value) || 0;
+        var nuevo = actual + valor;
+        if (nuevo >= -5 && nuevo <= 30) { inputPts.value = nuevo; }
+    }
+
+    function actualizarGolesMarcadorEnPantalla() {
+        var gl = document.getElementById('marcador-goles-l').value || 0;
+        var gv = document.getElementById('marcador-goles-v').value || 0;
+        document.getElementById('panel-marcador').innerHTML = partidoSeleccionadoActual.local_nombre + " <span class='goles-badge'>" + gl + " - " + gv + "</span> " + partidoSeleccionadoActual.visitante_nombre;
+    }
+
+    // NUEVA LÓGICA: Guarda estadísticas y la posición personalizada de arrastre X,Y en MySQL Workbench
+        // NUEVA FUNCIÓN MAESTRA: Envía a MySQL las posiciones X,Y y los checks de los 22 jugadores de golpe
+    function guardarTacticaCompletaEnMySQL() {
+        if (!partidoSeleccionadoActual || listaJugadoresActaActual.length === 0) return;
+
+        let promesas = [];
+
+        // Recorremos la plantilla completa para mandar la posición exacta de cada uno
+        listaJugadoresActaActual.forEach(j => {
+            var datosJugador = {
+                id_partido: partidoSeleccionadoActual.id_partido,
+                id_acta: j.id_acta,
+                id_jugador: j.id_jugador,
+                nuevo_nombre: j.nombre,
+                goles_local: parseInt(document.getElementById('marcador-goles-l').value) || 0,
+                goles_visitante: parseInt(document.getElementById('marcador-goles-v').value) || 0,
+                rol: j.rol, // 'titular' o 'suplente' según el check de la lista
+                puntos: j.puntos,
+                evento: j.evento,
+                cambio: j.cambio,
+                posicion_x: j.posicion_x, // Coordenada X del arrastre
+                posicion_y: j.posicion_y  // Coordenada Y del arrastre
+            };
+
+            // Creamos una petición en cola para cada futbolista
+            var peticion = fetch(API_URL + '/acta/guardar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datosJugador)
+            });
+            promesas.push(peticion);
+        });
+
+        // Cuando todos los jugadores se hayan guardado en MySQL Workbench, refrescamos la pantalla
+        Promise.all(promesas)
+            .then(() => {
+                alert("⚽ ¡Alineación y posiciones guardadas con éxito en MySQL Workbench!");
+                partidoSeleccionadoActual.goles_local = parseInt(document.getElementById('marcador-goles-l').value) || 0;
+                partidoSeleccionadoActual.goles_visitante = parseInt(document.getElementById('marcador-goles-v').value) || 0;
+                abrirPartidoEspecificoDesdeBD(partidoSeleccionadoActual);
+            }).catch(err => console.error("Error al guardar la táctica:", err));
+    }
+
+    // CORREGIDO: El botón derecho ahora SOLO guarda los puntos y eventos de la ficha, sin mover cromos
+    function guardarEstadisticasYMarcadorEnMySQL() {
+        if (!jugadorSeleccionadoParaEditar || !partidoSeleccionadoActual) return;
+
+        var jActual = listaJugadoresActaActual.find(x => x.id_acta == jugadorSeleccionadoParaEditar.id_acta);
+        if (!jActual) jActual = jugadorSeleccionadoParaEditar;
+
+        var numGoles = parseInt(document.getElementById('stat-goles-ind').value) || 0;
+        var iconoGol = numGoles === 1 ? "⚽" : numGoles >= 2 ? "⚽⚽" : "";
+        var iconoTarjeta = document.getElementById('stat-tarjeta-ind').value;
+        var eventoOtros = document.getElementById('stat-evt').value;
+        var eventoFinal = iconoGol || iconoTarjeta || eventoOtros || "";
+
+        var datosGuardar = {
+            id_partido: partidoSeleccionadoActual.id_partido,
+            id_acta: jActual.id_acta,
+            id_jugador: jActual.id_jugador,
+            nuevo_nombre: document.getElementById('stat-nombre-editar').value.trim(),
+            goles_local: parseInt(document.getElementById('marcador-goles-l').value) || 0,
+            goles_visitante: parseInt(document.getElementById('marcador-goles-v').value) || 0,
+            rol: jActual.rol,
+            puntos: parseInt(document.getElementById('stat-pts').value),
+            evento: eventoFinal,
+            cambio: document.getElementById('stat-cam').value,
+            posicion_x: jActual.posicion_x, // Mantiene su posición actual del césped
+            posicion_y: jActual.posicion_y
+        };
+
+        fetch(API_URL + '/acta/guardar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datosGuardar)
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert("Nota guardada para " + datosGuardar.nuevo_nombre);
+            // Actualizamos los datos en nuestra lista local para reflejar los puntos de inmediato
+            jActual.nombre = datosGuardar.nuevo_nombre;
+            jActual.puntos = datosGuardar.puntos;
+            jActual.evento = datosGuardar.evento;
+            jActual.cambio = datosGuardar.cambio;
+            recalcularYRepintarFranjasCesped();
+        });
+    }
+
+
+
+
+    function ocultarPanelesActa() {
+        document.getElementById('panel-marcador').style.display = 'none';
+        document.getElementById('panel-listas-checks').style.display = 'none';
+        document.getElementById('contenedor-acta-visual').style.display = 'none';
+    }
+
+    window.onload = function() {
+        cargarJornadasDesdeBD();
+        cargarEquiposEnSelectores();
+    };
+        // NUEVA LÓGICA: Resetea las posiciones guardadas en la web para forzar el dibujo automático del esquema elegido
+    function aplicarEsquemaPrefijado(bando) {
+        if (!partidoSeleccionadoActual) return;
+        
+        // Identificar qué ID de equipo corresponde al bando que se quiere cambiar
+        let idEquipoCambiar = (bando === 'local') ? partidoSeleccionadoActual.id_local : partidoSeleccionadoActual.id_visitante;
+        
+        // Borrar las coordenadas de las variables de la sesión web para ese bando específico
+        listaJugadoresActaActual.forEach(j => {
+            if (j.id_equipo == idEquipoCambiar) {
+                j.posicion_x = null;
+                j.posicion_y = null;
+            }
+        });
+        
+        // Repintar el terreno de juego con las nuevas distancias de bloques en el acto
+        recalcularYRepintarFranjasCesped();
+    }
+
+</script>
+</body>
+</html>

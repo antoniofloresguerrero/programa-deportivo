@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>LaLiga Fantasy 2025/2026 - Conexión MySQL</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333; }
+        .nav-tabs { background-color: #111; padding: 15px; display: flex; justify-content: center; gap: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .tab-btn { background: none; border: 2px solid #00CC66; color: white; padding: 8px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        .tab-btn.active, .tab-btn:hover { background-color: #00CC66; color: black; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* RECUADROS DE FORMULARIOS */
+        .form-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid #00CC66; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 12px; }
+        .form-group { display: flex; flex-direction: column; font-size: 13px; font-weight: bold; }
+        .form-group select, .form-group input { padding: 6px; border: 1px solid #ccc; border-radius: 4px; margin-top: 4px; }
+        .btn-g { background: #00CC66; color: white; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        .btn-g:hover { background-color: #00aa55; }
+
+        /* LISTADOS DE PARTIDOS DISPONIBLES */
+        .lista-partidos-jornada { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
+        .item-partido-btn { background: #111; color: white; border: 2px solid #00CC66; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s; }
+        .item-partido-btn:hover { background: #00CC66; color: black; }
+
+        /* MARCADOR DE TELEVISIÓN */
+        .marcador-visual { background: #111; padding: 20px; border-radius: 10px; text-align: center; color: white; margin-bottom: 25px; font-size: 24px; font-weight: bold; display: none; }
+        .goles-badge { background: #00CC66; padding: 5px 15px; border-radius: 5px; margin: 0 15px; }
+        
+        /* DISEÑO DE ACTAS EN DOS COLUMNAS */
+        .grid-actas { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .col-acta { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: none; }
+        .sub-cat { color: #666; font-size: 13px; font-weight: bold; margin: 15px 0 5px 0; text-transform: uppercase; border-bottom: 2px solid #eee; }
+        .tabla-acta { width: 100%; border-collapse: collapse; }
+        .fila-acta { border-bottom: 1px solid #f6f6f6; height: 40px; }
+        
+        /* MEDALLAS DEL SEMÁFORO FANTASY */
+        .medalla { display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 5px; font-weight: bold; color: white; }
+        .azul { background: #4a90e2; } .verde { background: #5cb85c; } .amarillo { background: #f0ad4e; } .rojo { background: #d9534f; } .gris { background: #999; }
+    </style>
+</head>
+<body>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="cambiarSeccion('config')">⚙️ Configurar Calendario</button>
+        <button class="tab-btn" onclick="cambiarSeccion('partidos')">🏟️ Ver Actas y Puntos</button>
+    </div>
+
+    <div class="container">
+
+        <!-- ==================== PESTAÑA A: CONFIGURAR JORNADAS ==================== -->
+        <div id="sec-config" class="panel active">
+            <h2>⚙️ Planificar Encuentros de la Temporada 2025/2026</h2>
+            <div class="form-box">
+                <h3>1. Crear o Seleccionar Jornada</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Selecciona Número de Jornada:</label>
+                        <select id="cfg-jornada-sel" onchange="actualizarSelectoresAlCambiar()"></select>
+                    </div>
+                    <div class="form-group" style="justify-content: flex-end;">
+                        <button class="btn-g" onclick="crearNuevaJornadaEnBD()">➕ Crear Nueva Jornada en MySQL</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-box">
+                <h3>2. Emparejar Nuevo Partido</h3>
+                <div class="form-grid">
+                    <div class="form-group"><label>Equipo Local:</label><select id="cfg-local"></select></div>
+                    <div class="form-group"><label>Equipo Visitante:</label><select id="cfg-visitante"></select></div>
+                    <div class="form-group" style="justify-content: flex-end;"><button class="btn-g" onclick="registrarNuevoPartidoEnBD()">🏟️ Guardar Partido en MySQL</button></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== PESTAÑA B: VISITAR ACTAS Y CALIFICACIONES ==================== -->
+        <div id="sec-partidos" class="panel">
+            <h2>🏟️ Historial y Calificaciones de Partidos</h2>
+            <div class="form-box">
+                <label style="font-weight:bold;">Selecciona la Jornada que deseas ver:</label>
+                <select id="ver-jornada-sel" onchange="cargarListaPartidosDeJornadaDesdeBD()" style="padding:6px; margin-left:10px;"></select>
+            </div>
+
+            <div class="lista-partidos-jornada" id="visor-lista-partidos"></div>
+            <div class="marcador-visual" id="panel-marcador"></div>
+
+            <!-- Formulario dinámico para meter estadísticas jugador a jugador -->
+            <div class="form-box" id="panel-formulario-stats" style="display:none;">
+                <h3>✍️ Registrar Marcador Manual y Calificaciones de Jugadores</h3>
+                
+                <div class="form-grid" style="background-color:#f9f9f9; padding:10px; border-radius:6px; margin-bottom:15px; border-left:4px solid #00CC66;">
+                    <div class="form-group"><label>Goles Local:</label><input type="number" id="marcador-goles-l" value="0" min="0" onchange="actualizarGolesMarcadorEnPantalla()"></div>
+                    <div class="form-group"><label>Goles Visitante:</label><input type="number" id="marcador-goles-v" value="0" min="0" onchange="actualizarGolesMarcadorEnPantalla()"></div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group"><label>Seleccionar Futbolista:</label><select id="stat-j"></select></div>
+                    <div class="form-group"><label>Editar Nombre Real:</label><input type="text" id="stat-nombre-editar"></div>
+                    <div class="form-group"><label>Alineación / Rol:</label><select id="stat-rol"><option value="titular">Titular</option><option value="suplente">Suplente</option></select></div>
+                    <div class="form-group"><label>Puntos Obtenidos:</label><input type="number" id="stat-pts" value="5"></div>
+                    <div class="form-group">
+                        <label>Icono Evento:</label>
+                        <select id="stat-evt"><option value="">Ninguno</option><option value="⚽">⚽ Gol</option><option value="⚽⚽">⚽⚽ Doblete</option><option value="🟨">🟨 Tarjeta</option><option value="👟">👟 Asis</option></select>
+                    </div>
+                    <div class="form-group"><label>Cambio / Minuto:</label><input type="text" id="stat-cam" placeholder="Ej: ⬇ 63'"></div>
+                </div>
+                <button class="btn-g" onclick="guardarEstadisticasYMarcadorEnMySQL()">💾 Actualizar Acta Completa en MySQL</button>
+            </div>
+
+            <!-- Listas en paralelo de titulares y suplentes -->
+            <div class="grid-actas">
+                <div class="col-acta" id="acta-box-local">
+                    <h2 id="titulo-acta-local" style="margin-top:0;">-</h2>
+                    <div class="sub-cat">Titulares</div><table class="tabla-acta" id="tabla-loc-tit"></table>
+                    <div class="sub-cat">Suplentes</div><table class="tabla-acta" id="tabla-loc-sup"></table>
+                </div>
+                <div class="col-acta" id="acta-box-visitante">
+                    <h2 id="titulo-acta-visitante" style="margin-top:0;">-</h2>
+                    <div class="sub-cat">Titulares</div><table class="tabla-acta" id="tabla-vis-tit"></table>
+                    <div class="sub-cat">Suplentes</div><table class="tabla-acta" id="tabla-vis-sup"></table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<script>
