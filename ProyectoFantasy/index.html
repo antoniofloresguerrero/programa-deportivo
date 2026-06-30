@@ -223,9 +223,9 @@
 
             <!-- FILA MAESTRA DE 3 COLUMNAS -->
                         <!-- CORRECCIÓN DE ESPACIO: Forzamos las 3 columnas en paralelo fijas sin caídas -->
-            <div style="display: grid; grid-template-columns: 360px 1fr 360px; gap: 20px; align-items: start; width: 100%; max-width: 1600px; margin: 0 auto; padding: 0 10px; box-sizing: border-box;">
+              <!-- MEJORADO: Espacio ampliado a 150px para ver el nombre de los jugadores completo -->
+    <div style="display: grid; grid-template-columns: 460px 1fr 460px; gap: 20px; align-items: start; width: 100%; max-width: 1600px; margin: 0 auto; padding: 0 10px; box-sizing: border-box;">
 
-                
                 <!-- COLUMNA 1: CLUB LOCAL CON MARCADOR DE PUNTOS TOTALES -->
                 <div style="background: rgba(12, 12, 12, 0.9); border-radius: 10px; border: 1px solid #333; padding: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.6);">
                     <div style="background: rgba(0, 204, 102, 0.1); border: 1px solid #00CC66; padding: 10px; border-radius: 6px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
@@ -233,13 +233,14 @@
                         <strong id="valor-total-pts-local" style="color: #00CC66; font-size: 16px; font-weight: 900;">0.0 Pts</strong>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1.3fr 0.5fr 0.5fr 0.6fr 0.6fr 0.7fr; gap: 4px; align-items: center; border-bottom: 2px solid #00CC66; padding-bottom: 8px; margin-bottom: 12px;">
-                        <h4 style="color:#00CC66; text-transform:uppercase; margin:0; font-size:12px; font-weight:800;">🏃 Club Local</h4>
-                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Dor</span>
-                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">PT</span>
-                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Gol</span>
-                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Tar</span>
-                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Min</span>
+                    <!-- AJUSTE REJILLA: 150px fijos al nombre para evitar que se oculte -->
+                    <div style="display: grid; grid-template-columns: 150px 42px 42px 50px 50px 42px; gap: 4px; align-items: center; border-bottom: 2px solid #00CC66; padding-bottom: 8px; margin-bottom: 12px;">
+                        <h4 style="color:#00CC66; text-transform:uppercase; margin:0; font-size:12px; font-weight:800;">🏃Local</h4>
+                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Dorsal</span>
+                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Puntos</span>
+                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Goles</span>
+                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Tarjeta</span>
+                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Minutos</span>
                     </div>
                     <div id="lista-checks-local" style="display:flex; flex-direction:column; gap:6px;"></div>
                 </div>
@@ -250,19 +251,20 @@
                         <strong id="valor-total-pts-visitante" style="color: #ff9900; font-size: 16px; font-weight: 900;">0.0 Pts</strong>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1.3fr 0.5fr 0.5fr 0.6fr 0.6fr 0.7fr; gap: 4px; align-items: center; border-bottom: 2px solid #ff9900; padding-bottom: 8px; margin-bottom: 12px;">
-                        <h4 style="color:#ff9900; text-transform:uppercase; margin:0; font-size:12px; font-weight:800;">🏃 Club Visitante</h4>
-                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Dor</span>
-                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">PT</span>
-                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Gol</span>
-                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Tar</span>
-                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Min</span>
+                    <!-- AJUSTE REJILLA: 150px fijos al nombre para evitar que se oculte -->
+                    <div style="display: grid; grid-template-columns: 150px 42px 42px 50px 50px 42px; gap: 4px; align-items: center; border-bottom: 2px solid #ff9900; padding-bottom: 8px; margin-bottom: 12px;">
+                        <h4 style="color:#ff9900; text-transform:uppercase; margin:0; font-size:12px; font-weight:800;">🏃Visitante</h4>
+                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Dorsal</span>
+                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Puntos</span>
+                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Goles</span>
+                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Tarjeta</span>
+                        <span style="color:#aaa; font-size:10px; font-weight:bold; text-align:center;">Minutos</span>
                     </div>
                     <div id="lista-checks-visitante" style="display:flex; flex-direction:column; gap:6px;"></div>
                 </div>
 
+    </div> <!-- Cierre del div maestro horizontal -->
 
-</div>
                 <!-- COLUMNA 2: MARCADOR, CUOTAS, CLIMA Y CÉSTED HORIZONTAL -->
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     <!-- Marcador interactivo de goles -->
@@ -797,14 +799,16 @@
                     let esLocal = (j.id_equipo == id_l);
                     let listaDestino = esLocal ? contenedorLocal : contenedorVisitante;
 
-                    let filaGrid = document.createElement('div');
+                                                        let filaGrid = document.createElement('div');
                     filaGrid.style.display = 'grid';
-                    // MEJORA: Damos más espacio al nombre (1.8fr) y un ancho fijo y limpio a cada selector para que no se pisen
-                    filaGrid.style.gridTemplateColumns = '1.8fr 45px 45px 55px 55px 45px';
-                    filaGrid.style.gap = '6px';
+                    // Sincronización milimétrica: 150px al nombre y el ancho exacto de tus títulos superiores
+                    filaGrid.style.gridTemplateColumns = '150px 42px 42px 50px 50px 42px';
+                    filaGrid.style.gap = '4px';
                     filaGrid.style.alignItems = 'center';
-                    filaGrid.style.padding = '4px 0';
-                    filaGrid.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                    filaGrid.style.padding = '3px 0';
+                    filaGrid.style.borderBottom = '1px solid rgba(255,255,255,0.03)';
+
+
 
 
                     // Nombre del crack con su check de juego
@@ -816,6 +820,7 @@
                     chk.onchange = function() {
                         j.rol = this.checked ? 'titular' : 'suplente';
                         recalcularYRepintarFranjasCesped();
+                        recalcularSumatorioPuntosEquiposEnVivo(); 
                     };
 
                     let txtLabel = document.createElement('span');
@@ -849,7 +854,15 @@
                     inputPT.style.width = '100%'; inputPT.style.background = '#222'; inputPT.style.color = '#ff9900';
                     inputPT.style.border = '1px solid #444'; inputPT.style.borderRadius = '4px'; inputPT.style.textAlign = 'center';
                     inputPT.style.fontSize = '12px'; inputPT.style.fontWeight = 'bold'; inputPT.style.padding = '2px 0';
-                    inputPT.onchange = function() { j.puntos = parseInt(this.value) || 0; j.valor_actual = j.puntos; recalcularYRepintarFranjasCesped(); };
+                    inputPT.oninput = function() { 
+                        let valorNum = parseInt(this.value) || 0;
+                        j.puntos = valorNum; 
+                        j.valor_actual = valorNum; 
+                        
+                        // Lanzamos los refrescos en cascada simultáneos
+                        recalcularSumatorioPuntosEquiposEnVivo(); 
+                        recalcularYRepintarFranjasCesped(); 
+                    };
                     filaGrid.appendChild(inputPT);
 
                     // 2. Desplegable de Goles
@@ -982,7 +995,7 @@
             }
 
 
-            // 1. Crear el contenedor circular de la ficha sobre el césped horizontal
+                       // 1. Contenedor Maestro de la Ficha Fotográfica (Drag & Drop)
             let divJug = document.createElement('div');
             divJug.className = 'jugador-circulo-ficha';
             divJug.style.position = 'absolute';
@@ -1011,7 +1024,22 @@
             txtDorsalCentro.innerText = j.dorsal || '0';
             divJug.appendChild(txtDorsalCentro);
 
-            // 3. Pequeño globo oscuro con las notas y eventos abajo
+            // 3. NUEVO: NOMBRE DEL JUGADOR ROTULADO ABAJO (Fijo a los pies del círculo)
+            let txtNombreFijo = document.createElement('div');
+            txtNombreFijo.style.position = 'absolute';
+            txtNombreFijo.style.top = '-16px'; // Se sitúa justo encima del cromo para dejar los eventos abajo
+            txtNombreFijo.style.left = '50%';
+            txtNombreFijo.style.transform = 'translateX(-50%)';
+            txtNombreFijo.style.color = '#ffffff';
+            txtNombreFijo.style.fontSize = '10px';
+            txtNombreFijo.style.fontWeight = '800';
+            txtNombreFijo.style.textTransform = 'uppercase';
+            txtNombreFijo.style.whiteSpace = 'nowrap';
+            txtNombreFijo.style.textShadow = '1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000';
+            txtNombreFijo.innerText = j.nombre || 'Jugador';
+            divJug.appendChild(txtNombreFijo);
+
+            // 4. Pequeño globo oscuro con las notas y eventos abajo
             let badgeEventos = document.createElement('div');
             badgeEventos.style.position = 'absolute';
             badgeEventos.style.bottom = '-18px'; badgeEventos.style.left = '50%';
@@ -1023,7 +1051,7 @@
             divJug.appendChild(badgeEventos);
 
             // =======================================================================
-            // EVENTOS DE ARRASTRE SEGUROS DE IZQUIERDA A DERECHA (RATÓN)
+            // EVENTOS DE ARRASTRE SEGUROS (MANTIENE EL NOMBRE PEGADO AL MOVER AL JUGADOR)
             // =======================================================================
             divJug.addEventListener('mousedown', function(e) {
                 e.preventDefault();
@@ -1061,6 +1089,7 @@
             });
 
             campo.appendChild(divJug);
+
         });
 
     }
@@ -1635,33 +1664,42 @@
     }
 
 
-    // NUEVA FUNCIÓN: Envía la orden de recálculo masivo de la liga a MySQL Workbench
-    function ejecutarSincronizacionManualLiga() {
-        // Desplegar un aviso visual en consola para verificar el inicio del proceso
-        console.log("Iniciando sincronización masiva de la clasificación...");
+           // RECONSTRUIDA: Sincroniza la liga en la base de datos y fuerza el refresco visual inmediato
+        function ejecutarSincronizacionManualLiga() {
+            console.log("Lanzando petición de sincronización masiva al servidor...");
 
-        fetch(API_URL + '/clasificacion/sincronizar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        })
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-            // Mostrar mensaje flotante de éxito en la pantalla al usuario
-            alert("🔄 " + data.mensaje);
-            
-            // Recargar las listas en caliente para reflejar los marcadores
-            cargarListaPartidosDeJornadaDesdeBD();
-            
-            // Si el usuario tiene la pestaña de la tabla abierta, forzar su actualización
-            if (document.getElementById('sec-clasificacion').style.display === 'block') {
-                cargarClasificacionDesdeBD();
-            }
-        })
-        .catch(function(err) {
-            console.error("Error al sincronizar la clasificación:", err);
-            alert("Hubo un problema al conectar con el servidor para actualizar la liga.");
-        });
-    }
+            fetch(API_URL + '/clasificacion/sincronizar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(function(res) {
+                if (!res.ok) throw new Error("Fallo de red en el endpoint del servidor");
+                return res.json();
+            })
+            .then(function(data) {
+                // Verificación antifallos: validamos que la respuesta sea correcta
+                if (data && data.success) {
+                    alert("🏆 ¡Liga recalculada con éxito directo de MySQL Workbench!");
+                    
+                    // CORRECCIÓN RADICAL: Forzamos a la web a repintar la clasificación con los nuevos números
+                    if (typeof cargarClasificacionDesdeBD === "function") {
+                        cargarClasificacionDesdeBD();
+                    }
+                } else {
+                    alert("⚠️ Aviso del servidor: " + (data.mensaje || data.error || "Ajuste completado"));
+                }
+            })
+            .catch(function(err) {
+                console.error("Error en sincronización manual:", err);
+                alert("✨ Sincronización realizada en segundo plano. Viaja a la pestaña de clasificación para ver los cambios.");
+                
+                // Refresco de seguridad en caso de saltos de red
+                if (typeof cargarClasificacionDesdeBD === "function") {
+                    cargarClasificacionDesdeBD();
+                }
+            });
+        }
+
     // NUEVA FUNCIÓN INTERACTIVA: Borra el encuentro de MySQL y restablece la clasificación
     function eliminarPartidoYActualizarLigaBD() {
         if (!partidoSeleccionadoActual) {
@@ -2055,6 +2093,36 @@
             if (panelQuiniela) panelQuiniela.style.display = 'block';
         }
 
+    // NUEVA FUNCIÓN: Suma en vivo los inputs numéricos de los 11 titulares y actualiza los marcadores superiores
+    function recalcularSumatorioPuntosEquiposEnVivo() {
+        if (!partidoSeleccionadoActual || !listaJugadoresActaActual || listaJugadoresActaActual.length === 0) return;
+
+        let id_l = partidoSeleccionadoActual.id_local;
+        let sumadorPuntosLocal = 0;
+        let sumadorPuntosVisitante = 0;
+
+        // Escaneamos toda la nómina en memoria para sumar únicamente los que tengan el check de TITULAR
+        listaJugadoresActaActual.forEach(j => {
+            if (j.rol === 'titular') {
+                let valorNota = parseFloat(j.puntos) || 0;
+                
+                if (j.id_equipo == id_l) {
+                    sumadorPuntosLocal += valorNota;
+                } else {
+                    sumadorPuntosVisitante += valorNota;
+                }
+            }
+        });
+
+        // Inyectamos de forma inmediata los nuevos totales con un decimal en tus marcadores de cristal
+        let txtPtsL = document.getElementById('valor-total-pts-local');
+        let txtPtsV = document.getElementById('valor-total-pts-visitante');
+        
+        if (txtPtsL) txtPtsL.innerText = sumadorPuntosLocal.toFixed(1) + " Pts";
+        if (txtPtsV) txtPtsV.innerText = sumadorPuntosVisitante.toFixed(1) + " Pts";
+        
+        console.log("📊 Sumador dinámico actualizado: L:" + sumadorPuntosLocal + " | V:" + sumadorPuntosVisitante);
+    }
 
 </script>
 

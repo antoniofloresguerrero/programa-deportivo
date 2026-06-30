@@ -352,16 +352,51 @@ app.get('/api/clasificacion', (req, res) => {
         res.json(results || []);
     });
 });
-// 11. API DE BOTÓN: RECALCULAR LA CLASIFICACIÓN MANUALMENTE DESDE LA WEB
-app.post('/api/clasificacion/sincronizar', (req, res) => {
-    try {
-        // Ejecutamos la función maestra de conteo de partidos que creamos antes
-        recalcularClasificacionGeneralMySQL();
-        res.json({ estatus: "OK", mensaje: "¡Base de datos sincronizada! Tabla recalculada con éxito." });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+// 11. API DE CLASIFICACIÓN CORREGIDA: Solo computa partidos jugados con marcador real
+app.get('/api/clasificacion', (req, res) => {
+    // Consulta relacional limpia: solo une actas de partidos que YA se han disputado
+    const queryClasificacion = `
+        SELECT 
+            e.id_equipo,
+            e.nombre,
+            COUNT(DISTINCT p.id_partido) as pj,
+            SUM(
+                CASE 
+                    WHEN (p.id_local = e.id_equipo AND p.goles_local > p.goles_visitante) OR 
+                         (p.id_visitante = e.id_equipo AND p.goles_visitante > p.goles_local) THEN 3
+                    WHEN p.goles_local = p.goles_visitante THEN 1
+                    ELSE 0
+                END
+            ) as pt,
+            SUM(CASE WHEN (p.id_local = e.id_equipo AND p.goles_local > p.goles_visitante) OR (p.id_visitante = e.id_equipo AND p.goles_visitante > p.goles_local) THEN 1 ELSE 0 END) as pg,
+            SUM(CASE WHEN p.goles_local = p.goles_visitante THEN 1 ELSE 0 END) as pe,
+            SUM(CASE WHEN (p.id_local = e.id_equipo AND p.goles_local < p.goles_visitante) OR (p.id_visitante = e.id_equipo AND p.goles_visitante < p.goles_local) THEN 1 ELSE 0 END) as pp,
+            SUM(CASE WHEN p.id_local = e.id_equipo THEN p.goles_local ELSE p.goles_visitante END) as gf,
+            SUM(CASE WHEN p.id_local = e.id_equipo THEN p.goles_visitante ELSE p.goles_local END) as gc
+        FROM equipos e
+        JOIN partidos p ON (e.id_equipo = p.id_local OR e.id_equipo = p.id_visitante)
+        WHERE p.goles_local IS NOT NULL AND p.goles_visitante IS NOT NULL -- 👈 FILTRO CRUCIAL: Ignora partidos futuros
+        GROUP BY e.id_equipo, e.nombre
+        ORDER BY pt DESC, (gf - gc) DESC, gf DESC`;
+
+    db.query(queryClasificacion, (err, rows) => {
+        if (err) {
+            console.error("Error al calcular clasificación real:", err);
+            return res.status(500).json({ error: err.message });
+        }
+        
+        // Si la liga acaba de empezar y no hay partidos jugados, enviamos los 20 clubes a 0 puntos de forma segura
+        if (rows.length === 0) {
+            db.query('SELECT id_equipo, nombre, 0 as pt, 0 as pj, 0 as pg, 0 as pe, 0 as pp, 0 as gf, 0 as gc FROM equipos ORDER BY nombre ASC', (errEq, todos) => {
+                if (errEq) return res.status(500).json({ error: errEq.message });
+                return res.json(todos);
+            });
+        } else {
+            res.json(rows);
+        }
+    });
 });
+
 // 12. API DE BOTÓN: ELIMINAR PARTIDO COMPLETO DE MYSQL Y RECALCULAR LIGA
 app.delete('/api/partidos/eliminar/:id_partido', (req, res) => {
     const id_p = req.params.id_partido;
@@ -423,6 +458,88 @@ app.get('/api/jugador-detalle/:id_jugador', (req, res) => {
     });
 });
 
+// 15. API DE SINCRONIZACIÓN OFICIAL: Graba físicamente los puntos en las celdas de MySQL
+app.post('/api/clasificacion/sincronizar', (req, res) => {
+    console.log("Iniciando recalculo masivo y guardado de la tabla de posiciones...");
+
+    // 1. QUERY DE EXTRACTOR: Traemos únicamente los partidos que ya tienen goles guardados
+    const queryPartidos = `
+        SELECT id_local, id_visitante, goles_local, goles_visitante 
+        FROM partidos 
+        WHERE goles_local IS NOT NULL AND goles_visitante IS NOT NULL`;
+
+    db.query(queryPartidos, (err, partidos) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        // Estructura temporal en memoria para resetear los 20 clubes a cero antes de sumar
+        let stats = {};
+
+        // 2. QUERY AUXILIAR: Traemos todos los clubes para inicializar el mapa de posiciones
+        db.query('SELECT id_equipo FROM equipos', (errEq, clubes) => {
+            if (errEq) return res.status(500).json({ error: errEq.message });
+
+            clubes.forEach(c => {
+                stats[c.id_equipo] = { pt: 0, pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0 };
+            });
+
+            // 3. ALGORITMO LIGA: Recorremos los marcadores guardados para repartir los puntos (3, 1, 0)
+            partidos.forEach(p => {
+                let idL = p.id_local;
+                let idV = p.id_visitante;
+                let gL = parseInt(p.goles_local) || 0;
+                let gV = parseInt(p.goles_visitante) || 0;
+
+                // Si ambos clubes existen en el mapa estadístico, procesamos su fila de Excel
+                if (stats[idL] && stats[idV]) {
+                    stats[idL].pj++; stats[idV].pj++;
+                    stats[idL].gf += gL; stats[idL].gc += gV;
+                    stats[idV].gf += gV; stats[idV].gc += gL;
+
+                    if (gL > gV) {
+                        stats[idL].pt += 3; stats[idL].pg++; stats[idV].pp++;
+                    } else if (gV > gL) {
+                        stats[idV].pt += 3; stats[idV].pg++; stats[idL].pp++;
+                    } else {
+                        stats[idL].pt += 1; stats[idV].pt += 1;
+                        stats[idL].pe++; stats[idV].pe++;
+                    }
+                }
+            });
+
+            // 4. MAPEO DE INYECCIÓN SQL: Creamos un array de promesas para mandar el UPDATE físico de cada club
+            let promesasUpdate = Object.keys(stats).map(id_club => {
+                let s = stats[id_club];
+                const queryUpdateFisico = `
+                    UPDATE equipos 
+                    SET pt = ?, pj = ?, pg = ?, pe = ?, pp = ?, gf = ?, gc = ? 
+                    WHERE id_equipo = ?`;
+                
+                return new Promise((resolve, reject) => {
+                    db.query(queryUpdateFisico, [s.pt, s.pj, s.pg, s.pe, s.pp, s.gf, s.gc, id_club], (errUp) => {
+                        if (errUp) reject(errUp);
+                        else resolve();
+                    });
+                });
+            });
+
+                       // Ejecutamos todas las consultas en paralelo y respondemos con las claves unificadas
+            Promise.all(promesasUpdate)
+                .then(() => {
+                    console.log("💾 ¡Base de datos de LaLiga actualizada físicamente!");
+                    // CORRECCIÓN CLAVE: Enviamos un JSON limpio con la propiedad 'success' y 'mensaje'
+                    res.json({ 
+                        success: true, 
+                        mensaje: "Clasificación oficial grabada en MySQL con éxito." 
+                    });
+                })
+                .catch(errPromise => {
+                    console.error("Error al inyectar puntos:", errPromise);
+                    res.status(500).json({ success: false, error: errPromise.message });
+                });
+
+        });
+    });
+});
 
 
 
