@@ -388,6 +388,42 @@ app.get('/api/jugadores/equipo/:id_equipo', (req, res) => {
         res.json(results || []);
     });
 });
+// 14. API MAESTRA DEL HISTORIAL CORREGIDA: Trae los goles reales sin alterar los marcadores
+app.get('/api/jugador-detalle/:id_jugador', (req, res) => {
+    const id_j = req.params.id_jugador;
+
+    // Consulta limpia que extrae los goles guardados directamente de la tabla partidos
+    const query = `
+        SELECT 
+            p.id_partido, 
+            p.id_jornada, 
+            p.goles_local, 
+            p.goles_visitante,
+            ap.puntos,
+            el.nombre AS local_nombre, 
+            ev.nombre AS visitante_nombre
+        FROM acta_partido ap
+        JOIN partidos p ON ap.id_partido = p.id_partido
+        JOIN equipos el ON p.id_local = el.id_equipo
+        JOIN equipos ev ON p.id_visitante = ev.id_equipo
+        WHERE ap.id_jugador = ?
+        ORDER BY p.id_jornada DESC`;
+
+    db.query(query, [id_j], (err, rows) => {
+        if (err) {
+            console.error("Error en MySQL Historial:", err);
+            return res.status(500).json({ error: err.message });
+        }
+        
+        // Enviamos la respuesta estructurada con los datos puros del Workbench
+        res.json({
+            ranking: "1º (Estrella del Club)",
+            historial_partidos: rows || []
+        });
+    });
+});
+
+
 
 
 app.listen(3000, () => {
