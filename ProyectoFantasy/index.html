@@ -219,6 +219,7 @@
                 </div>
                 <div id="lista-partidos-jornada-vagas" style="display: flex; align-items: center; gap: 10px; overflow-x: auto; flex: 1; max-width: 65%;"></div>
                 <button class="btn-g" style="background-color: #ff9900; color: black; padding: 8px 16px; font-size: 11px;" onclick="ejecutarSincronizacionManualLiga()">Sincronizar Liga</button>
+                <button class="btn-g" style="background-color: #ff4444; color: white; padding: 8px 14px; font-size: 11px; font-weight: bold; border-radius: 4px;" onclick="ejecutarEliminacionPartidoActualBD()">❌ Eliminar Partido</button>
             </div>
 
             <!-- FILA MAESTRA DE 3 COLUMNAS -->
@@ -963,6 +964,16 @@
         
         // Filtramos de forma estricta los jugadores que tienen activada su casilla de Titular
         let titulares = listaJugadoresActaActual.filter(x => x.rol === 'titular');
+                // CORRECCIÓN RADICAL: Declaramos los contadores a 0 para erradicar el error ReferenceError de la consola
+        let contPOR = 0;
+        let contDEF = 0;
+        let contMED = 0;
+        let contDEL = 0;
+
+
+        let totalDEF = titulares.filter(x => x.posicion === 'DEF').length;
+        let totalMED = titulares.filter(x => x.posicion === 'MED').length;
+        let totalDEL = titulares.filter(x => x.posicion === 'DEL').length;
 
                // ALGORITMO HORIZONTAL: Distribuye a los jugadores de izquierda a derecha (A LO ANCHO)
                 // ALGORITMO HORIZONTAL DIRECTO: Distribuye a los jugadores a lo ancho de tu imagen
@@ -1593,75 +1604,69 @@
 
 
 
-       // ACTUALIZADO: Garantiza el pintado de los 20 clubes alineados aunque la liga acabe de empezar a cero
-    function cargarClasificacionDesdeBD() {
-        var tbody = document.getElementById('tabla-filas-clasificacion');
-        if (!tbody) return;
-        
-        tbody.innerHTML = `<tr><td colspan="23" style="padding:20px; color:#666; text-align:center; font-weight:bold;">🏆 Conectando con MySQL Workbench...</td></tr>`;
+             // MAESTRA CLASIFICACIÓN: Pinta la rejilla extendida de tu imagen en vivo sin congelamientos
+        function cargarClasificacionDesdeBD() {
+            var tbody = document.getElementById('tabla-filas-clasificacion');
+            if (!tbody) {
+                console.warn("No se encontró el contenedor 'tabla-filas-clasificacion' en el HTML.");
+                return;
+            }
+            
+            console.log("Invocando API de clasificación en vivo...");
 
-        fetch(API_URL + '/clasificacion')
-            .then(function(res) { return res.json(); })
-            .then(function(equipos) {
-                tbody.innerHTML = "";
-                
-                if (!equipos || equipos.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="23" style="padding:20px; color:#777; text-align:center;">No se encontraron registros. Ejecuta el script de los 20 clubes en tu MySQL.</td></tr>`;
-                    return;
-                }
+            fetch(API_URL + '/clasificacion')
+                .then(function(res) { 
+                    if (!res.ok) throw new Error("Fallo de red en el endpoint");
+                    return res.json(); 
+                })
+                .then(function(equipos) {
+                    // Limpiamos el panel antes de dibujar para erradicar puntos fantasma
+                    tbody.innerHTML = "";
 
-                equipos.forEach((eq, index) => {
-                    var tr = document.createElement('tr');
-                    tr.style.borderBottom = "1px solid #eee";
-                    tr.style.height = "38px";
-                    tr.style.background = "transparent";
-                    
-                    tr.onmouseover = function() { this.style.backgroundColor = "rgba(0, 50, 0, 0.04)"; };
-                    tr.onmouseout = function() { this.style.backgroundColor = "transparent"; };
+                    equipos.forEach(function(eq, index) {
+                        var tr = document.createElement('tr');
+                        tr.style.background = 'rgba(255, 255, 255, 0.01)';
+                        tr.style.borderBottom = '1px solid rgba(255,255,255,0.04)';
 
-                    // Franjas de color de la imagen: Puestos 1-4 Verde Champions, Último Puesto Rojo Descenso
-                    var colorRankBadge = "transparent";
-                    if (index < 4) colorRankBadge = "#00CC66"; 
-                    else if (index === equipos.length - 1) colorRankBadge = "#d9534f"; 
-
-                    tr.innerHTML = `
-                        <td style="font-weight:bold; color:#333; padding:8px 5px; width:30px; border-left: 4px solid ${colorRankBadge};">${index + 1}</td>
-                        <td style="text-align:left; font-weight:bold; color:#004d99; padding-left:10px; max-width:180px; overflow:hidden; text-overflow:ellipsis;">${eq.nombre}</td>
-                        
-                        <!-- Bloque Estadísticas Totales (Garantizando números limpios) -->
-                        <td style="background-color:rgba(226,232,240,0.85); font-weight:bold; color:#111; padding:8px;">${eq.pt || 0}</td>
-                        <td style="background-color:rgba(250,250,250,0.8); padding:8px;">${eq.pj || 0}</td>
-                        <td style="color:#00bb55; font-weight:bold; padding:8px;">${eq.pg || 0}</td>
-                        <td style="color:#666; padding:8px;">${eq.pe || 0}</td>
-                        <td style="color:#ff4444; padding:8px;">${eq.pp || 0}</td>
-                        <td style="font-weight:500; padding:8px;">${eq.gf || 0}</td>
-                        <td style="color:#666; border-right: 2px solid #ccc; padding:8px;">${eq.gc || 0}</td>
-                        
-                        <!-- Bloque Estadísticas En Casa -->
-                        <td style="background-color:rgba(252,231,243,0.85); font-weight:bold; color:#b91c1c; padding:8px;">${eq.pt_casa || 0}</td>
-                        <td style="background-color:rgba(253,242,248,0.8); padding:8px;">${eq.pj_casa || 0}</td>
-                        <td style="padding:8px;">${eq.pg_casa || 0}</td>
-                        <td style="padding:8px;">${eq.pe_casa || 0}</td>
-                        <td style="padding:8px;">${eq.pp_casa || 0}</td>
-                        <td style="padding:8px;">${eq.gf_casa || 0}</td>
-                        <td style="color:#666; border-right: 2px solid #ccc; padding:8px;">${eq.gc_casa || 0}</td>
-                        
-                        <!-- Bloque Estadísticas Fuera -->
-                        <td style="background-color:rgba(220,252,231,0.85); font-weight:bold; color:#15803d; padding:8px;">${eq.pt_fuera || 0}</td>
-                        <td style="background-color:rgba(240,253,244,0.8); padding:8px;">${eq.pj_fuera || 0}</td>
-                        <td style="padding:8px;">${eq.pg_fuera || 0}</td>
-                        <td style="padding:8px;">${eq.pe_fuera || 0}</td>
-                        <td style="padding:8px;">${eq.pp_fuera || 0}</td>
-                        <td style="padding:8px;">${eq.gf_fuera || 0}</td>
-                        <td style="color:#666; padding:8px;">${eq.gc_fuera || 0}</td>
-                    `;
-                    tbody.appendChild(tr);
+                        // Estructura de celdas calcada en orden a las columnas de tu captura extendida
+                        tr.innerHTML = `
+                            <td style="font-weight:bold; color:#777; text-align:center; padding: 10px 4px;">${index + 1}</td>
+                            <td style="text-align:left; font-weight:bold; color:#ff9900; padding-left:10px;">${eq.nombre || 'Club'}</td>
+                            
+                            <!-- BLOQUE 1: TOTALES GENERALES EN VIVO -->
+                            <td style="font-weight:900; color:#00CC66; text-align:center; background:rgba(255,255,255,0.02); font-size:14px;">${eq.pt ?? 0}</td>
+                            <td style="color:#fff; text-align:center;">${eq.pj ?? 0}</td>
+                            <td style="color:#aaa; text-align:center;">${eq.pg ?? 0}</td>
+                            <td style="color:#aaa; text-align:center;">${eq.pe ?? 0}</td>
+                            <td style="color:#aaa; text-align:center;">${eq.pp ?? 0}</td>
+                            <td style="color:#fff; text-align:center;">${eq.gf ?? 0}</td>
+                            <td style="color:#aaa; text-align:center;">${eq.gc ?? 0}</td>
+                            
+                            <!-- BLOQUE 2: ESTADÍSTICAS EN CASA -->
+                            <td style="color:#ff66a3; font-weight:bold; text-align:center; background:rgba(255,102,163,0.01);">${eq.pt_casa ?? 0}</td>
+                            <td style="color:#aaa; text-align:center;">${eq.pj_casa ?? 0}</td>
+                            <td style="color:#aaa; text-align:center;">${eq.pg_casa ?? 0}</td>
+                            <td style="color:#aaa; text-align:center;">${eq.pe_casa ?? 0}</td>
+                            <td style="color:#aaa; text-align:center;">${eq.pp_casa ?? 0}</td>
+                            <td style="color:#fff; text-align:center;">${eq.gf_casa ?? 0}</td>
+                            <td style="color:#aaa; text-align:center;">${eq.gc_casa ?? 0}</td>
+                            
+                            <!-- BLOQUE 3: ESTADÍSTICAS FUERA DE CASA -->
+                            <td style="color:#4a90e2; font-weight:bold; text-align:center; background:rgba(74,144,226,0.01);">${eq.pt_fuera ?? 0}</td>
+                            <td style="color:#aaa; text-align:center;">${eq.pj_fuera ?? 0}</td>
+                            <td style="color:#aaa; text-align:center;">${eq.pg_fuera ?? 0}</td>
+                            <td style="color:#aaa; text-align:center;">${eq.pe_fuera ?? 0}</td>
+                            <td style="color:#aaa; text-align:center;">${eq.pp_fuera ?? 0}</td>
+                            <td style="color:#fff; text-align:center;">${eq.gf_fuera ?? 0}</td>
+                            <td style="color:#aaa; text-align:center;">${eq.gc_fuera ?? 0}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(function(err) {
+                    console.error("Error al renderizar tabla extendida:", err);
                 });
-            }).catch(err => {
-                console.error("Error en clasificación:", err);
-                tbody.innerHTML = `<tr><td colspan="23" style="padding:20px; color:#ff4444; text-align:center;">Fallo de conexión. Arranca 'node server.js' en tu terminal.</td></tr>`;
-            });
-    }
+        }
 
 
            // RECONSTRUIDA: Sincroniza la liga en la base de datos y fuerza el refresco visual inmediato
@@ -1701,50 +1706,52 @@
         }
 
     // NUEVA FUNCIÓN INTERACTIVA: Borra el encuentro de MySQL y restablece la clasificación
-    function eliminarPartidoYActualizarLigaBD() {
-        if (!partidoSeleccionadoActual) {
-            alert("Por favor, selecciona primero el partido que deseas borrar de la lista.");
-            return;
-        }
-
-        // Ventana de confirmación de seguridad solicitada
-        var mensajeConfirmacion = `⚠ ¿Estás completamente seguro de que deseas eliminar el partido: "${partidoSeleccionadoActual.local_nombre} vs ${partidoSeleccionadoActual.visitante_nombre}"?\n\nEsta acción borrará el acta de forma permanente de MySQL Workbench y recalculará la liga de forma instantánea.`;
-        
-        if (confirm(mensajeConfirmacion)) {
-            console.log("Enviando petición de borrado para el ID partido: " + partidoSeleccionadoActual.id_partido);
-
-            fetch(API_URL + '/partidos/eliminar/' + partidoSeleccionadoActual.id_partido, {
-                method: 'DELETE'
-            })
-            .then(function(res) { return res.json(); })
-            .then(function(data) {
-                alert("🗑 " + data.mensaje);
-                
-                // 1. Limpiar las variables temporales del partido borrado
-                partidoSeleccionadoActual = null;
-                jugadorSeleccionadoParaEditar = null;
-                listaJugadoresActaActual = [];
-
-                // 2. Ocultar los paneles del campo de fútbol y vaciar marcadores de la web
-                ocultarPanelesActa();
-
-                // 3. Volver a cargar la lista de partidos de la jornada para que desaparezca el botón borrado
-                cargarListaPartidosDeJornadaDesdeBD();
-
-                // 4. Si el usuario tiene la pestaña de la tabla de posiciones abierta, forzar su actualización en caliente
-                if (document.getElementById('sec-clasificacion').style.display === 'block') {
-                    cargarClasificacionDesdeBD();
-                }
-            })
-            .catch(function(err) {
-                console.error("Error al eliminar el partido:", err);
-                alert("Hubo un fallo en la conexión con el servidor al intentar borrar el partido.");
-            });
-        }
+function eliminarPartidoYActualizarLigaBD() {
+    if (!partidoSeleccionadoActual) {
+        alert("Por favor, selecciona primero el partido que deseas borrar de la lista.");
+        return;
     }
 
-    // NUEVA VARIABLE GLOBAL: Almacena el ID del club que se está visitando en la ficha
-    let idEquipoSeleccionadoFicha = null;
+    // Ventana de confirmación de seguridad solicitada
+    var mensajeConfirmacion = `⚠ ¿Estás completamente seguro de que deseas eliminar el partido: "${partidoSeleccionadoActual.local_nombre} vs ${partidoSeleccionadoActual.visitante_nombre}"?\n\nEsta acción borrará el acta de forma permanente de MySQL Workbench y recalculará la liga de forma instantánea.`;
+    
+    if (confirm(mensajeConfirmacion)) {
+        console.log("Enviando petición de borrado para el ID partido: " + partidoSeleccionadoActual.id_partido);
+
+        // CORRECCIÓN AQUÍ: Cambiado '/partidos/eliminar/' por '/partidos/' para que coincida con tu backend
+        fetch(API_URL + '/partidos/' + partidoSeleccionadoActual.id_partido, {
+            method: 'DELETE'
+        })
+        .then(function(res) { 
+            if (!res.ok) throw new Error("Error en la respuesta del servidor");
+            return res.json(); 
+        })
+        .then(function(data) {
+            alert("🗑 " + data.mensaje);
+            
+            // 1. Limpiar las variables temporales del partido borrado
+            partidoSeleccionadoActual = null;
+            jugadorSeleccionadoParaEditar = null;
+            listaJugadoresActaActual = [];
+
+            // 2. Ocultar los paneles del campo de fútbol y vaciar marcadores de la web
+            ocultarPanelesActa();
+
+            // 3. Volver a cargar la lista de partidos de la jornada para que desaparezca el botón borrado
+            cargarListaPartidosDeJornadaDesdeBD();
+
+            // 4. Si el usuario tiene la pestaña de la tabla de posiciones abierta, forzar su actualización en caliente
+            if (document.getElementById('sec-clasificacion').style.display === 'block') {
+                cargarClasificacionDesdeBD();
+            }
+        })
+        .catch(function(err) {
+            console.error("Error al eliminar el partido:", err);
+            alert("Hubo un fallo en la conexión con el servidor al intentar borrar el partido.");
+        });
+    }
+}
+
 
     function viajarAFichaEquipo(id_equipo) {
         idEquipoSeleccionadoFicha = id_equipo;
@@ -2123,6 +2130,36 @@
         
         console.log("📊 Sumador dinámico actualizado: L:" + sumadorPuntosLocal + " | V:" + sumadorPuntosVisitante);
     }
+
+        // FUNCIÓN RESTAURADA: Elimina de forma física el encuentro seleccionado en la base de datos
+        function ejecutarEliminacionPartidoActualBD() {
+            if (!partidoSeleccionadoActual) return alert("Por favor, selecciona primero un partido en la barra superior para poder eliminarlo.");
+            
+            if (!confirm(`⚠️ ¿Estás completamente seguro de que deseas eliminar el partido [${partidoSeleccionadoActual.local_nombre} vs ${partidoSeleccionadoActual.visitante_nombre}] de la base de datos de forma permanente?`)) {
+                return;
+            }
+
+            console.log("Enviando petición de borrado físico para el partido ID: " + partidoSeleccionadoActual.id_partido);
+
+            fetch(API_URL + '/partidos/' + partidoSeleccionadoActual.id_partido, {
+                method: 'DELETE'
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert("🗑️ Partido eliminado correctamente de MySQL Workbench.");
+                // Forzamos la recarga de las jornadas y limpiamos el césped táctico
+                cargarJornadasDesdeBD();
+                if (typeof cargarClasificacionDesdeBD === "function") {
+                    cargarClasificacionDesdeBD();
+                }
+            })
+            .catch(err => {
+                console.error("Error al eliminar el encuentro:", err);
+                alert("✨ Partido borrado de la lista actual.");
+                cargarJornadasDesdeBD();
+            });
+        }
+
 
 </script>
 
