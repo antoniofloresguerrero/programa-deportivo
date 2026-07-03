@@ -4,7 +4,10 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+// CORRECCIÓN RADICAL: Eleva el límite de carga a 50MB para soportar películas de fotogramas continuos gigantes
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
 // INDICA A NODE QUE EXPONGA TU CARPETA DE FOTOS DE FORMA SEGURA EN INTERNET
 const path = require('path'); // Pon esta línea arriba del todo si no la tienes
 
