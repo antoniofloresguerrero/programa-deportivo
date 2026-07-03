@@ -831,6 +831,13 @@ app.get('/jugadores', (req, res) => {
         res.json(rows);
     });
 });
+// Endpoint físico para eliminar jugadas de la base de datos
+app.delete('/api/jugadas/:id', (req, res) => {
+    db.query('DELETE FROM jugadas_tacticas WHERE id_jugada = ?', [req.params.id], (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ success: true });
+    });
+});
 
 
 

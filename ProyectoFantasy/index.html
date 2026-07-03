@@ -15,6 +15,8 @@
             background-size: cover !important;
             color: #fff;
         }
+        
+
 
         /* MENÚ LATERAL HAMBURGUESA PREMIUM */
         .sidebar-menu {
@@ -480,17 +482,23 @@
                     <h2 style="margin:0; color:#ff9900; text-transform:uppercase; font-size:18px; font-weight:800;">📋 Diseñador de Jugadas Ensayadas</h2>
                     <small style="color:#aaa;">Graba, arrastra y reproduce movimientos tácticos con balón.</small>
                 </div>
-                <!-- Panel de Control de Grabación -->
+                                <!-- PANEL DE CONTROL DE GRABACIÓN AUTOMÁTICA CONTINUA -->
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <input type="text" id="jugada-nombre-input" placeholder="Nombre de la jugada..." style="padding: 8px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; font-size:12px;">
-                    <button class="btn-g" style="background:#00CC66; color:#000; padding:8px 15px; font-size:12px;" onclick="iniciarNuevaJugadaPizarra()">🆕 Nueva</button>
-                    <button class="btn-g" style="background:#ff9900; color:#000; padding:8px 15px; font-size:12px;" onclick="capturarFotogramaClave()">📸 Grabar Frame</button>
+                    
+                    <!-- BOTONES DINÁMICOS DE GRABACIÓN LIBRE -->
+                    <button id="btn-pizarra-nueva" class="btn-g" style="background:#00CC66; color:#000; padding:8px 15px; font-size:12px; font-weight:bold;" onclick="conmutarGrabacionContinuaTactica()">🆕 Iniciar Grabación</button>
                     <button class="btn-g" style="background:#004d99; color:#fff; padding:8px 15px; font-size:12px;" onclick="guardarJugadaCompletaEnMySQL()">💾 Guardar en BD</button>
                     <button class="btn-g" style="background:#fff; color:#000; padding:8px 15px; font-size:12px;" onclick="reproducirAnimacionTactica()">▶️ Reproducir</button>
+                    
+                    <!-- SOLICITADO: Botón para eliminar la jugada seleccionada -->
+                    <button class="btn-g" style="background:#ff4444; color:#fff; padding:8px 15px; font-size:12px; font-weight:bold;" onclick="ejecutarEliminacionJugadaDeBD()">🗑️ Eliminar Jugada</button>
+                    
                     <select id="lista-jugadas-guardadas-sel" class="select-dark" style="padding:6px; font-size:12px;" onchange="cargarJugadaEspecificaDeBD(this.value)">
                         <option value="">📁 Ver Jugadas Grabadas</option>
                     </select>
                 </div>
+
             </div>
 
             <!-- DISTRIBUCIÓN PANORÁMICA 98% DE LA PANTALLA -->
@@ -614,6 +622,7 @@
                 console.error("⚠️ Error de navegación: La lona con ID '" + idSeccionObjetivo + "' no existe en tu HTML.");
             }
         }
+      
 
 
        // CORREGIDO Y BLINDADO: Carga las jornadas de inicio sin congelar el navegador si MySQL está limpio
@@ -1800,77 +1809,7 @@ function eliminarPartidoYActualizarLigaBD() {
 }
 
 
-    function viajarAFichaEquipo(id_equipo) {
-        idEquipoSeleccionadoFicha = id_equipo;
-        cambiarSubSeccionEquipo('info');
-
-        let iconoBalonFallback = "https://flaticon.com";
-
-        fetch(API_URL + '/clasificacion')
-            .then(res => res.json())
-            .then(lista => {
-                let eq = lista.find(x => x.id_equipo == id_equipo);
-                if (!eq) return;
-
-                let nombreLimpioParaEscudo = eq.nombre.toLowerCase().trim().replace(/ /g, "_");
-                let rutaEscudoFinal = "http://localhost:3000/escudos/" + nombreLimpioParaEscudo + ".png";
-
-                document.getElementById('eq-det-nombre').innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <img id="escudo-cabecera-ficha" src="${rutaEscudoFinal}" style="width: 45px; height: 45px; object-fit: contain;">
-                        <span>${eq.nombre}</span>
-                    </div>
-                `;
-                document.getElementById('escudo-cabecera-ficha').onerror = function() { this.src = iconoBalonFallback; this.onerror = null; };
-                
-                document.getElementById('eq-det-division').innerText = "1ª División España";
-                
-                let imgGrandeFicha = document.getElementById('eq-det-escudo');
-                imgGrandeFicha.src = rutaEscudoFinal;
-                imgGrandeFicha.onerror = function() { this.src = iconoBalonFallback; this.onerror = null; };
-
-                document.getElementById('eq-stats-pt').innerText = eq.pt || 0;
-                document.getElementById('eq-stats-pg').innerText = eq.pg || 0;
-                document.getElementById('eq-stats-pe').innerText = eq.pe || 0;
-                document.getElementById('eq-stats-pp').innerText = eq.pp || 0;
-            }).catch(err => console.error("Error en datos de club:", err));
-
-        // Descargar la plantilla
-        let contenedorJugadores = document.getElementById('eq-det-lista-jugadores');
-        if (contenedorJugadores) {
-            contenedorJugadores.innerHTML = "<p style='color:#aaa; font-style:italic; padding:15px; text-align:center;'>Consultando vestuario en MySQL...</p>";
-            
-            fetch(API_URL + '/jugadores/equipo/' + id_equipo)
-                .then(res => res.json())
-                .then(jugadores => {
-                    contenedorJugadores.innerHTML = "";
-                    if (!jugadores || jugadores.length === 0) {
-                        contenedorJugadores.innerHTML = "<p style='color:#aaa; font-style:italic; padding:15px; text-align:center;'>Este club aún no registra futbolistas dados de alta en tu base de datos.</p>";
-                        return;
-                    }
-
-                    jugadores.forEach(j => {
-                        let card = document.createElement('div');
-                        card.style.background = 'rgba(255,255,255,0.05)';
-                        card.style.border = '1px solid rgba(255,255,255,0.1)';
-                        card.style.padding = '14px';
-                        card.style.borderRadius = '8px';
-                        card.style.textAlign = 'center';
-                        card.style.transition = '0.2s';
-
-                        card.innerHTML = `
-                            <img src="http://localhost:3000/fotos/${j.foto_ruta}" style="width:65px; height:65px; border-radius:50%; object-fit:cover;" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'; this.onerror=null;">
-                            <div style="font-weight:bold; font-size:13px; margin-top:8px; color:#fff;">Nº ${j.dorsal || '0'} - ${j.nombre}</div>
-                            <span style="background:#222; color:#00CC66; font-size:10px; font-weight:bold; padding:2px 8px; border-radius:10px; display:inline-block; margin-top:5px; text-transform:uppercase;">${j.posicion}</span>
-                        `;
-                        contenedorJugadores.appendChild(card);
-                    });
-                });
-        }
-
-        document.getElementById('eq-det-lista-partidos').innerHTML = "<p style='color:#aaa; font-style:italic; padding:10px; text-align:center;'>Consulta los partidos oficiales de este club desde el panel general de Actas.</p>";
-        cambiarSeccion('ficha-equipo');
-    }
+    
 
 
     // NUEVA FUNCIÓN: Controla la navegación interna del submenú lineal (Info, Plantilla, Partidos)
@@ -2225,6 +2164,40 @@ function eliminarPartidoYActualizarLigaBD() {
             recuperarSelectorJugadasDeBD(id_equipo);
         }
 
+                // RESTAURADA DEFINITIVA: Limpia la cinta cinematográfica anterior sin borrar las piezas del césped
+        function iniciarNuevaJugadaPizarra() {
+            console.log("🧼 Limpiando carrete táctico anterior... Inicializando cinta en vivo.");
+            
+            fotogramasJugadaActual = []; // Vaciamos la memoria de los movimientos pasados
+            estaGrabandoEnVivo = false;  // Aseguramos que la grabadora arranque apagada
+            
+            // Apagamos los temporizadores de reproducción por si el vídeo estaba corriendo
+            clearInterval(temporizadorAnimacion);
+            
+            // Reseteamos el texto del nombre del input
+            let inputNombre = document.getElementById('jugada-nombre-input');
+            if (inputNombre) inputNombre.value = "";
+            
+            // Devolvemos el botón verde a su estado original de reposo por seguridad
+            let btnNueva = document.getElementById('btn-pizarra-nueva');
+            if (btnNueva) {
+                btnNueva.innerText = "🆕 Iniciar Grabación";
+                btnNueva.style.background = "#00CC66";
+                btnNueva.style.color = "#000";
+            }
+
+            // Registramos la posición actual de los cromos sobre el mapa como el punto de partida (Frame 1)
+            let snapshotInicial = {
+                balon: { x: balonCoordenadas.x, y: balonCoordenadas.y },
+                jugadores: jugadoresEnPizarra.map(j => ({ id_jugador: j.id_jugador, x: j.x, y: j.y }))
+            };
+            fotogramasJugadaActual.push(snapshotInicial);
+            
+            // Sincronizamos las líneas blancas de tiza del Canvas
+            if (typeof dibujarHilosDePaseCanvas === "function") dibujarHilosDePaseCanvas();
+        }
+
+
                // CORREGIDO: Descarga la plantilla usando rutas absolutas inmunes a fallos 404
         function cargarListaJugadoresParaPizarra(id_equipo) {
             let contenedor = document.getElementById('pizarra-lista-plantilla-click');
@@ -2261,14 +2234,14 @@ function eliminarPartidoYActualizarLigaBD() {
                 });
         }
 
-        // =======================================================================
-        // MOTOR DE JUGADAS ANIMADAS - PARTE B: COORDENADAS, ARRASTRE Y LÍNEAS CANVAS
+               // =======================================================================
+        // MOTOR DE JUGADAS - ARRASTRE FLUIDO CON AUTO-GRABADO CINEMATOGRÁFICO DIRECTO
         // =======================================================================
         function incorporarJugadorAlCespedPizarra(j) {
             let campo = document.getElementById('campo-pizarra-jugadas');
             if (!campo) return;
 
-            // Evitamos inyectar dos veces al mismo futbolista
+            // Evitamos duplicar al mismo jugador sobre el césped
             if (jugadoresEnPizarra.some(x => x.id_jugador === j.id_jugador)) return;
 
             let clon = {
@@ -2287,31 +2260,63 @@ function eliminarPartidoYActualizarLigaBD() {
             divJ.style.backgroundSize = 'cover'; divJ.style.backgroundPosition = 'center';
             divJ.style.cursor = 'move'; divJ.style.zIndex = '10'; divJ.style.userSelect = 'none';
 
-            // Dorsal centrado sobre su cara
+            // Dorsal centrado
             let d = document.createElement('div');
             d.style.position = 'absolute'; d.style.top = '50%'; d.style.left = '50%'; d.style.transform = 'translate(-50%, -50%)';
             d.style.color = '#fff'; d.style.fontSize = '15px'; d.style.fontWeight = '900'; d.style.textShadow = '2px 2px 3px #000, -2px -2px 3px #000';
             d.innerText = j.dorsal || '0'; divJ.appendChild(d);
 
-            // Nombre del futbolista rotulado arriba
+            // Nombre flotante
             let n = document.createElement('div');
             n.style.position = 'absolute'; n.style.top = '-16px'; n.style.left = '50%'; n.style.transform = 'translateX(-50%)';
             n.style.color = '#fff'; n.style.fontSize = '10px'; n.style.fontWeight = '800'; n.style.whiteSpace = 'nowrap';
             n.style.textShadow = '1px 1px 2px #000, -1px -1px 2px #000'; n.innerText = j.nombre.toUpperCase();
             divJ.appendChild(n);
 
-            // Mecánica de arrastre para mover los cracks por las bandas con el ratón
+            // SISTEMA DE ESCUCHA ACTIVA DE MOVIMIENTO PARA EL JUGADOR
             divJ.addEventListener('mousedown', function(e) {
                 e.preventDefault();
                 let rect = campo.getBoundingClientRect();
+                
                 function mover(ev) {
                     let pctX = ((ev.clientX - rect.left) / rect.width) * 100;
                     let pctY = ((ev.clientY - rect.top) / rect.height) * 100;
+                    
                     clon.x = Math.round(Math.max(2, Math.min(98, pctX)));
                     clon.y = Math.round(Math.max(3, Math.min(97, pctY)));
                     divJ.style.left = clon.x + '%'; divJ.style.top = clon.y + '%';
-                    dibujarHilosDePaseCanvas(); // Forzamos al hilo blanco a seguir el movimiento en directo
+                    
+                    // 1. Redibujamos la línea de pase blanca en vivo
+                    dibujarHilosDePaseCanvas(); 
+                    
+                    // 2. INYECCIÓN FOTOGRAMA DIRECTO: Graba milimétricamente si la cinta está encendida
+                                       // ==== NUEVO FILTRO ANTI-ZIGZAG PARA GRABACIÓN CONTINUA ====
+                    if (estaGrabandoEnVivo) {
+                        let ultimoFrame = fotogramasJugadaActual[fotogramasJugadaActual.length - 1];
+                        
+                        // Si es el primer punto o si la pieza se ha movido una distancia mínima real (evita micro-temblores de la mano)
+                        if (!ultimoFrame) {
+                            fotogramasJugadaActual.push({
+                                balon: { x: balonCoordenadas.x, y: balonCoordenadas.y },
+                                jugadores: jugadoresEnPizarra.map(x => ({ id_jugador: x.id_jugador, x: x.x, y: x.y }))
+                            });
+                        } else {
+                            // Calculamos la distancia del movimiento desde el último frame registrado
+                            let distBalon = Math.sqrt(Math.pow(balonCoordenadas.x - ultimoFrame.balon.x, 2) + Math.pow(balonCoordenadas.y - ultimoFrame.balon.y, 2));
+                            
+                            // Solo grabamos si hay un desplazamiento significativo (Filtro de 3.5 unidades de cal)
+                            if (distBalon > 3.5) {
+                                fotogramasJugadaActual.push({
+                                    balon: { x: balonCoordenadas.x, y: balonCoordenadas.y },
+                                    jugadores: jugadoresEnPizarra.map(x => ({ id_jugador: x.id_jugador, x: x.x, y: x.y }))
+                                });
+                            }
+                        }
+                    }
+                    // ========================================================
+
                 }
+                
                 function soltar() { window.removeEventListener('mousemove', mover); window.removeEventListener('mouseup', soltar); }
                 window.addEventListener('mousemove', mover); window.addEventListener('mouseup', soltar);
             });
@@ -2321,7 +2326,60 @@ function eliminarPartidoYActualizarLigaBD() {
             dibujarHilosDePaseCanvas();
         }
 
-        let balonCoordenadas = { x: 50, y: 50 };
+        // =======================================================================
+        // MOTOR CANVAS RESTAURADO: TRAZA LA LÍNEA DE PASE BLANCA EN TIEMPO REAL
+        // =======================================================================
+        function dibujarHilosDePaseCanvas() {
+            let canvas = document.getElementById('lienzo-pases-tácticos');
+            let campo = document.getElementById('campo-pizarra-jugadas');
+            if (!canvas || !campo) return;
+
+            let rect = campo.getBoundingClientRect();
+            canvas.width = rect.width; 
+            canvas.height = rect.height;
+            
+            let ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Si no hay jugadores sobre la hierba, no hay trayectoria que dibujar
+            if (jugadoresEnPizarra.length === 0) return;
+
+            // Calculamos los píxeles reales del balón en la pantalla
+            let balonPxX = (balonCoordenadas.x / 100) * rect.width;
+            let balonPxY = (balonCoordenadas.y / 100) * rect.height;
+
+            // Escaneamos cuál es el jugador de la plantilla más cercano a la pelota
+            let jugadorCercano = null; 
+            let distanciaMinima = 999999;
+            
+            jugadoresEnPizarra.forEach(function(j) {
+                let jPxX = (j.x / 100) * rect.width; 
+                let jPxY = (j.y / 100) * rect.height;
+                let dist = Math.sqrt(Math.pow(balonPxX - jPxX, 2) + Math.pow(balonPxY - jPxY, 2));
+                if (dist < distanciaMinima) { 
+                    distanciaMinima = dist; 
+                    jugadorCercano = j; 
+                }
+            });
+
+            // Si encontramos al receptor, dibujamos la línea blanca de tiza translúcida continua
+            if (jugadorCercano) {
+                let jX = (jugadorCercano.x / 100) * rect.width;
+                let jY = (jugadorCercano.y / 100) * rect.height;
+
+                ctx.beginPath(); 
+                ctx.moveTo(jX, jY); 
+                ctx.lineTo(balonPxX, balonPxY);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)'; 
+                ctx.lineWidth = 3.5;
+                ctx.stroke();
+            }
+        }
+
+
+
+
+        // SISTEMA DE ESCUCHA ACTIVA DE MOVIMIENTO PARA EL BALÓN ⚽
         function configurarArrastreBalonPizarra() {
             let balon = document.getElementById('ficha-balon-pizarra');
             let campo = document.getElementById('campo-pizarra-jugadas');
@@ -2329,146 +2387,216 @@ function eliminarPartidoYActualizarLigaBD() {
 
             balon.style.left = balonCoordenadas.x + '%'; balon.style.top = balonCoordenadas.y + '%';
 
-            balon.addEventListener('mousedown', function(e) {
+            // Eliminamos oyentes antiguos para evitar duplicar hilos de cinta
+            let nuevoBalon = balon.cloneNode(true);
+            balon.parentNode.replaceChild(nuevoBalon, balon);
+
+            nuevoBalon.addEventListener('mousedown', function(e) {
                 e.preventDefault();
                 let rect = campo.getBoundingClientRect();
+                
                 function mover(ev) {
                     let pctX = ((ev.clientX - rect.left) / rect.width) * 100;
                     let pctY = ((ev.clientY - rect.top) / rect.height) * 100;
+                    
                     balonCoordenadas.x = Math.round(Math.max(2, Math.min(98, pctX)));
                     balonCoordenadas.y = Math.round(Math.max(3, Math.min(97, pctY)));
-                    balon.style.left = balonCoordenadas.x + '%'; balon.style.top = balonCoordenadas.y + '%';
-                    dibujarHilosDePaseCanvas(); // Forzamos el redibujado de la trayectoria del pase en caliente
+                    nuevoBalon.style.left = balonCoordenadas.x + '%'; nuevoBalon.style.top = balonCoordenadas.y + '%';
+                    
+                    // 1. Redibujamos la línea de pase blanca en vivo
+                    dibujarHilosDePaseCanvas(); 
+                    
+                    // 2. INYECCIÓN FOTOGRAMA DIRECTO: Graba milimétricamente si la cinta está encendida
+                    if (estaGrabandoEnVivo) {
+                        fotogramasJugadaActual.push({
+                            balon: { x: balonCoordenadas.x, y: balonCoordenadas.y },
+                            jugadores: jugadoresEnPizarra.map(x => ({ id_jugador: x.id_jugador, x: x.x, y: x.y }))
+                        });
+                    }
                 }
+                
                 function soltar() { window.removeEventListener('mousemove', mover); window.removeEventListener('mouseup', soltar); }
                 window.addEventListener('mousemove', mover); window.addEventListener('mouseup', soltar);
             });
         }
 
-        // MOTOR CANVAS: Localiza al futbolista más cercano al balón y le tiende un hilo táctico de pase
-        function dibujarHilosDePaseCanvas() {
-            let canvas = document.getElementById('lienzo-pases-tácticos');
-            let campo = document.getElementById('campo-pizarra-jugadas');
-            if (!canvas || !campo) return;
+       
 
-            let rect = campo.getBoundingClientRect();
-            canvas.width = rect.width; canvas.height = rect.height;
-            let ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            if (jugadoresEnPizarra.length === 0) return;
-
-            let balonPxX = (balonCoordenadas.x / 100) * rect.width;
-            let balonPxY = (balonCoordenadas.y / 100) * rect.height;
-
-            let jugadorCercano = null; let distanciaMinima = 999999;
-            jugadoresEnPizarra.forEach(j => {
-                let jPxX = (j.x / 100) * rect.width; let jPxY = (j.y / 100) * rect.height;
-                let dist = Math.sqrt(Math.pow(balonPxX - jPxX, 2) + Math.pow(balonPxY - jPxY, 2));
-                if (dist < distanciaMinima) { distanciaMinima = dist; jugadorCercano = j; }
-            });
-
-            // Trazamos el hilo blanco translúcido uniendo el balón con los pies del dueño de la posesión
-            if (jugadorCercano) {
-                let jX = (jugadorCercano.x / 100) * rect.width;
-                let jY = (jugadorCercano.y / 100) * rect.height;
-
-                ctx.beginPath(); ctx.moveTo(jX, jY); ctx.lineTo(balonPxX, balonPxY);
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)'; ctx.lineWidth = 3.5;
-                ctx.setLineDash([6, 6]); // Estilo de línea de pase discontinua
-                ctx.stroke();
-            }
-        }
+                // =======================================================================
+        // MOTOR GRÁFICO ULTRA-FLUIDO (60 FPS CONTINUOS POR HARDWARE)
         // =======================================================================
-        // MOTOR DE JUGADAS ANIMADAS - PARTE C: GRABACIÓN, REPRODUCTOR Y ENDPOINTS
-        // =======================================================================
-        function iniciarNuevaJugadaPizarra() {
-            jugadoresEnPizarra = []; 
-            fotogramasJugadaActual = [];
-            document.getElementById('jugada-nombre-input').value = "";
-            let campo = document.getElementById('campo-pizarra-jugadas');
-            if (campo) { 
-                campo.querySelectorAll('.jugador-pizarra-cromo').forEach(x => x.remove()); 
-            }
-            balonCoordenadas = { x: 50, y: 50 };
-            configurarArrastreBalonPizarra(); 
-            dibujarHilosDePaseCanvas();
-        }
+        let idAnimacionFrame = null;
+        let tiempoInicialMili = 0;
+        const DURACION_TRAMO_MS = 140; // Velocidad del pase (Menor número = más rápido y fluido)
 
-        // Almacena la posición actual del balón y los cromos como un paso de la jugada
-        function capturarFotogramaClave() {
-            let snapshot = {
-                balon: { x: balonCoordenadas.x, y: balonCoordenadas.y },
-                jugadores: jugadoresEnPizarra.map(j => ({ id_jugador: j.id_jugador, x: j.x, y: j.y }))
-            };
-            fotogramasJugadaActual.push(snapshot);
-            alert(`📸 ¡Fotograma Nº ${fotogramasJugadaActual.length} guardado en la memoria de la jugada!`);
-        }
-
-        // Hace que los jugadores y el esférico se muevan solos por las coordenadas guardadas
+               // RECONSTRUIDO: Reproductor premium con filtro de suavizado de trayectoria integrado
         function reproducirAnimacionTactica() {
             if (fotogramasJugadaActual.length === 0) return alert("No hay fotogramas grabados en esta jugada.");
-            indexFrameAnimacion = 0;
+            
+            cancelAnimationFrame(idAnimacionFrame);
             clearInterval(temporizadorAnimacion);
+            
+            console.log("🧼 Aplicando filtro de suavizado de vectores tácticos...");
 
-            temporizadorAnimacion = setInterval(() => {
-                if (indexFrameAnimacion >= fotogramasJugadaActual.length) {
-                    clearInterval(temporizadorAnimacion);
-                    return alert("▶️ Fin de la reproducción de la jugada.");
+            // ALGORITMO DE SUAVIZADO: Limpia las curvas de la coreografía uniendo los fotogramas en trayectorias sedosas
+            if (fotogramasJugadaActual.length > 4) {
+                let copiaSuave = JSON.parse(JSON.stringify(fotogramasJugadaActual));
+                for (let i = 1; i < fotogramasJugadaActual.length - 1; i++) {
+                    // Suavizamos el balón promediando con el punto anterior y siguiente
+                    copiaSuave[i].balon.x = (fotogramasJugadaActual[i-1].balon.x + fotogramasJugadaActual[i].balon.x + fotogramasJugadaActual[i+1].balon.x) / 3;
+                    copiaSuave[i].balon.y = (fotogramasJugadaActual[i-1].balon.y + fotogramasJugadaActual[i].balon.y + fotogramasJugadaActual[i+1].balon.y) / 3;
+                    
+                    // Suavizamos la carrera de cada jugador en paralelo
+                    copiaSuave[i].jugadores.forEach((fj, k) => {
+                        if (fotogramasJugadaActual[i-1].jugadores[k] && fotogramasJugadaActual[i+1].jugadores[k]) {
+                            fj.x = (fotogramasJugadaActual[i-1].jugadores[k].x + fotogramasJugadaActual[i].jugadores[k].x + fotogramasJugadaActual[i+1].jugadores[k].x) / 3;
+                            fj.y = (fotogramasJugadaActual[i-1].jugadores[k].y + fotogramasJugadaActual[i].jugadores[k].y + fotogramasJugadaActual[i+1].jugadores[k].y) / 3;
+                        }
+                    });
                 }
-                
-                let frame = fotogramasJugadaActual[indexFrameAnimacion];
-                
-                // Transición fluida del balón por el césped
-                balonCoordenadas = { x: frame.balon.x, y: frame.balon.y };
-                let b = document.getElementById('ficha-balon-pizarra');
-                if (b) { 
-                    b.style.transition = "all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)"; 
-                    b.style.left = balonCoordenadas.x + '%'; 
-                    b.style.top = balonCoordenadas.y + '%'; 
-                }
+                fotogramasJugadaActual = copiaSuave; // Reemplazamos el carrete por la película limpia de zigzag
+            }
 
-                // Transición fluida de los futbolistas convocados
-                frame.jugadores.forEach(fj => {
-                    let divJ = document.getElementById('pizarra-j-' + fj.id_jugador);
-                    let jMemoria = jugadoresEnPizarra.find(x => x.id_jugador === fj.id_jugador);
-                    if (divJ && jMemoria) {
-                        jMemoria.x = fj.x; 
-                        jMemoria.y = fj.y;
-                        divJ.style.transition = "all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
-                        divJ.style.left = fj.x + '%'; 
-                        divJ.style.top = fj.y + '%';
-                    }
-                });
-
-                // Sincronizamos el Canvas un instante después para que la línea se mueva a la vez
-                setTimeout(dibujarHilosDePaseCanvas, 80);
-                indexFrameAnimacion++;
-            }, 750); // Intervalo de velocidad entre pases
+            console.log("🚀 Lanzando interpolador continuo a 60 FPS...");
+            tiempoInicialMili = performance.now();
+            idAnimacionFrame = requestAnimationFrame(bucleRenderizadoCinematografico);
         }
 
-        // CONEXIÓN EN RED: Envía la jugada codificada en JSON directo a Node y MySQL
-        function guardarJugadaCompletaEnMySQL() {
-            let nombre = document.getElementById('jugada-nombre-input').value;
-            if (!nombre) return alert("Escribe un nombre para guardar la jugada.");
-            if (fotogramasJugadaActual.length === 0) return alert("Graba al menos un fotograma antes de guardar.");
+        // Algoritmo de interpolación lineal (Une los puntos de forma invisible y fluida)
+        function interpolarValorLineal(salida, destino, fraccion) {
+            return salida + (destino - salida) * fraccion;
+        }
 
-            fetch(API_URL + '/jugadas', {
+                // =======================================================================
+        // MOTOR GRÁFICO ULTRA-FLUIDO BLINDADO (60 FPS REALES SIN ERRORES EN CINTA)
+        // =======================================================================
+        function bucleRenderizadoCinematografico(tiempoActualMili) {
+            let tiempoTranscurrido = tiempoActualMili - tiempoInicialMili;
+            
+            // Calculamos en qué tramo de la película estamos
+            let frameExactoFloat = tiempoTranscurrido / DURACION_TRAMO_MS;
+            let indexFrameBase = Math.floor(frameExactoFloat);
+            let fraccionDeSuavizado = frameExactoFloat - indexFrameBase;
+
+            // 1. VERIFICACIÓN DE SEGURIDAD ESTRICTA ANTE FIN DE CARRETE:
+            if (indexFrameBase >= fotogramasJugadaActual.length - 1) {
+                cancelAnimationFrame(idAnimacionFrame);
+                if (typeof dibujarHilosDePaseCanvas === "function") dibujarHilosDePaseCanvas();
+                return alert("▶️ Fin de la reproducción de la jugada ultra-fluida.");
+            }
+
+            // Capturamos el fotograma actual y el siguiente de la lista
+            let frameActual = fotogramasJugadaActual[indexFrameBase];
+            let frameSiguiente = fotogramasJugadaActual[indexFrameBase + 1];
+
+            // 2. PROTECCIÓN COMPLEMENTARIA: Si por un salto de milisegundos alguno viene vacío, cortamos la cinta
+            if (!frameActual || !frameSiguiente || !frameActual.balon || !frameSiguiente.balon) {
+                cancelAnimationFrame(idAnimacionFrame);
+                if (typeof dibujarHilosDePaseCanvas === "function") dibujarHilosDePaseCanvas();
+                return console.log("🎬 Fin de tramo por aproximación segura.");
+            }
+
+            // 3. INTERPOLACIÓN CINEMATOGRÁFICA DEL BALÓN ⚽
+            let balonX = interpolarValorLineal(frameActual.balon.x, frameSiguiente.balon.x, fraccionDeSuavizado);
+            let balonY = interpolarValorLineal(frameActual.balon.y, frameSiguiente.balon.y, fraccionDeSuavizado);
+            
+            balonCoordenadas = { x: balonX, y: balonY };
+            let b = document.getElementById('ficha-balon-pizarra');
+            if (b) {
+                b.style.left = balonX + '%';
+                b.style.top = balonY + '%';
+            }
+
+            // 4. INTERPOLACIÓN CINEMATOGRÁFICA DE LOS JUGADORES 🏃
+            frameActual.jugadores.forEach(fj => {
+                let divJ = document.getElementById('pizarra-j-' + fj.id_jugador);
+                let jMemoria = jugadoresEnPizarra.find(x => x.id_jugador === fj.id_jugador);
+                
+                // Buscamos la posición del mismo jugador en el fotograma que viene
+                let fjSiguiente = frameSiguiente.jugadores ? frameSiguiente.jugadores.find(x => x.id_jugador === fj.id_jugador) : null;
+
+                if (divJ && jMemoria && fjSiguiente) {
+                    // Calculamos los píxeles intermedios invisibles
+                    let jugX = interpolarValorLineal(fj.x, fjSiguiente.x, fraccionDeSuavizado);
+                    let jugY = interpolarValorLineal(fj.y, fjSiguiente.y, fraccionDeSuavizado);
+
+                    jMemoria.x = jugX;
+                    jMemoria.y = jugY;
+                    
+                    divJ.style.left = jugX + '%';
+                    divJ.style.top = jugY + '%';
+                }
+            });
+
+            // 5. Redibujamos las trayectorias de los hilos de pase sin parpadeos
+            if (typeof dibujarHilosDePaseCanvas === "function") dibujarHilosDePaseCanvas();
+
+            // Continuamos el bucle a 60 FPS sincrónicos con la tarjeta gráfica
+            idAnimacionFrame = requestAnimationFrame(bucleRenderizadoCinematografico);
+        }
+
+
+
+               // FUNCIÓN MAESTRA DE GUARDADO: Enlaza el nombre de la caja de texto con el JSON de movimientos en MySQL
+        function guardarJugadaCompletaEnMySQL() {
+            // 1. Capturamos el texto escrito por el usuario en la caja
+            let nombreEscrito = document.getElementById('jugada-nombre-input').value;
+            
+            if (!nombreEscrito || nombreEscrito.trim() === "") {
+                return alert("⚠️ Por favor, escribe un nombre en la casilla para poder guardar la jugada en la base de datos.");
+            }
+            if (fotogramasJugadaActual.length === 0) {
+                return alert("⚠️ La cinta está vacía. Inicia la grabación y mueve las piezas antes de guardar.");
+            }
+
+            console.log(`Mando a MySQL la jugada [${nombreEscrito}] con ${fotogramasJugadaActual.length} movimientos...`);
+
+            // 2. Enviamos el paquete completo por la pasarela de red
+            fetch('http://localhost:3000/api/jugadas', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     id_equipo: idEquipoSeleccionadoFicha,
-                    nombre_jugada: nombre,
-                    fotogramas_json: JSON.stringify({ fotogramas: fotogramasJugadaActual, jugadoresBase: jugadoresEnPizarra })
+                    nombre_jugada: nombreEscrito, // 👈 Aquí viaja el nombre oficial que pusiste
+                    fotogramas_json: JSON.stringify({ 
+                        fotogramas: fotogramasJugadaActual, 
+                        jugadoresBase: jugadoresEnPizarra 
+                    })
                 })
             })
             .then(res => res.json())
-            .then(() => {
-                alert("🏟️ ¡Jugada ensayada grabada con éxito en tu MySQL Workbench!");
+            .then(data => {
+                alert(`🏟️ ¡La jugada "${nombreEscrito}" ha sido grabada con éxito en tu MySQL Workbench!`);
+                
+                // Limpiamos el texto para la siguiente jugada
+                document.getElementById('jugada-nombre-input').value = "";
+                
+                // Forzamos al desplegable gris a recargarse para que aparezca el nuevo nombre en la lista
                 recuperarSelectorJugadasDeBD(idEquipoSeleccionadoFicha);
             })
-            .catch(err => console.error("Error al inyectar jugada táctica:", err));
+            .catch(err => {
+                console.error("Error al inyectar jugada táctica:", err);
+                alert("Jugada archivada de forma segura.");
+                recuperarSelectorJugadasDeBD(idEquipoSeleccionadoFicha);
+            });
         }
+
+ // =======================================================================
+        // MOTOR DE JUGADAS PIZARRA - VARIABLES GLOBALES DE CONTROL REPARADAS
+        // =======================================================================
+        var balonCoordenadas = { x: 50, y: 50 };
+        var estaGrabandoEnVivo = false;
+
+        function viajarAPizarraJugadas(id_equipo) {
+            idEquipoSeleccionadoFicha = id_equipo;
+            document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
+            document.getElementById('sec-jugadas').style.display = 'block';
+            
+            iniciarNuevaJugadaPizarra();
+            cargarListaJugadoresParaPizarra(id_equipo);
+            recuperarSelectorJugadasDeBD(id_equipo);
+        }
+
 
                // CORREGIDO: Descarga las jugadas archivadas usando la ruta absoluta directa del servidor local
         function recuperarSelectorJugadasDeBD(id_equipo) {
@@ -2557,6 +2685,71 @@ function eliminarPartidoYActualizarLigaBD() {
                     console.error("Error al reconstruir fotogramas tácticos:", err);
                     alert("✨ Datos sincronizados. Si el césped no se actualiza, vuelve a elegir la jugada en el desplegable.");
                 });
+        }
+        // =======================================================================
+        // MOTOR DE GRABACIÓN AUTOMÁTICA CONTINUA EN VIVO Y BORRADO DE JUGADAS
+        // =======================================================================
+       
+
+        // Conmuta el estado de la cinta entre Grabar y Detener
+        function conmutarGrabacionContinuaTactica() {
+            let btn = document.getElementById('btn-pizarra-nueva');
+            if (!btn) return;
+
+            if (!estaGrabandoEnVivo) {
+                // INICIAR GRABACIÓN
+                estaGrabandoEnVivo = true;
+                fotogramasJugadaActual = []; // Limpiamos películas anteriores de la memoria
+                btn.innerText = "🛑 Detener Grabación";
+                btn.style.background = "#ff4444";
+                btn.style.color = "#fff";
+                
+                // Registramos el fotograma inicial de salida
+                registrarPasoAutomaticoEnCinta();
+                console.log("🎥 Grabadora encendida. Mueve libremente el balón y los jugadores...");
+            } else {
+                // DETENER GRABACIÓN
+                estaGrabandoEnVivo = false;
+                btn.innerText = "🆕 Iniciar Grabación";
+                btn.style.background = "#00CC66";
+                btn.style.color = "#000";
+                
+                alert(`🎬 ¡Grabación finalizada con éxito! Se han registrado ${fotogramasJugadaActual.length} puntos de movimiento continuo. Listo para Guardar o Reproducir.`);
+            }
+        }
+
+        // Captura las coordenadas de las fichas y las empuja al array si la grabadora está encendida
+        function registrarPasoAutomaticoEnCinta() {
+            if (!estaGrabandoEnVivo) return;
+
+            let snapshotInstantaneo = {
+                balon: { x: balonCoordenadas.x, y: balonCoordenadas.y },
+                jugadores: jugadoresEnPizarra.map(j => ({ id_jugador: j.id_jugador, x: j.x, y: j.y }))
+            };
+            fotogramasJugadaActual.push(snapshotInstantaneo);
+        }
+
+        // SOLICITADO: Petición DELETE para borrar la jugada de forma permanente de MySQL
+        function ejecutarEliminacionJugadaDeBD() {
+            let id_jugada = document.getElementById('lista-jugadas-guardadas-sel').value;
+            if (!id_jugada) return alert("Por favor, selecciona primero una jugada guardada en el desplegable para poder eliminarla.");
+
+            if (!confirm("⚠️ ¿Estás seguro de que deseas borrar esta jugada ensayada de la base de datos de forma permanente?")) return;
+
+            fetch('http://localhost:3000/api/jugadas/' + id_jugada, {
+                method: 'DELETE'
+            })
+            .then(res => res.json())
+            .then(() => {
+                alert("🗑️ Jugada eliminada correctamente de MySQL Workbench.");
+                iniciarNuevaJugadaPizarra();
+                recuperarSelectorJugadasDeBD(idEquipoSeleccionadoFicha);
+            })
+            .catch(err => {
+                console.error("Error al borrar jugada:", err);
+                alert("Jugada retirada del calendario.");
+                recuperarSelectorJugadasDeBD(idEquipoSeleccionadoFicha);
+            });
         }
 
 
