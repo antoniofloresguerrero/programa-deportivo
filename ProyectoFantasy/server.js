@@ -89,18 +89,90 @@ app.post('/api/partidos', (req, res) => {
     });
 });
 
-// 5. OBTENER DETALLE DEL ACTA COMPLETA INCLUYENDO FOTOS Y VÍDEOS MULTIMEDIA
+// =======================================================================
+// =======================================================================
+// 5. API DEL ACTA RECONSTRUIDA: UNE CON JUGADORES PARA LEER EL ID_EQUIPO REAL
+// =======================================================================
 app.get('/api/acta/:id_partido', (req, res) => {
-    const query = `
-        SELECT a.*, j.nombre, j.posicion, j.id_equipo, j.foto_ruta, j.video_ruta 
-        FROM acta_partido a 
-        JOIN jugadores j ON a.id_jugador = j.id_jugador 
-        WHERE a.id_partido = ?`;
-    db.query(query, [req.params.id_partido], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(results || []);
+    const id_p = req.params.id_partido;
+    console.log(`🔍 Cargando acta blindada y repartiendo bandos para el partido ID: ${id_p}`);
+
+    // CORRECCIÓN RADICAL SQL: Forzamos la lectura de j.id_equipo directo de la ficha del jugador
+    // Esto repara las celdas vacías o los ceros que se quedaron tras los reinicios de pruebas
+    const queryActaBase = `
+        SELECT 
+            ap.id_acta, 
+            ap.id_partido, 
+            j.id_equipo, -- 👈 LEEMOS EL ID REAL DE LA TABLA JUGADORES, NO DEL ACTA VACÍA
+            ap.id_jugador, 
+            ap.rol, 
+            ap.puntos, 
+            ap.evento, 
+            ap.cambio, 
+            ap.posicion_x, 
+            ap.posicion_y,
+            j.nombre, 
+            j.posicion, 
+            j.foto_ruta, 
+            j.dorsal
+        FROM acta_partido ap
+        JOIN jugadores j ON ap.id_jugador = j.id_jugador
+        WHERE ap.id_partido = ?`;
+
+    db.query(queryActaBase, [id_p], (err, jugadoresActa) => {
+        if (err) {
+            console.error("Error crítico en consulta de acta:", err);
+            return res.status(500).json({ error: err.message });
+        }
+        
+        if (jugadoresActa.length === 0) return res.json([]);
+
+        // QUERY DE MEMORIA: Buscamos el historial completo de notas pasadas para la media móvil
+        const queryHistorialGlobal = `
+            SELECT ap.id_jugador, ap.puntos, p.id_jornada
+            FROM acta_partido ap
+            JOIN partidos p ON ap.id_partido = p.id_partido
+            WHERE p.goles_local IS NOT NULL AND p.goles_visitante IS NOT NULL
+            ORDER BY p.id_jornada DESC`;
+
+        db.query(queryHistorialGlobal, (errHist, todasLasNotas) => {
+            if (errHist) return res.status(500).json({ error: errHist.message });
+
+            let mapaHistorial = {};
+            todasLasNotas.forEach(nota => {
+                if (!mapaHistorial[nota.id_jugador]) mapaHistorial[nota.id_jugador] = [];
+                mapaHistorial[nota.id_jugador].push(parseInt(nota.puntos) || 0);
+            });
+
+            // Aplicamos la media móvil exacta manteniendo los decimales puros
+            let actaCalculadaConMedia = jugadoresActa.map(j => {
+                let notasPasadas = mapaHistorial[j.id_jugador] || [];
+                let ultimas3Notas = notasPasadas.slice(0, 3);
+                let cantidadPartidosReales = ultimas3Notas.length;
+                let mediaCalculada = 0;
+
+                if (cantidadPartidosReales > 0) {
+                    let sumaPuntos = ultimas3Notas.reduce((a, b) => a + b, 0);
+                    if (sumaPuntos === 0 && cantidadPartidosReales === 3) {
+                        mediaCalculada = 5.0;
+                    } else {
+                        mediaCalculada = parseFloat((sumaPuntos / cantidadPartidosReales).toFixed(1));
+                    }
+                } else {
+                    mediaCalculada = parseFloat((parseInt(j.puntos) || 0).toFixed(1));
+                }
+
+                j.puntos = mediaCalculada;
+                j.valor_actual = mediaCalculada;
+                return j;
+            });
+
+            // Enviamos el acta con las IDs de los clubes totalmente reparadas en red
+            res.json(actaCalculadaConMedia);
+        });
     });
 });
+
 
 
 
@@ -504,6 +576,261 @@ app.post('/api/clasificacion/sincronizar', (req, res) => {
     });
 });
 
+        // =======================================================================
+        // MOTOR DE JUGADAS JUGADAS - PARTE A: SELECCIÓN Y CARGA DE PLANTILLA
+        // =======================================================================
+        let jugadoresEnPizarra = [];
+        let fotogramasJugadaActual = [];
+        let indexFrameAnimacion = 0;
+        let temporizadorAnimacion = null;
+
+        function viajarAPizarraJugadas(id_equipo) {
+            idEquipoSeleccionadoFicha = id_equipo;
+            document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
+            document.getElementById('sec-jugadas').style.display = 'block';
+            
+            iniciarNuevaJugadaPizarra();
+            cargarListaJugadoresParaPizarra(id_equipo);
+            recuperarSelectorJugadasDeBD(id_equipo);
+        }
+
+        function cargarListaJugadoresParaPizarra(id_equipo) {
+            let contenedor = document.getElementById('pizarra-lista-plantilla-click');
+            if (!contenedor) return;
+            contenedor.innerHTML = "";
+
+            fetch(API_URL + '/jugadores?id_equipo=' + id_equipo)
+                .then(res => res.json())
+                .then(jugadores => {
+                    jugadores.forEach(j => {
+                        let btn = document.createElement('button');
+                        btn.style.width = '100%'; btn.style.textAlign = 'left'; btn.style.padding = '8px 12px';
+                        btn.style.background = 'rgba(255,255,255,0.05)'; btn.style.border = '1px solid #444';
+                        btn.style.borderRadius = '6px'; btn.style.color = '#fff'; btn.style.cursor = 'pointer';
+                        btn.style.fontSize = '12px'; btn.style.fontWeight = 'bold';
+                        btn.innerText = `[${j.posicion}] ${j.nombre}`;
+                        
+                        btn.onclick = function() { incorporarJugadorAlCespedPizarra(j); };
+                        contenedor.appendChild(btn);
+                    });
+                });
+        }
+        // =======================================================================
+        // MOTOR DE JUGADAS ANIMADAS - PARTE B: COORDENADAS, ARRASTRE Y LÍNEAS CANVAS
+        // =======================================================================
+        function incorporarJugadorAlCespedPizarra(j) {
+            let campo = document.getElementById('campo-pizarra-jugadas');
+            if (!campo) return;
+
+            // Evitamos inyectar dos veces al mismo futbolista
+            if (jugadoresEnPizarra.some(x => x.id_jugador === j.id_jugador)) return;
+
+            let clon = {
+                id_jugador: j.id_jugador, nombre: j.nombre, foto_ruta: j.foto_ruta, dorsal: j.dorsal,
+                x: 25, y: 50 // Coordenadas de salida iniciales
+            };
+            jugadoresEnPizarra.push(clon);
+
+            let divJ = document.createElement('div');
+            divJ.className = 'jugador-pizarra-cromo'; divJ.id = 'pizarra-j-' + j.id_jugador;
+            divJ.style.position = 'absolute'; divJ.style.left = clon.x + '%'; divJ.style.top = clon.y + '%';
+            divJ.style.transform = 'translate(-50%, -50%)'; divJ.style.width = '44px'; divJ.style.height = '44px';
+            divJ.style.borderRadius = '50%'; divJ.style.border = '2.5px solid #00CC66';
+            divJ.style.boxShadow = '0 6px 12px rgba(0,0,0,0.5)';
+            divJ.style.backgroundImage = `url('http://localhost:3000/fotos/${j.foto_ruta || "silueta.jpg"}')`;
+            divJ.style.backgroundSize = 'cover'; divJ.style.backgroundPosition = 'center';
+            divJ.style.cursor = 'move'; divJ.style.zIndex = '10'; divJ.style.userSelect = 'none';
+
+            // Dorsal centrado sobre su cara
+            let d = document.createElement('div');
+            d.style.position = 'absolute'; d.style.top = '50%'; d.style.left = '50%'; d.style.transform = 'translate(-50%, -50%)';
+            d.style.color = '#fff'; d.style.fontSize = '15px'; d.style.fontWeight = '900'; d.style.textShadow = '2px 2px 3px #000, -2px -2px 3px #000';
+            d.innerText = j.dorsal || '0'; divJ.appendChild(d);
+
+            // Nombre del futbolista rotulado arriba
+            let n = document.createElement('div');
+            n.style.position = 'absolute'; n.style.top = '-16px'; n.style.left = '50%'; n.style.transform = 'translateX(-50%)';
+            n.style.color = '#fff'; n.style.fontSize = '10px'; n.style.fontWeight = '800'; n.style.whiteSpace = 'nowrap';
+            n.style.textShadow = '1px 1px 2px #000, -1px -1px 2px #000'; n.innerText = j.nombre.toUpperCase();
+            divJ.appendChild(n);
+
+            // Mecánica de arrastre para mover los cracks por las bandas con el ratón
+            divJ.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                let rect = campo.getBoundingClientRect();
+                function mover(ev) {
+                    let pctX = ((ev.clientX - rect.left) / rect.width) * 100;
+                    let pctY = ((ev.clientY - rect.top) / rect.height) * 100;
+                    clon.x = Math.round(Math.max(2, Math.min(98, pctX)));
+                    clon.y = Math.round(Math.max(3, Math.min(97, pctY)));
+                    divJ.style.left = clon.x + '%'; divJ.style.top = clon.y + '%';
+                    dibujarHilosDePaseCanvas(); // Forzamos al hilo blanco a seguir el movimiento en directo
+                }
+                function soltar() { window.removeEventListener('mousemove', mover); window.removeEventListener('mouseup', soltar); }
+                window.addEventListener('mousemove', mover); window.addEventListener('mouseup', soltar);
+            });
+
+            campo.appendChild(divJ);
+            configurarArrastreBalonPizarra();
+            dibujarHilosDePaseCanvas();
+        }
+
+        let balonCoordenadas = { x: 50, y: 50 };
+        function configurarArrastreBalonPizarra() {
+            let balon = document.getElementById('ficha-balon-pizarra');
+            let campo = document.getElementById('campo-pizarra-jugadas');
+            if (!balon || !campo) return;
+
+            balon.style.left = balonCoordenadas.x + '%'; balon.style.top = balonCoordenadas.y + '%';
+
+            balon.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                let rect = campo.getBoundingClientRect();
+                function mover(ev) {
+                    let pctX = ((ev.clientX - rect.left) / rect.width) * 100;
+                    let pctY = ((ev.clientY - rect.top) / rect.height) * 100;
+                    balonCoordenadas.x = Math.round(Math.max(2, Math.min(98, pctX)));
+                    balonCoordenadas.y = Math.round(Math.max(3, Math.min(97, pctY)));
+                    balon.style.left = balonCoordenadas.x + '%'; balon.style.top = balonCoordenadas.y + '%';
+                    dibujarHilosDePaseCanvas(); // Forzamos el redibujado de la trayectoria del pase en caliente
+                }
+                function soltar() { window.removeEventListener('mousemove', mover); window.removeEventListener('mouseup', soltar); }
+                window.addEventListener('mousemove', mover); window.addEventListener('mouseup', soltar);
+            });
+        }
+
+        // MOTOR CANVAS: Localiza al futbolista más cercano al balón y le tiende un hilo táctico de pase
+        function dibujarHilosDePaseCanvas() {
+            let canvas = document.getElementById('lienzo-pases-tácticos');
+            let campo = document.getElementById('campo-pizarra-jugadas');
+            if (!canvas || !campo) return;
+
+            let rect = campo.getBoundingClientRect();
+            canvas.width = rect.width; canvas.height = rect.height;
+            let ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (jugadoresEnPizarra.length === 0) return;
+
+            let balonPxX = (balonCoordenadas.x / 100) * rect.width;
+            let balonPxY = (balonCoordenadas.y / 100) * rect.height;
+
+            let jugadorCercano = null; let distanciaMinima = 999999;
+            jugadoresEnPizarra.forEach(j => {
+                let jPxX = (j.x / 100) * rect.width; let jPxY = (j.y / 100) * rect.height;
+                let dist = Math.sqrt(Math.pow(balonPxX - jPxX, 2) + Math.pow(balonPxY - jPxY, 2));
+                if (dist < distanciaMinima) { distanciaMinima = dist; jugadorCercano = j; }
+            });
+
+            // Trazamos el hilo blanco translúcido uniendo el balón con los pies del dueño de la posesión
+            if (jugadorCercano) {
+                let jX = (jugadorCercano.x / 100) * rect.width;
+                let jY = (jugadorCercano.y / 100) * rect.height;
+
+                ctx.beginPath(); ctx.moveTo(jX, jY); ctx.lineTo(balonPxX, balonPxY);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)'; ctx.lineWidth = 3.5;
+                ctx.setLineDash([6, 6]); // Estilo de línea de pase discontinua
+                ctx.stroke();
+            }
+        }
+// =======================================================================
+// ENDPOINTS DE LA PIZARRA DE JUGADAS (BLINDADOS CONTRA ERRORES 404 Y 500)
+// =======================================================================
+
+// 1. GUARDAR NUEVA JUGADA ENSAYADA (Rutas Duplicadas)
+const queryGuardarJugada = 'INSERT INTO jugadas_tacticas (id_equipo, nombre_jugada, fotogramas_json) VALUES (?, ?, ?)';
+app.post('/api/jugadas', (req, res) => {
+    const { id_equipo, nombre_jugada, fotogramas_json } = req.body;
+    db.query(queryGuardarJugada, [id_equipo, nombre_jugada, fotogramas_json], (err) => {
+        if (err) return res.status(500).json({ success: false, error: err.message });
+        res.json({ success: true });
+    });
+});
+app.post('/jugadas', (req, res) => {
+    const { id_equipo, nombre_jugada, fotogramas_json } = req.body;
+    db.query(queryGuardarJugada, [id_equipo, nombre_jugada, fotogramas_json], (err) => {
+        if (err) return res.status(500).json({ success: false, error: err.message });
+        res.json({ success: true });
+    });
+});
+
+// 2. LISTAR JUGADAS DISPONIBLES DE UN CLUB (Rutas Duplicadas)
+const queryListarJugadas = 'SELECT id_jugada, nombre_jugada FROM jugadas_tacticas WHERE id_equipo = ?';
+app.get('/api/jugadas', (req, res) => {
+    db.query(queryListarJugadas, [req.query.id_equipo], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+app.get('/jugadas', (req, res) => {
+    db.query(queryListarJugadas, [req.query.id_equipo], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+// 3. RECUPERAR EL HISTORIAL DE MOVIMIENTOS DE UNA JUGADA (Rutas Duplicadas)
+// =======================================================================
+// 3. RECUPERAR EL HISTORIAL DE MOVIMIENTOS CORREGIDO (ENVÍA FILA ÚNICA)
+// =======================================================================
+const queryDetalleJugada = 'SELECT * FROM jugadas_tacticas WHERE id_jugada = ?';
+
+app.get('/api/jugada-detalle/:id', (req, res) => {
+    const id_j = req.params.id;
+    console.log(`📥 Descargando de MySQL la fila de la jugada ID: ${id_j}`);
+
+    db.query(queryDetalleJugada, [id_j], (err, rows) => {
+        if (err) {
+            console.error("Error en base de datos al leer detalle:", err);
+            return res.status(500).json({ error: err.message });
+        }
+        
+        // CORRECCIÓN CLAVE: Si MySQL encuentra la jugada, extraemos la primera fila (rows[0])
+        // Si no la encuentra, enviamos un objeto vacío estructurado en lugar de un array nulo
+        if (rows && rows.length > 0) {
+            res.json(rows[0]); 
+        } else {
+            res.status(404).json({ error: "Jugada no encontrada en MySQL Workbench" });
+        }
+    });
+});
+
+// Duplicamos el endpoint sin el prefijo /api por si tu Live Server retiene rutas en la caché global
+app.get('/jugada-detalle/:id', (req, res) => {
+    const id_j = req.params.id;
+    db.query(queryDetalleJugada, [id_j], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (rows && rows.length > 0) {
+            res.json(rows[0]);
+        } else {
+            res.status(404).json({ error: "Jugada no encontrada" });
+        }
+    });
+});
+
+// =======================================================================
+// ENDPOINT DE JUGADORES CORREGIDO: SEGURO CONTRA ERRORES 404 DE PIZARRA
+// =======================================================================
+const queryFiltrarJugadoresClub = 'SELECT id_jugador, nombre, posicion, foto_ruta, dorsal, id_equipo FROM jugadores WHERE id_equipo = ?';
+
+app.get('/api/jugadores', (req, res) => {
+    const id_eq = req.query.id_equipo;
+    console.log(`🏃 Buscando en MySQL la plantilla del club ID: ${id_eq}`);
+    
+    db.query(queryFiltrarJugadoresClub, [id_eq], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+// Duplicamos el endpoint sin el prefijo /api por si tu Live Server retiene rutas antiguas
+app.get('/jugadores', (req, res) => {
+    const id_eq = req.query.id_equipo;
+    db.query(queryFiltrarJugadoresClub, [id_eq], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
 
 
 
