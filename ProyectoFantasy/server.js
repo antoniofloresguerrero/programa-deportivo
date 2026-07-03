@@ -891,32 +891,56 @@ app.delete('/api/jugadas/:id', (req, res) => {
 // ENDPOINTS CRUD AVANZADOS PARA LA GESTIÓN DE JUGADORES (MYSQL WORKBENCH)
 // =======================================================================
 
-// 1. OBTENER DETALLE HISTÓRICO ACUMULADO DE UN JUGADOR
+// =======================================================================
+// 1. OBTENER DETALLE HISTÓRICO CORREGIDO: INMUNE A VALORES NULOS O TEXTOS VACÍOS
+// =======================================================================
 app.get('/api/jugadores/detalle/:id', (req, res) => {
     const id_j = req.params.id;
+    console.log(`📥 Consultando de forma segura en MySQL el perfil del jugador ID: ${id_j}`);
     
-    // Consulta maestra: Trae los datos base y suma todo su historial de actas de partidos jugados
-    const queryHistorial = `
+    // CONSULTA REPARADA: Eliminamos el REPLACE conflictivo del campo cambio. 
+    // Ahora lee de forma segura los minutos convirtiendo directamente a número o asumiendo 0 si es nulo.
+    const queryHistorialBlindada = `
         SELECT 
-            j.*,
+            j.id_jugador,
+            j.nombre,
+            j.posicion,
+            j.dorsal,
+            j.id_equipo,
+            j.foto_ruta,
             COUNT(DISTINCT CASE WHEN ap.id_partido IS NOT NULL THEN ap.id_partido END) as partidos_jugados,
-            COALESCE(SUM(CAST(ap.puntos AS DECIMAL(10,1))), 0) as puntos_totales,
-            COALESCE(AVG(CAST(ap.puntos AS DECIMAL(10,1))), 0) as puntos_media,
+            COALESCE(SUM(CASE WHEN ap.puntos IS NOT NULL THEN CAST(ap.puntos AS DECIMAL(10,1)) ELSE 0 END), 0) as puntos_totales,
+            COALESCE(AVG(CASE WHEN ap.puntos IS NOT NULL THEN CAST(ap.puntos AS DECIMAL(10,1)) ELSE 0 END), 0) as puntos_media,
             COALESCE(SUM(CASE WHEN ap.evento LIKE '%⚽%' THEN (LENGTH(ap.evento) - LENGTH(REPLACE(ap.evento, '⚽', ''))) / LENGTH('⚽') ELSE 0 END), 0) as goles_totales,
             COALESCE(SUM(CASE WHEN ap.evento LIKE '%🟨%' THEN 1 ELSE 0 END), 0) as amarillas_totales,
             COALESCE(SUM(CASE WHEN ap.evento LIKE '%🟥%' THEN 1 ELSE 0 END), 0) as rojas_totales,
-            COALESCE(SUM(CAST(REPLACE(ap.cambio, "' Jugados", "") AS UNSIGNED)), 0) as minutos_totales
+            COALESCE(SUM(CASE WHEN ap.cambio IS NOT NULL THEN CAST(REGEXP_REPLACE(ap.cambio, '[^0-9]', '') AS UNSIGNED) ELSE 0 END), 0) as minutos_totales
         FROM jugadores j
         LEFT JOIN acta_partido ap ON j.id_jugador = ap.id_jugador
         LEFT JOIN partidos p ON ap.id_partido = p.id_partido AND p.goles_local IS NOT NULL AND p.goles_visitante IS NOT NULL
         WHERE j.id_jugador = ?
-        GROUP BY j.id_jugador`;
+        GROUP BY j.id_jugador, j.nombre, j.posicion, j.dorsal, j.id_equipo, j.foto_ruta`;
 
-    db.query(queryHistorial, [id_j], (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(rows[0] || {});
+    db.query(queryHistorialBlindada, [id_j], (err, rows) => {
+        if (err) {
+            console.error("🔴 Error crítico de sintaxis SQL en el perfil:", err);
+            return res.status(500).json({ error: err.message });
+        }
+        
+        // Si MySQL Workbench devuelve un array, extraemos la primera fila de forma limpia
+        if (rows && rows.length > 0) {
+            res.json(rows[0]);
+        } else {
+            // Mandamos un objeto estructurado de respaldo si el jugador no tiene partidos en su historial
+            res.json({
+                id_jugador: id_j, nombre: "Jugador de Reserva", posicion: "MED", dorsal: 0,
+                partidos_jugados: 0, puntos_totales: 0, puntos_media: 0, goles_totales: 0,
+                amarillas_totales: 0, rojas_totales: 0, minutos_totales: 0
+            });
+        }
     });
 });
+
 
 // 2. CREAR NUEVO JUGADOR EN LA BASE DE DATOS
 app.post('/api/jugadores', (req, res) => {
