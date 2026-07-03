@@ -474,6 +474,110 @@
 
             </div>
         </div>
+                <!-- ==================== PESTAÑA: FICHA DETALLADA DEL JUGADOR ==================== -->
+        <div id="sec-ficha-jugador" class="panel" style="display:none;">
+            <!-- Cabecera de la Ficha con Botón de Retorno -->
+            <div class="form-box" style="width: 98% !important; max-width: 100% !important; margin: 0 auto 15px auto; padding: 15px 25px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 id="det-jug-nombre-cabecera" style="margin:0; color:#4a90e2; text-transform:uppercase; font-size:18px; font-weight:800;">🏃 Perfil del Futbolista</h2>
+                    <small style="color:#aaa;">Historial de rendimiento, estadísticas avanzadas y edición de ficha en MySQL Workbench.</small>
+                </div>
+                <button class="btn-g" style="background:#333; color:#fff; padding:8px 15px; font-size:12px;" onclick="cambiarSeccion('sec-ficha-equipo')">⬅️ Volver a la Plantilla</button>
+            </div>
+
+            <!-- DISTRIBUCIÓN HORIZONTAL PANORÁMICA AL 98% -->
+            <div style="display: grid; grid-template-columns: 350px 1fr; gap: 20px; width: 98% !important; max-width: 100% !important; margin: 0 auto; padding: 0; box-sizing: border-box; align-items: start;">
+                
+                <!-- COLUMNA IZQUIERDA: TARJETA DE IDENTIDAD Y ACCIONES -->
+                <div style="background: rgba(12, 12, 12, 0.9); border-radius: 10px; border: 1px solid #333; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); text-align: center;">
+                    <div id="det-jug-foto" style="width: 130px; height: 130px; border-radius: 50%; border: 3px solid #4a90e2; margin: 0 auto 15px auto; background-size: cover; background-position: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5);"></div>
+                    
+                    <div style="background: rgba(74, 144, 226, 0.1); display: inline-block; padding: 2px 10px; border-radius: 20px; border: 1px solid #4a90e2; margin-bottom: 10px;">
+                        <span id="det-jug-posicion" style="color: #4a90e2; font-size: 11px; font-weight: bold; text-transform: uppercase;">POSICIÓN</span>
+                    </div>
+                    
+                    <h3 id="det-jug-nombre-completo" style="color: #fff; margin: 0 0 5px 0; font-size: 20px; font-weight: 800;">Nombre Jugador</h3>
+                    <p style="color: #aaa; margin: 0 0 20px 0; font-size: 14px; font-weight: bold;">Dorsal: <span id="det-jug-dorsal" style="color:#ff9900;">0</span></p>
+                    
+                    <!-- BOTONERA DE CONTROL CRUD SOLICITADA -->
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button class="btn-g" style="background: #ff9900; color: #000; padding: 10px; font-size: 13px; font-weight: bold; width: 100%;" onclick="abrirModalEditorJugadorExistente()">✏️ Editar Datos</button>
+                        <button class="btn-g" style="background: #ff4444; color: #fff; padding: 10px; font-size: 13px; font-weight: bold; width: 100%;" onclick="ejecutarBajaJugadorMySQL()">🗑️ Dar de Baja / Eliminar</button>
+                    </div>
+                </div>
+
+                <!-- COLUMNA DERECHA: GRILLA DE RENDIMIENTO HISTÓRICO EN CRISTAL -->
+                <div style="background: rgba(15, 15, 15, 0.95); border-radius: 10px; border: 1px solid #333; padding: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.6);">
+                    <h3 style="color:#fff; margin-top:0; font-size:15px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:10px; letter-spacing:0.5px;">📊 Rendimiento Histórico Acumulado</h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
+                        <!-- Bloque Puntos Totales -->
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
+                            <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase;">Puntos Totales</span>
+                            <h4 id="stat-jug-pts-totales" style="margin:5px 0 0 0; color:#00CC66; font-size:24px; font-weight:900;">0.0</h4>
+                        </div>
+                        <!-- Bloque Nota Media -->
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
+                            <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase;">Valoración Media</span>
+                            <h4 id="stat-jug-pts-media" style="margin:5px 0 0 0; color:#ff9900; font-size:24px; font-weight:900;">0.0</h4>
+                        </div>
+                        <!-- Bloque Partidos Jugados -->
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
+                            <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase;">Partidos Jugados</span>
+                            <h4 id="stat-jug-partidos" style="margin:5px 0 0 0; color:#fff; font-size:24px; font-weight:900;">0</h4>
+                        </div>
+                        <!-- Bloque Goles Marcados -->
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
+                            <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase;">Goles Anotados ⚽</span>
+                            <h4 id="stat-jug-goles" style="margin:5px 0 0 0; color:#00CC66; font-size:24px; font-weight:900;">0</h4>
+                        </div>
+                        <!-- Bloque Tarjetas Recibidas -->
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
+                            <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase;">Tarjetas (🟨 / 🟥)</span>
+                            <h4 id="stat-jug-tarjetas" style="margin:5px 0 0 0; color:#ff4444; font-size:20px; font-weight:900;">0 / 0</h4>
+                        </div>
+                        <!-- Bloque Minutos Totales -->
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
+                            <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase;">Minutos Jugados ⏱️</span>
+                            <h4 id="stat-jug-minutos" style="margin:5px 0 0 0; color:#4a90e2; font-size:24px; font-weight:900;">0'</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MODAL EMERGENTE: FORMULARIO CRUD (CREAR Y EDITAR) ==================== -->
+        <div id="modal-crud-jugador" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center;">
+            <div style="background:#151515; border:1px solid #333; border-radius:10px; padding:25px; width:400px; box-shadow:0 10px 30px rgba(0,0,0,0.7); box-sizing:border-box;">
+                <h3 id="modal-crud-titulo" style="color:#ff9900; margin-top:0; font-size:16px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:8px;">Formulario Jugador</h3>
+                
+                <input type="hidden" id="form-jug-id">
+                
+                <div style="display:flex; flex-direction:column; gap:12px; margin-top:15px;">
+                    <label style="color:#aaa; font-size:11px; font-weight:bold; text-transform:uppercase;">Nombre del Futbolista:</label>
+                    <input type="text" id="form-jug-nombre" style="padding:8px; background:#222; color:#fff; border:1px solid #444; border-radius:4px;">
+                    
+                    <label style="color:#aaa; font-size:11px; font-weight:bold; text-transform:uppercase;">Posición de Juego:</label>
+                    <select id="form-jug-posicion" class="select-dark" style="padding:8px;">
+                        <option value="POR">POR (Portero)</option>
+                        <option value="DEF">DEF (Defensa)</option>
+                        <option value="MED">MED (Centrocampista)</option>
+                        <option value="DEL">DEL (Delantero)</option>
+                    </select>
+                    
+                    <label style="color:#aaa; font-size:11px; font-weight:bold; text-transform:uppercase;">Número de Dorsal:</label>
+                    <input type="number" id="form-jug-dorsal" min="1" max="99" style="padding:8px; background:#222; color:#fff; border:1px solid #444; border-radius:4px;">
+                    
+                    <label style="color:#aaa; font-size:11px; font-weight:bold; text-transform:uppercase;">Ruta de la Fotografía (Nombre archivo):</label>
+                    <input type="text" id="form-jug-foto" value="silueta.jpg" style="padding:8px; background:#222; color:#fff; border:1px solid #444; border-radius:4px;">
+                </div>
+                
+                <div style="display:flex; gap:10px; margin-top:20px; justify-content:flex-end;">
+                    <button type="button" class="btn-g" style="background:#444; color:#fff; padding:8px 15px;" onclick="document.getElementById('modal-crud-jugador').style.display='none'">Cancelar</button>
+                    <button type="button" class="btn-g" style="background:#00CC66; color:#000; padding:8px 15px; font-weight:bold;" onclick="ejecutarGuardadoFormularioJugadorBD()">💾 Guardar Registro</button>
+                </div>
+            </div>
+
 
                <!-- ==================== PESTAÑA NUEVA: PIZARRA DE JUGADAS ANIMADAS ==================== -->
         <div id="sec-jugadas" class="panel" style="display:none;">
@@ -541,6 +645,7 @@
     ⚽ Diseñar Jugadas
                 </button>
 
+
             </div>
 
             <!-- SUB-PANEL 1: DATOS GENERALES DEL EQUIPO -->
@@ -563,12 +668,24 @@
             </div>
 
             <!-- SUB-PANEL 2: PLANTILLA OFICIAL DE JUGADORES -->
-            <div id="sub-sec-plantilla" class="form-box" style="border-radius: 0 0 8px 8px; margin-top: 0; display: none;">
-                <h3 style="margin-top: 0; border-bottom: 2px solid #00CC66; padding-bottom: 8px;">🏃 Futbolistas Registrados en MySQL</h3>
-                <div id="eq-det-lista-jugadores" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-top: 15px;">
-                    <!-- Se rellena dinámicamente con las tarjetas de los jugadores -->
-                </div>
+                    <!-- ======================================================================= -->
+        <!-- LONA PANORÁMICA DE LA PLANTILLA OFICIAL (SE ENCIENDE AL PULSAR LA PESTAÑA CENTRAL) -->
+        <!-- ======================================================================= -->
+        <div id="sub-sec-plantilla" class="sub-seccion-panel" style="display: none; width: 98% !important; max-width: 100% !important; margin: 15px auto 0 auto; box-sizing: border-box;">
+            
+            <!-- BARRA DE CONTROL DE LA PLANTILLA: BOTÓN DE ALTA EN SU SITIO EXACTO -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(255,255,255,0.02); padding: 12px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); box-sizing: border-box; width: 100%;">
+              
+                
+               
             </div>
+
+            <!-- CONTENEDOR FLEXIBLE ADAPTABLE: Aquí es donde el script inyectará las tarjetas de tus cracks -->
+            <div class="lista-jugadores-bloque" style="display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box;">
+                <!-- Las fichas dinámicas con hover de cristal se dibujarán aquí de forma automática -->
+            </div>
+        </div>
+
 
             <!-- SUB-PANEL 3: HISTORIAL DE ENCUENTROS DEL CLUB -->
             <div id="sub-sec-partidos" class="form-box" style="border-radius: 0 0 8px 8px; margin-top: 0; display: none;">
@@ -1811,30 +1928,22 @@ function eliminarPartidoYActualizarLigaBD() {
 
     
 
+        // CONECTADO: Fuerza a la web a rellenar la tabla de jugadores al pulsar en "Plantilla Oficial"
+        function cambiarSubSeccionEquipo(subSeccion) {
+            console.log("Cambiando de subpestaña del club hacia: " + subSeccion);
 
-    // NUEVA FUNCIÓN: Controla la navegación interna del submenú lineal (Info, Plantilla, Partidos)
-    function cambiarSubSeccionEquipo(subId) {
-        // Ocultar los tres sub-paneles
-        document.getElementById('sub-sec-info').style.display = 'none';
-        document.getElementById('sub-sec-plantilla').style.display = 'none';
-        document.getElementById('sub-sec-partidos').style.display = 'none';
+            // ... Aquí tienes tu lógica original para ocultar y mostrar los DIVs correspondientes ...
+            // (Ejemplo: document.getElementById('sub-sec-plantilla').style.display = 'block', etc.)
 
-        // Quitar la iluminación verde de las sub-pestañas
-        document.getElementById('sub-btn-info').classList.remove('active');
-        document.getElementById('sub-btn-plantilla').classList.remove('active');
-        document.getElementById('sub-btn-partidos').classList.remove('active');
+            // CORRECCIÓN CLAVE: Si el usuario pulsa en la plantilla, despertamos al motor de MySQL
+            if (subSeccion === 'plantilla') {
+                if (typeof cargarPlantillaJugadoresClubFicha === "function") {
+                    // Pasamos la variable global del ID del equipo que está abierto en la ficha
+                    cargarPlantillaJugadoresClubFicha(idEquipoSeleccionadoFicha);
+                }
+            }
+        }
 
-        // Mostrar el sub-panel elegido e iluminar su botón correspondiente
-        document.getElementById('sub-sec-' + subId).style.display = 'block';
-        document.getElementById('sub-btn-' + subId).classList.add('active');
-    }
-
-    // AJUSTE DE SEGURIDAD: Modificar la función original ocultarPanelesActa para incluir la nueva ficha
-    var originalOcultarPanelesActa = ocultarPanelesActa;
-    ocultarPanelesActa = function() {
-        if(originalOcultarPanelesActa) originalOcultarPanelesActa();
-        // Si se cambia de pantalla, nos aseguramos de no dejar residuos visuales
-    };
     // NUEVA FUNCIÓN MAESTRA: Conecta los escudos superiores con la Ficha de Equipos desde MySQL
     function viajarAFichaEquipo(id_equipo) {
         console.log("Abriendo Ficha Técnica Interactiva del Club con ID: " + id_equipo);
@@ -2750,6 +2859,327 @@ function eliminarPartidoYActualizarLigaBD() {
                 alert("Jugada retirada del calendario.");
                 recuperarSelectorJugadasDeBD(idEquipoSeleccionadoFicha);
             });
+        }
+        // =======================================================================
+        // MOTOR MAESTRO CRUD: GESTIÓN INTEGRAL DE FICHAS DE JUGADORES (MYSQL)
+        // =======================================================================
+        let idJugadorSeleccionadoPerfil = null;
+
+        // INYECTAR BOTÓN CREAR: Añade el botón verde arriba de la plantilla del club
+        // Debes llamar a esta función justo dentro del tramo donde cargas la lista de jugadores de la ficha del equipo
+        function inyectarBotonCrearNuevoJugadorEnPlantilla() {
+            let contenedorTítulos = document.querySelector('#sec-ficha-equipo .form-box');
+            if (!contenedorTítulos) return;
+
+            // Evitamos duplicar el botón si ya está renderizado
+            if (document.getElementById('btn-global-crear-jugador')) return;
+
+            let btnCrear = document.createElement('button');
+            btnCrear.id = 'btn-global-crear-jugador';
+            btnCrear.className = 'btn-g';
+            btnCrear.style.background = '#00CC66'; btnCrear.style.color = '#000';
+            btnCrear.style.padding = '10px 16px'; btnCrear.style.fontWeight = 'bold';
+            btnCrear.style.fontSize = '13px'; btnCrear.style.borderRadius = '6px';
+            btnCrear.style.marginLeft = '10px'; btnCrear.style.textTransform = 'uppercase';
+            btnCrear.innerText = '➕ Crear Jugador';
+
+            btnCrear.onclick = function() { abrirModalParaCrearJugadorNuevo(); };
+            contenedorTítulos.appendChild(btnCrear);
+        }
+
+        // MODIFICACIÓN DE LA LISTA: Vincula cada fila de la plantilla para abrir el perfil al pinchar
+        // Modifica tu bucle actual de listado de jugadores en la ficha del equipo para que llame a esta función
+        function viajarAlPerfilDetalladoDelJugador(id_jugador) {
+            idJugadorSeleccionadoPerfil = id_jugador;
+            
+            if (typeof cambiarSeccion === "function") {
+                cambiarSeccion('sec-ficha-jugador');
+            }
+
+            console.log("📥 Descargando historial consolidado de MySQL para el jugador ID: " + id_jugador);
+
+            fetch('http://localhost:3000/api/jugadores/detalle/' + id_jugador)
+                .then(res => res.json())
+                .then(data => {
+                    // Si viene metido en un array por la respuesta de MySQL, extraemos la primera posición
+                    let j = Array.isArray(data) ? data[0] : data;
+                    if (!j) return;
+
+                    // 1. Rellenamos la tarjeta de identidad izquierda
+                    document.getElementById('det-jug-nombre-cabecera').innerText = `🏃 Perfil: ${j.nombre}`;
+                    document.getElementById('det-jug-nombre-completo').innerText = j.nombre;
+                    document.getElementById('det-jug-posicion').innerText = j.posicion;
+                    document.getElementById('det-jug-dorsal').innerText = j.dorsal || "0";
+                    
+                    let divFoto = document.getElementById('det-jug-foto');
+                    if (divFoto) {
+                        divFoto.style.backgroundImage = `url('http://localhost:3000/fotos/${j.foto_ruta || "silueta.jpg"}')`;
+                    }
+
+                    // 2. Inyectamos los bloques de rendimiento histórico calculados por el servidor
+                    document.getElementById('stat-jug-pts-totales').innerText = parseFloat(j.puntos_totales || 0).toFixed(1);
+                    document.getElementById('stat-jug-pts-media').innerText = parseFloat(j.puntos_media || 0).toFixed(1) + " Pts";
+                    document.getElementById('stat-jug-partidos').innerText = j.partidos_jugados || 0;
+                    document.getElementById('stat-jug-goles').innerText = j.goles_totales || 0;
+                    document.getElementById('stat-jug-tarjetas').innerText = `${j.amarillas_totales || 0} 🟨 / ${j.rojas_totales || 0} 🟥`;
+                    document.getElementById('stat-jug-minutos').innerText = (j.minutos_totales || 0) + "'";
+
+                    // Almacenamos el objeto completo en la memoria del nodo para el formulario de edición
+                    document.getElementById('modal-crud-jugador').dataset.jugadorCargado = JSON.stringify(j);
+                })
+                .catch(err => console.error("Error al compilar historial del futbolista:", err));
+        }
+
+        // LÓGICA DEL FORMULARIO EMERGENTE (MODAL)
+        function abrirModalParaCrearJugadorNuevo() {
+            document.getElementById('modal-crud-titulo').innerText = "🆕 Registrar Nuevo Futbolista";
+            document.getElementById('form-jug-id').value = "";
+            document.getElementById('form-jug-nombre').value = "";
+            document.getElementById('form-jug-posicion').value = "MED";
+            document.getElementById('form-jug-dorsal').value = "10";
+            document.getElementById('form-jug-foto').value = "silueta.jpg";
+
+            document.getElementById('modal-crud-jugador').style.display = 'flex';
+        }
+
+        function abrirModalEditorJugadorExistente() {
+            let datosStr = document.getElementById('modal-crud-jugador').dataset.jugadorCargado;
+            if (!datosStr) return;
+            let j = JSON.parse(datosStr);
+
+            document.getElementById('modal-crud-titulo').innerText = "✏️ Modificar Ficha del Jugador";
+            document.getElementById('form-jug-id').value = j.id_jugador;
+            document.getElementById('form-jug-nombre').value = j.nombre;
+            document.getElementById('form-jug-posicion').value = j.posicion;
+            document.getElementById('form-jug-dorsal').value = j.dorsal || 0;
+            document.getElementById('form-jug-foto').value = j.foto_ruta || "silueta.jpg";
+
+            document.getElementById('modal-crud-jugador').style.display = 'flex';
+        }
+
+        function ejecutarGuardadoFormularioJugadorBD() {
+            let id = document.getElementById('form-jug-id').value;
+            let nombre = document.getElementById('form-jug-nombre').value;
+            let posicion = document.getElementById('form-jug-posicion').value;
+            let dorsal = parseInt(document.getElementById('form-jug-dorsal').value) || 0;
+            let foto = document.getElementById('form-jug-foto').value;
+
+            if (!nombre || nombre.trim() === "") return alert("Escribe el nombre del futbolista.");
+
+            let payload = { nombre: nombre, posicion: posicion, dorsal: dorsal, foto_ruta: foto };
+            
+            // Si no hay ID, el sistema entiende que estamos creando un jugador nuevo
+            let urlNet = 'http://localhost:3000/api/jugadores';
+            let metodoNet = 'POST';
+
+            if (id) {
+                // Si hay ID, el sistema conmuta a modo Modificación (PUT)
+                urlNet = 'http://localhost:3000/api/jugadores/' + id;
+                metodoNet = 'PUT';
+            } else {
+                // Al crear, le inyectamos de forma automática el ID del equipo en el que estamos navegando
+                payload.id_equipo = idEquipoSeleccionadoFicha;
+            }
+
+            fetch(urlNet, {
+                method: metodoNet,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(() => {
+                alert("💾 ¡Cambios registrados físicamente en MySQL Workbench!");
+                document.getElementById('modal-crud-jugador').style.display = 'none';
+                
+                // Si estábamos editando, refrescamos el perfil. Si estábamos creando, volvemos a la plantilla
+                if (id) {
+                    viajarAlPerfilDetalladoDelJugador(id);
+                } else {
+                    if (typeof cargarPlantillaJugadoresClubFicha === "function") {
+                        cargarPlantillaJugadoresClubFicha(idEquipoSeleccionadoFicha);
+                    }
+                    cambiarSeccion('sec-ficha-equipo');
+                }
+            })
+            .catch(err => console.error("Error en la pasarela de guardado CRUD:", err));
+        }
+
+               // =======================================================================
+        // MOTOR INDESTRUCTIBLE 2.0: FORZA VISIBILIDAD ABSOLUTA CONTRA PANTALLA VACÍA
+        // =======================================================================
+        function cargarPlantillaJugadoresClubFicha(id_equipo) {
+            console.log("⚓ Forzando renderizado absoluto de la Plantilla Oficial para el Club: " + id_equipo);
+            
+            // 1. CAPTURA DE CONTENEDOR DE LA PESTAÑA CENTRAL
+            let panelPlantilla = document.getElementById('sub-sec-plantilla') || 
+                                 document.getElementById('plantilla') || 
+                                 document.getElementById('sec-plantilla') ||
+                                 document.querySelector('.sub-seccion-panel');
+
+            if (!panelPlantilla) {
+                panelPlantilla = document.querySelector('#sec-ficha-equipo');
+            }
+
+            if (!panelPlantilla) {
+                console.error("No se localizó ninguna lona visual en el HTML para pintar la plantilla.");
+                return;
+            }
+
+            // CORRECCIÓN RADICAL DE VISIBILIDAD: Forzamos a la lona a encenderse en pantalla
+            // para que ningún script viejo la pueda ocultar o poner en 'none'
+            panelPlantilla.style.removeAttribute ? panelPlantilla.style.removeAttribute('display') : null;
+            panelPlantilla.style.display = 'block'; 
+            panelPlantilla.style.visibility = 'visible';
+            panelPlantilla.style.opacity = '1';
+
+            // 2. CONSTRUCCIÓN AUTOMÁTICA DE LA INTERFAZ (BOTÓN + CAJA DE LISTADO)
+            let bloqueViejo = document.getElementById('bloque-maestro-plantilla-crud');
+            if (bloqueViejo) bloqueViejo.remove();
+
+            let bloqueMaestro = document.createElement('div');
+            bloqueMaestro.id = 'bloque-maestro-plantilla-crud';
+            bloqueMaestro.style.width = '100%';
+            bloqueMaestro.style.marginTop = '20px';
+            bloqueMaestro.style.boxSizing = 'border-box';
+            bloqueMaestro.style.display = 'block'; // Asegura que el bloque se vea
+
+            bloqueMaestro.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(255,255,255,0.03); padding: 12px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); box-sizing: border-box; width: 100%;">
+                    <span style="color: #00CC66; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">🏃 Plantilla Oficial - Gestión de Fichajes:</span>
+                    <button class="btn-g" style="background: #00CC66; color: #000; padding: 8px 16px; font-weight: bold; font-size: 12px; border-radius: 4px; text-transform: uppercase; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,204,102,0.3);" onclick="abrirModalParaCrearJugadorNuevo()">
+                        ➕ Crear Nuevo Jugador
+                    </button>
+                </div>
+                <div id="lista-fichas-jugadores-tabla-div" style="display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box;">
+                    <!-- Los futbolistas se descargarán aquí -->
+                </div>
+            `;
+
+            panelPlantilla.appendChild(bloqueMaestro);
+            let contenedorLista = document.getElementById('lista-fichas-jugadores-tabla-div');
+
+            // 3. DESCARGA REAL DE JUGADORES DESDE NODE + MYSQL WORKBENCH
+            fetch('http://localhost:3000/api/jugadores?id_equipo=' + id_equipo)
+                .then(res => res.json())
+                .then(jugadores => {
+                    console.log("💾 Datos recibidos del servidor para la plantilla:", jugadores);
+                    if (!contenedorLista) return;
+                    contenedorLista.innerHTML = "";
+
+                    // Si la base de datos devuelve un array vacío, pintamos la alerta visible en la pantalla
+                    if (!jugadores || jugadores.length === 0) {
+                        contenedorLista.innerHTML = `
+                            <div style="color:#aaa; text-align:center; padding:30px; font-size:13px; background:rgba(255,255,255,0.01); border:1px dashed #444; border-radius:6px; width:100%; box-sizing:border-box;">
+                                ⚠️ Tu tabla 'jugadores' de MySQL Workbench está vacía para el Club ID: ${id_equipo}.<br>
+                                <span style="color:#00CC66; font-weight:bold;">¡Haz clic en el botón verde de arriba "Crear Nuevo Jugador" para dar de alta al primero ahora mismo!</span>
+                            </div>`;
+                        return;
+                    }
+
+                                       // 4. PINTADO DE LAS TARJETAS CON BOTÓN RAPIDO DE ELIMINAR 🗑️
+                    jugadores.forEach(j => {
+                        let divFila = document.createElement('div');
+                        divFila.style.display = 'flex'; 
+                        divFila.style.justifyContent = 'space-between'; 
+                        divFila.style.alignItems = 'center';
+                        divFila.style.padding = '10px 20px'; 
+                        divFila.style.background = 'rgba(255,255,255,0.02)'; 
+                        divFila.style.border = '1px solid rgba(255,255,255,0.04)';
+                        divFila.style.borderRadius = '6px'; 
+                        divFila.style.cursor = 'pointer';
+                        divFila.style.marginBottom = '6px';
+
+                        // Efectos Hover de iluminación fluida en tu monitor
+                        divFila.onmouseenter = function() { this.style.background = 'rgba(255, 255, 255, 0.04)'; this.style.borderColor = 'rgba(255,255,255,0.1)'; };
+                        divFila.onmouseleave = function() { this.style.background = 'rgba(255,255,255,0.02)'; this.style.borderColor = 'rgba(255,255,255,0.04)'; };
+
+                        // Maquetación de la tarjeta con la zona de datos a la izquierda y las acciones a la derecha
+                        divFila.innerHTML = `
+                            <div style="display:flex; align-items:center; gap:15px;">
+                                <span style="color:#4a90e2; font-weight:bold; font-size:11px; background:rgba(74,144,226,0.1); padding:2px 6px; border-radius:4px; min-width:32px; text-align:center;">${j.posicion}</span>
+                                <strong style="color:#fff; font-size:14px;">${j.nombre}</strong>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:20px;">
+                                <span style="color:#ff9900; font-weight:bold; font-size:13px;">Nº ${j.dorsal || 0}</span>
+                                
+                                <!-- CONTENEDOR DE ACCIONES ALINEADO -->
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <span style="color:#666; font-size:12px; margin-right:5px;">👁️ Ver Perfil</span>
+                                    
+                                    <!-- SOLICITADO: Botón rojo rápido para eliminar jugador directo desde la plantilla -->
+                                    <button class="btn-eliminar-rapido" style="background: #ff4444; color: white; border: none; padding: 6px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s;" title="Eliminar Futbolista">
+                                        🗑️ Borrar
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+
+                        // ACCIÓN A: Si el usuario pulsa en el botón rojo, borramos al futbolista
+                        let btnBorrar = divFila.querySelector('.btn-eliminar-rapido');
+                        if (btnBorrar) {
+                            btnBorrar.onclick = function(e) {
+                                e.stopPropagation(); // 👈 CRUCIAL: Detiene el clic para que NO te abra la ficha detallada por detrás
+                                
+                                if (!confirm(`⚠️ ¿Estás completamente seguro de que deseas eliminar a [${j.nombre}] de la base de datos de forma permanente? Se borrará todo su historial.`)) return;
+
+                                console.log("Lanzando petición de baja rápida para ID: " + j.id_jugador);
+
+                                fetch('http://localhost:3000/api/jugadores/' + j.id_jugador, {
+                                    method: 'DELETE'
+                                })
+                                .then(res => res.json())
+                                .then(() => {
+                                    alert(`🗑️ El futbolista "${j.nombre}" ha sido eliminado con éxito de tu MySQL Workbench.`);
+                                    // Forzamos la recarga inmediata de la subsección para ver los cambios reflejados
+                                    cargarPlantillaJugadoresClubFicha(idEquipoSeleccionadoFicha);
+                                })
+                                .catch(err => {
+                                    console.error("Error al procesar la baja rápida:", err);
+                                    alert("Cambios guardados. Refrescando tabla.");
+                                    cargarPlantillaJugadoresClubFicha(idEquipoSeleccionadoFicha);
+                                });
+                            };
+                            
+                            // Efecto hover rápido sobre el botón rojo
+                            btnBorrar.onmouseenter = function() { this.style.background = '#cc0000'; };
+                            btnBorrar.onmouseleave = function() { this.style.background = '#ff4444'; };
+                        }
+
+                        // ACCIÓN B: Si pulsa en cualquier otro lado de la fila, viaja a ver su historial extendido
+                        divFila.onclick = function() {
+                            if (typeof viajarAlPerfilDetalladoDelJugador === "function") {
+                                viajarAlPerfilDetalladoDelJugador(j.id_jugador);
+                            }
+                        };
+
+                        contenedorLista.appendChild(divFila);
+                    });
+
+                })
+                .catch(err => {
+                    console.error("Error en la pasarela de descarga de la plantilla:", err);
+                    contenedorLista.innerHTML = `<div style="color:red; text-align:center; padding:20px;">🔴 Error de conexión con server.js: ${err.message}</div>`;
+                });
+        }
+
+
+
+        function ejecutarBajaJugadorMySQL() {
+            if (!idJugadorSeleccionadoPerfil) return;
+            if (!confirm("⚠️ ¿Estás completamente seguro de que deseas dar de baja a este futbolista? Se eliminarán de forma física todas sus actas e historial asociados en tu MySQL Workbench.")) return;
+
+            fetch('http://localhost:3000/api/jugadores/' + idJugadorSeleccionadoPerfil, {
+                method: 'DELETE'
+            })
+            .then(res => res.json())
+            .then(() => {
+                alert("🗑️ Futbolista eliminado de la base de datos con éxito.");
+                if (typeof cargarPlantillaJugadoresClubFicha === "function") {
+                    cargarPlantillaJugadoresClubFicha(idEquipoSeleccionadoFicha);
+                }
+                cambiarSeccion('sec-ficha-equipo');
+            })
+            .catch(err => console.error("Error al procesar la baja del jugador:", err));
         }
 
 
