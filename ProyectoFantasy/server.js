@@ -991,6 +991,138 @@ app.delete('/api/jugadores/:id', (req, res) => {
     });
 });
 
+// =======================================================================
+// PASARELA DEFINITIVA CORREGIDA PARA EL ESQUEMA FANTASY_LIGA (SÍN FALLOS 500)
+// =======================================================================
+app.get('/api/partidos', (req, res) => {
+    const idEquipoFiltro = req.query.id_equipo;
+    console.log("📅 Extrayendo registros oficiales de fantasy_liga.partidos para el Club ID: " + idEquipoFiltro);
+
+    let queryHistorialDefinitiva = "";
+    let parametrosSQL = [];
+
+    // SI EL FRONTEND ENVÍA EL FILTRO, BUSCAMOS CON LAS COLUMNAS EXACTAS DE TU CAPTURA
+    if (idEquipoFiltro) {
+        queryHistorialDefinitiva = `
+            SELECT 
+                p.id_partido,
+                p.id_jornada AS jornada,
+                p.id_local,
+                p.id_visitante,
+                p.goles_local,
+                p.goles_visitante,
+                COALESCE(eq_l.nombre, 'Club Local') AS equipo_local,
+                COALESCE(eq_v.nombre, 'Club Visitante') AS equipo_visitante
+            FROM fantasy_liga.partidos p
+            LEFT JOIN fantasy_liga.equipos eq_l ON p.id_local = eq_l.id_equipo
+            LEFT JOIN fantasy_liga.equipos eq_v ON p.id_visitante = eq_v.id_equipo
+            WHERE p.id_local = ? OR p.id_visitante = ?
+            ORDER BY p.id_jornada ASC, p.id_partido ASC`;
+        parametrosSQL = [idEquipoFiltro, idEquipoFiltro];
+    } else {
+        // Calendario masivo general del carrusel de actas
+        queryHistorialDefinitiva = `
+            SELECT 
+                p.id_partido,
+                p.id_jornada AS jornada,
+                p.id_local,
+                p.id_visitante,
+                p.goles_local,
+                p.goles_visitante,
+                COALESCE(eq_l.nombre, 'Club Local') AS equipo_local,
+                COALESCE(eq_v.nombre, 'Club Visitante') AS equipo_visitante
+            FROM fantasy_liga.partidos p
+            LEFT JOIN fantasy_liga.equipos eq_l ON p.id_local = eq_l.id_equipo
+            LEFT JOIN fantasy_liga.equipos eq_v ON p.id_visitante = eq_v.id_equipo
+            ORDER BY p.id_jornada ASC, p.id_partido ASC`;
+    }
+
+    db.query(queryHistorialDefinitiva, parametrosSQL, (err, rows) => {
+        if (err) {
+            console.error("🔴 Error crítico de sintaxis en el esquema fantasy_liga:", err);
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows || []);
+    });
+});
+
+// =======================================================================
+// ENPOINT CLASIFICACIÓN INTERACTIVA: CALCULO DE TRES BANDAS (WORKBENCH)
+// =======================================================================
+app.get('/api/clasificacion-completa', (req, res) => {
+    console.log("📊 Procesando tabla de clasificación con desglose En Casa/Fuera...");
+
+    // 1. Descargamos todos los equipos registrados
+    db.query("SELECT * FROM fantasy_liga.equipos", (errEq, equipos) => {
+        if (errEq) return res.status(500).json({ error: errEq.message });
+
+        // 2. Descargamos todos los partidos que ya tengan goles anotados
+        db.query("SELECT * FROM fantasy_liga.partidos WHERE goles_local IS NOT NULL AND goles_visitante IS NOT NULL", (errPart, partidos) => {
+            if (errPart) return res.status(500).json({ error: errPart.message });
+
+            // Estructuramos el almacén estadístico para cada club según tu imagen de ejemplo
+            let tabla = equipos.map(e => ({
+                id_equipo: e.id_equipo,
+                nombre: e.nombre,
+                escudo: e.escudo_ruta || "generico.png",
+                // TOTALES
+                pt: 0, pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0,
+                // EN CASA
+                c_pt: 0, c_pj: 0, c_pg: 0, c_pe: 0, c_pp: 0, c_gf: 0, c_gc: 0,
+                // FUERA
+                f_pt: 0, f_pj: 0, f_pg: 0, f_pe: 0, f_pp: 0, f_gf: 0, f_gc: 0
+            }));
+
+            // 3. PROCESAMIENTO MATEMÁTICO DE ACTAS DE ENCUENTROS
+            partidos.forEach(p => {
+                let loc = tabla.find(x => x.id_equipo == p.id_local);
+                let vis = tabla.find(x => x.id_equipo == p.id_visitante);
+
+                if (loc && vis) {
+                    let gl = parseInt(p.goles_local);
+                    let gv = parseInt(p.goles_visitante);
+
+                    // Acumulamos Goles Totales
+                    loc.gf += gl; loc.gc += gv;
+                    vis.gf += gv; vis.gc += gl;
+
+                    // Acumulamos Goles Desglosados
+                    loc.c_gf += gl; loc.c_gc += gv;
+                    vis.f_gf += gv; vis.f_gc += gl;
+
+                    // Sumamos Partidos Jugados
+                    loc.pj++; vis.pj++;
+                    loc.c_pj++; vis.f_pj++;
+
+                    // Evaluamos el resultado del choque
+                    if (gl > gv) {
+                        // Gana Local
+                        loc.pt += 3; loc.pg++; loc.c_pt += 3; loc.c_pg++;
+                        vis.pp++; vis.f_pp++;
+                    } else if (gl < gv) {
+                        // Gana Visitante
+                        vis.pt += 3; vis.pg++; vis.f_pt += 3; vis.f_pg++;
+                        loc.pp++; loc.c_pp++;
+                    } else {
+                        // Empate
+                        loc.pt += 1; loc.pe++; loc.c_pt += 1; loc.c_c_pe || loc.c_pe++;
+                        vis.pt += 1; vis.pe++; vis.f_pt += 1; vis.f_pe++;
+                    }
+                }
+            });
+
+            // 4. ORDENACIÓN OFICIAL (Por puntos, y en caso de empate por diferencia de goles general)
+            tabla.sort((a, b) => {
+                if (b.pt !== a.pt) return b.pt - a.pt;
+                return (b.gf - b.gc) - (a.gf - a.gc);
+            });
+
+            res.json(tabla);
+        });
+    });
+});
+
+
 
 app.listen(3000, () => {
     console.log('Servidor corriendo en http://localhost:3000');

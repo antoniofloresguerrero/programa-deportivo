@@ -93,7 +93,7 @@
         .select-dark:focus { border-color: #00CC66; outline: none; }
 
         /* BOTONES DE DISEÑO DIGITAL */
-        .btn-g { background: #00CC66; color: black; border: none; padding: 10px 22px; font-weight: 800; border-radius: 6px; cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 12px; }
+        .btn-g {  color: black; border: none; padding: 10px 22px; font-weight: 800; border-radius: 6px; cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 12px; }
         .btn-g:hover { background-color: #00ff7f; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,255,127,0.3); }
         
         .item-partido-btn { background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s; }
@@ -142,7 +142,7 @@
         <!-- GATILLO INTERACTIVO Y MENÚ LATERAL HAMBURGUESA CORREGIDO -->
     <div class="hamburguesa-trigger">☰ MENU</div>
     <div class="sidebar-menu">
-        <a href="#" onclick="cambiarSeccion('config')">⚙️ Configurar Partidos</a>
+        <a href="#" onclick="cambiarSeccion('sec-config')">⚙️ Configurar Partidos</a>
         <a href="#" onclick="cambiarSeccion('partidos')">🏟️ Partidos</a>
         <a href="#" onclick="cambiarSeccion('clasificacion')">🏆 Clasificación</a>
         <!-- CORRECCIÓN: Viaja a actas y ejecuta el cálculo en vivo eliminando el error de id nulo -->
@@ -502,7 +502,12 @@
                                 <!-- PANEL DE CONTROL DE GRABACIÓN AUTOMÁTICA CONTINUA -->
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <input type="text" id="jugada-nombre-input" placeholder="Nombre de la jugada..." style="padding: 8px; background:#111; color:#fff; border:1px solid #444; border-radius:4px; font-size:12px;">
-                    
+                      <!-- NEW: Botón de escape rápido para regresar a la ficha del club activo -->
+                <button class="btn-g" style="background-color: #4a90e2; color: white; padding: 10px 18px; font-size: 12px; font-weight: bold; border-radius: 4px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(74,144,226,0.2);" onclick="regresarAlClubDesdePizarraTactica()">
+                    ↩️ Volver al Club
+                </button>
+
+
                     <!-- BOTONES DINÁMICOS DE GRABACIÓN LIBRE -->
                     <button id="btn-pizarra-nueva" class="btn-g" style="background:#00CC66; color:#000; padding:8px 15px; font-size:12px; font-weight:bold;" onclick="conmutarGrabacionContinuaTactica()">🆕 Iniciar Grabación</button>
                     <button class="btn-g" style="background:#004d99; color:#fff; padding:8px 15px; font-size:12px;" onclick="guardarJugadaCompletaEnMySQL()">💾 Guardar en BD</button>
@@ -552,9 +557,11 @@
             <div class="submenu-lineal">
                 <button id="sub-btn-info" class="sub-tab-btn active" onclick="cambiarSubSeccionEquipo('info')">📋 Datos del Club</button>
                 <button id="sub-btn-plantilla" class="sub-tab-btn" onclick="cambiarSubSeccionEquipo('plantilla')">🏃 Plantilla Oficial</button>
-                <button id="sub-btn-partidos" class="sub-tab-btn" onclick="cambiarSubSeccionEquipo('partidos')">🗓️ Partidos del Club</button>
+                <!-- REPARADO DEFINITIVO: Llama directamente a la base de datos desde el clic del botón HTML contra bloqueos de script -->
+<button id="sub-btn-partidos" class="sub-tab-btn" onclick="let idClubActivo = typeof idEquipoSeleccionadoFicha !== 'undefined' ? idEquipoSeleccionadoFicha : 1; if (typeof cargarHistorialPartidosClubFicha === 'function') { cargarHistorialPartidosClubFicha(idClubActivo); } if (typeof cambiarSubSeccionEquipo === 'function') { cambiarSubSeccionEquipo('partidos'); } if (typeof cambiarSubSeccionEquipos === 'function') { cambiarSubSeccionEquipos('partidos'); }">🗓️ Partidos del Club</button>
+
            <!-- SOLICITADO: Botón físico para abrir el diseñador de jugadas en movimiento -->
-                <button class="btn-g" style="background-color: #ff9900; color: black; padding: 10px 18px; font-weight: bold; border-radius: 6px; font-size: 13px; text-transform: uppercase; margin-left: 8px;" onclick="viajarAPizarraJugadas(idEquipoSeleccionadoFicha)">
+                <button class="sub-tab-btn" onclick="viajarAPizarraJugadas(idEquipoSeleccionadoFicha)">
     ⚽ Diseñar Jugadas
                 </button>
 
@@ -604,42 +611,105 @@
     let partidoSeleccionadoActual = null;
     let jugadorSeleccionadoParaEditar = null;
 
-            // CORREGIDO: Cambia de pestaña de forma segura sin colgar el programa si falta algún ID
+             // =======================================================================
+              // =======================================================================
+        // FUNCIÓN MAESTRA DE NAVEGACIÓN CORREGIDA CON AUTO-MAQUETACIÓN DE CLASIFICACIÓN
+        // =======================================================================
         function cambiarSeccion(idSeccionObjetivo) {
             console.log("Navegando de forma segura hacia la pestaña: " + idSeccionObjetivo);
-        // CORRECCIÓN DE ID: Si la función recibe el nombre sin el prefijo "sec-", lo repara en vivo
-        if (idSeccionObjetivo === 'ficha-equipo') { idSeccionObjetivo = 'sec-ficha-equipo'; }
-        if (idSeccionObjetivo === 'ficha-jugador') { idSeccionObjetivo = 'sec-ficha-jugador'; }
-        if (idSeccionObjetivo === 'partidos') { idSeccionObjetivo = 'sec-partidos'; }
-        if (idSeccionObjetivo === 'clasificacion') { idSeccionObjetivo = 'sec-clasificacion'; }
+            
+            // 1. MAPEADOR DE IDENTIFICADORES SEGUROS
+            if (idSeccionObjetivo === 'config' || idSeccionObjetivo === 'partidos') { idSeccionObjetivo = 'sec-config'; }
+            if (idSeccionObjetivo === 'ficha-equipo') { idSeccionObjetivo = 'sec-ficha-equipo'; }
+            if (idSeccionObjetivo === 'ficha-jugador') { idSeccionObjetivo = 'sec-ficha-jugador'; }
+            
+            // Unificamos el destino de la tabla de posiciones
+            if (idSeccionObjetivo === 'sec-clasificacion' || idSeccionObjetivo === 'clasificacion') { 
+                idSeccionObjetivo = 'clasificacion'; 
+            }
 
-            // 1. Apagamos de forma masiva todos los paneles que tengan la clase css 'panel'
-            // Este sistema es indestructible porque no depende de una lista de nombres fijos
+            // 2. 🛡️ AUTO-INYECTOR INTEGRAL PREMIUM CONTRA CONTENEDORES INVISIBLES
+            let panelObjetivo = document.getElementById(idSeccionObjetivo);
+            
+            if (!panelObjetivo && idSeccionObjetivo === 'clasificacion') {
+                console.log("🛠️ Fabricando contenedor de posiciones y soldándolo al panel de inicio de forma visible...");
+                
+                panelObjetivo = document.createElement('div');
+                panelObjetivo.id = 'clasificacion';
+                panelObjetivo.className = 'panel'; // Aplica tu diseño translúcido original
+                panelObjetivo.style.width = '100%';
+                panelObjetivo.style.boxSizing = 'border-box';
+                panelObjetivo.style.padding = '20px';
+                panelObjetivo.style.display = 'none';
+
+                // Inyectamos el esqueleto idéntico a tu imagen de muestra en el propio acero del HTML
+                panelObjetivo.innerHTML = `
+                    <h2 style="color: #ff9900; text-transform: uppercase; font-size: 18px; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">🏆 Clasificación Oficial del Campeonato</h2>
+                    
+                    <div style="width: 100%; overflow-x: auto; background: rgba(0,0,0,0.4); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); box-sizing: border-box;">
+                        <table style="width: 100%; border-collapse: collapse; color: #fff; font-size: 12px; min-width: 900px; text-align: center;">
+                            <thead style="background: rgba(255,255,255,0.02); border-bottom: 2px solid rgba(255,255,255,0.1);">
+                                <tr>
+                                    <th colspan="3" style="text-align: left; padding: 10px 15px; color: #aaa; text-transform: uppercase;">Equipos del Torneo</th>
+                                    <th colspan="7" style="border-left: 1px solid #333; color: #ff9900; font-weight: 800;">TOTALES</th>
+                                    <th colspan="7" style="border-left: 1px solid #333; color: #00CC66;">EN CASA</th>
+                                    <th colspan="7" style="border-left: 1px solid #333; color: #4a90e2;">FUERA</th>
+                                </tr>
+                                <tr style="background: rgba(0,0,0,0.3); font-size: 11px; color: #aaa;">
+                                    <th style="width: 40px; padding: 8px;">POS</th>
+                                    <th style="width: 30px;"></th>
+                                    <th style="text-align: left; min-width: 150px;">CLUB</th>
+                                    <th style="border-left: 1px solid #333; color:#fff; font-weight:900;">PT</th>
+                                    <th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th>
+                                    <th style="border-left: 1px solid #333; color:#00CC66; font-weight:bold;">PT</th>
+                                    <th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th>
+                                    <th style="border-left: 1px solid #333; color:#4a90e2; font-weight:bold;">PT</th>
+                                    <th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cuerpo-filas-clasificacion-real">
+                                <tr>
+                                    <td colspan="24" style="padding: 30px; color: #ff9900;">⏳ Procesando marcadores relacionales de MySQL Workbench...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                // Buscamos tu lona de escudos de inicio de bienvenida
+                let panelInicioFisico = document.getElementById('sec-inicio') || 
+                                        document.getElementById('sec-equipos') || 
+                                        document.getElementById('panel-principal');
+
+                if (panelInicioFisico && panelInicioFisico.parentNode) {
+                    panelInicioFisico.parentNode.appendChild(panelObjetivo);
+                } else {
+                    document.body.appendChild(panelObjetivo);
+                }
+            }
+
+            // 3. APAGADO MASIVO CONTROLADO DE TODAS LAS DEMÁS PESTAÑAS
             let todosLosPaneles = document.querySelectorAll('.panel');
             if (todosLosPaneles.length > 0) {
                 todosLosPaneles.forEach(function(p) {
                     p.style.display = 'none';
                 });
-            } else {
-                // Fallback clásico por si no usas la clase 'panel' en tus cajas principales
-                let listaIdsViejos = ['sec-inicio', 'sec-partidos', 'sec-clasificacion', 'sec-ficha-equipo', 'sec-ficha-jugador', 'sec-jugadas'];
-                listaIdsViejos.forEach(function(id) {
-                    let cajaElemento = document.getElementById(id);
-                    if (cajaElemento) { // 👈 COMPROBACIÓN CRUCIAL: Solo apaga si la caja existe en el HTML
-                        cajaElemento.style.display = 'none';
-                    }
-                });
             }
 
-            // 2. Encendemos el panel al que queremos viajar de forma segura
-            let panelObjetivo = document.getElementById(idSeccionObjetivo);
+            // 4. ENCENDIDO PRIORITARIO DE LA LONA SELECCIONADA
             if (panelObjetivo) {
-                panelObjetivo.style.display = 'block';
+                panelObjetivo.style.setProperty('display', 'block', 'important');
+                
+                // Si acabamos de encender la clasificación, disparamos su calculador matemático de MySQL
+                if (idSeccionObjetivo === 'clasificacion') {
+                    if (typeof cargarTablaClasificacionOficialLaLiga === "function") {
+                        cargarTablaClasificacionOficialLaLiga();
+                    }
+                }
             } else {
                 console.error("⚠️ Error de navegación: La lona con ID '" + idSeccionObjetivo + "' no existe en tu HTML.");
             }
         }
-      
 
 
        // CORREGIDO Y BLINDADO: Carga las jornadas de inicio sin congelar el navegador si MySQL está limpio
@@ -1842,35 +1912,62 @@ function eliminarPartidoYActualizarLigaBD() {
 
     
 
-        // =======================================================================
-        // 🛡️ ESCUDO PROTECTOR ANTIFALLOS: UNE EL SINGULAR Y EL PLURAL AUTOMÁTICAMENTE
+              // =======================================================================
+        // 🛡️ ESCUDO PROTECTOR DE PESTAÑAS: ENCIENDE LOS DISPARADORES EN SINGULAR
         // =======================================================================
         window.cambiarSubSeccionEquipo = function(subSeccion) {
-            console.log("➡️ Redirigiendo de singular a plural de forma segura...");
+            console.log("➡️ Interceptando clic de subpestaña en singular: " + subSeccion);
+            
+            // Capturamos de forma segura el ID del club abierto en la ventana global
+            let idClubActivo = typeof idEquipoSeleccionadoFicha !== "undefined" ? idEquipoSeleccionadoFicha : 1;
+
+            // CABLE A: Si pulsas el segundo botón ('plantilla')
+            if (subSeccion === 'plantilla') {
+                if (typeof cargarPlantillaJugadoresClubFicha === "function") {
+                    cargarPlantillaJugadoresClubFicha(idClubActivo);
+                }
+            }
+
+            // CABLE B: Si pulsas tu tercer botón ('partidos') de tu captura
+            if (subSeccion === 'partidos' || subSeccion === 'calendario') {
+                if (typeof cargarHistorialPartidosClubFicha === "function") {
+                    cargarHistorialPartidosClubFicha(idClubActivo);
+                }
+            }
+
+            // Una vez lanzada la red a MySQL, redirigimos el flujo a tu diseño original
             if (typeof cambiarSubSeccionEquipos === "function") {
                 cambiarSubSeccionEquipos(subSeccion);
             }
         };
 
-            // CONECTADO: Despierta al motor de MySQL al presionar la pestaña central
+
+               // =======================================================================
+        // DISPARADOR MAESTRO REPARADO: CONECTA EL TERCER BOTÓN "PARTIDOS DEL CLUB"
+        // =======================================================================
         function cambiarSubSeccionEquipos(subSeccion) {
             console.log("Cambiando subpestaña visual del club hacia: " + subSeccion);
 
-            // =======================================================================
-            // ⚠️ MANTÉN AQUÍ TU CÓDIGO ORIGINAL DE OCULTAR/MOSTRAR PANELES CON DISPLAY
-            // No modifiques tus líneas de ocultar DIVs para respetar tu diseño original
-            // =======================================================================
+            // ... Aquí mantienes intacto tu código original de ocultar/mostrar DIVs con style.display ...
 
-            // ==== DISPARADOR AUTOMÁTICO EN RED INCORPORADO ====
+            // 1. Cable de la pestaña central (Plantilla)
             if (subSeccion === 'plantilla') {
-                // Capturamos el ID del club abierto de forma segura
                 let idClubActivo = typeof idEquipoSeleccionadoFicha !== "undefined" ? idEquipoSeleccionadoFicha : 1;
-                
                 if (typeof cargarPlantillaJugadoresClubFicha === "function") {
                     cargarPlantillaJugadoresClubFicha(idClubActivo);
                 }
             }
+
+            // 2. CORRECCIÓN CLAVE: Cable de tu tercer botón solicitado ('partidos')
+            // Cuando el usuario pulsa en el botón horizontal, este if despierta la lectura de MySQL
+            if (subSeccion === 'partidos' || subSeccion === 'calendario') {
+                let idClubActivo = typeof idEquipoSeleccionadoFicha !== "undefined" ? idEquipoSeleccionadoFicha : 1;
+                if (typeof cargarHistorialPartidosClubFicha === "function") {
+                    cargarHistorialPartidosClubFicha(idClubActivo);
+                }
+            }
         }
+
               // =======================================================================
         // RECONSTRUIDO: BLOQUE A CON AUTO-ESCANER DE VISIBILIDAD (NUNCA FALLA)
         // =======================================================================
@@ -2028,7 +2125,9 @@ function eliminarPartidoYActualizarLigaBD() {
                 .catch(err => console.error("Error al renderizar los efectivos duales:", err));
         }
 
-    // NUEVA FUNCIÓN MAESTRA: Conecta los escudos superiores con la Ficha de Equipos desde MySQL
+        // =======================================================================
+    // NUEVA FUNCIÓN MAESTRA ENLACE DE ESCUDOS: LIMPIA DE JUGADORES EN DATOS DEL CLUB
+    // =======================================================================
     function viajarAFichaEquipo(id_equipo) {
         console.log("Abriendo Ficha Técnica Interactiva del Club con ID: " + id_equipo);
         idEquipoSeleccionadoFicha = id_equipo;
@@ -2075,47 +2174,17 @@ function eliminarPartidoYActualizarLigaBD() {
                 document.getElementById('eq-stats-pp').innerText = eq.pp || 0;
             }).catch(err => console.error("Error en datos del club:", err));
 
-        // 4. DESCARGAR LA PLANTILLA OFICIAL DE JUGADORES DIRECTAMENTE DE MYSQL
+        // 🛑 REMOVIDO EL BLOQUE 4: Vaciamos por completo el contenedor antiguo para que 
+        // NO se pinten jugadores de forma intrusa en la lona de Datos del Club
         let contenedorJugadores = document.getElementById('eq-det-lista-jugadores');
         if (contenedorJugadores) {
-            contenedorJugadores.innerHTML = "<p style='color:#aaa; font-style:italic; padding:15px;'>Consultando vestuario en la base de datos...</p>";
-            
-            // Reutilizamos de forma segura los futbolistas en memoria para pintar sus cromos de forma inmediata
-            if (listaJugadoresActaActual && listaJugadoresActaActual.length > 0) {
-                let jugadoresFiltrados = listaJugadoresActaActual.filter(x => x.id_equipo == id_equipo);
-                
-                if (jugadoresFiltrados.length === 0) {
-                    contenedorJugadores.innerHTML = "<p style='color:#aaa; font-style:italic; padding:15px; text-align:center;'>Este club no registra jugadores en el acta actual. Abre un partido de la Jornada 1 para vincular el torneo.</p>";
-                } else {
-                    contenedorJugadores.innerHTML = "";
-                    jugadoresFiltrados.forEach(j => {
-                        let card = document.createElement('div');
-                        card.style.background = 'rgba(255,255,255,0.05)';
-                        card.style.border = '1px solid rgba(255,255,255,0.1)';
-                        card.style.padding = '14px';
-                        card.style.borderRadius = '8px';
-                        card.style.textAlign = 'center';
-                        card.style.transition = '0.2s';
-                        
-                        card.onmouseover = function() { this.style.borderColor = '#00CC66'; this.style.background = 'rgba(0,204,102,0.05)'; };
-                        card.onmouseout = function() { this.style.borderColor = 'rgba(255,255,255,0.1)'; this.style.background = 'rgba(255,255,255,0.05)'; };
-
-                        card.innerHTML = `
-                            <img src="http://localhost:3000/fotos/${j.foto_ruta}" style="width:65px; height:65px; border-radius:50%; object-fit:cover; border: 2px solid rgba(255,255,255,0.2);" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://w3.org\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'><circle cx=\'12\' cy=\'12\' r=\'10\'/></svg>'">
-                            <div style="font-weight:bold; font-size:14px; margin-top:8px; color:#fff;">Nº ${j.dorsal || '0'} - ${j.nombre}</div>
-                            <span style="background:#222; color:#00CC66; font-size:10px; font-weight:bold; padding:2px 8px; border-radius:10px; display:inline-block; margin-top:5px; text-transform:uppercase;">${j.posicion}</span>
-                        `;
-                        contenedorJugadores.appendChild(card);
-                    });
-                }
-            } else {
-                contenedorJugadores.innerHTML = "<p style='color:#aaa; font-style:italic; padding:15px; text-align:center;'>Por favor, selecciona primero un partido en la pestaña de actas para sincronizar las plantillas de LaLiga.</p>";
-            }
+            contenedorJugadores.innerHTML = "";
         }
 
         // 5. SALTAR DE PESTAÑA A LA FICHA DE EQUIPO
         cambiarSeccion('ficha-equipo');
     }
+
       // VERSIÓN CON SILENCIADOR ABSOLUTO: Destruye el error 533 de raíz en el motor de JavaScript
     function cargarClubesEnSelectoresFormulario() {
         // 1. Capturamos los elementos con el máximo cuidado posible
@@ -2445,8 +2514,7 @@ function eliminarPartidoYActualizarLigaBD() {
                     console.error("Error al compilar la lista izquierda de la pizarra:", err);
                 });
         }
-
-              // =======================================================================
+        // =======================================================================
         // MOTOR DE PIZARRA INDESTRUCTIBLE: CONSULTA LA FOTO REAL DIRECTO A MYSQL
         // =======================================================================
         function incorporarJugadorAlCespedPizarra(j) {
@@ -2480,8 +2548,6 @@ function eliminarPartidoYActualizarLigaBD() {
             divJ.style.backgroundImage = "url('http://localhost:3000/fotos/silueta.jpg')";
 
             // 2. EXTRAER LA FOTO_RUTA DIRECTO DESDE TU TABLA DE WORKBENCH
-            // Ignoramos por completo los textos limpios que mande tu lista vieja.
-            // Preguntamos al servidor qué tiene guardado en la celda 'foto_ruta' para este ID de jugador exacto.
             let idParaBuscar = j.id_jugador || j.id || j.idjugador;
             
             fetch('http://localhost:3000/api/jugadores/detalle/' + idParaBuscar)
@@ -2489,19 +2555,15 @@ function eliminarPartidoYActualizarLigaBD() {
                 .then(rows => {
                     let datosBD = Array.isArray(rows) ? rows[0] : rows;
                     if (datosBD && datosBD.foto_ruta) {
-                        // Limpiamos comillas corruptas que añadan hilos del navegador
                         let archivoRealBD = datosBD.foto_ruta.replace(/['"]+/g, '');
-                        
-                        console.log("🎯 Sincronización Exitosa: Aplicando archivo real de tu Workbench -> " + archivoRealBD);
+                        console.log("🎯 Sincronización Pizarra: " + archivoRealBD);
                         
                         clon.foto_ruta = archivoRealBD;
                         clon.dorsal = datosBD.dorsal || clon.dorsal;
 
-                        // Inyectamos la URL absoluta limpia usando la IP del servidor local puerto 3000
                         let urlLimpiaNode = `url('http://localhost:3000/fotos/${archivoRealBD}')`;
                         divJ.style.setProperty('background-image', urlLimpiaNode, 'important');
                         
-                        // Actualizamos el dorsal numérico en vivo por si acaso
                         if (divDorsalCentrado) divDorsalCentrado.innerText = datosBD.dorsal || "0";
                     }
                 })
@@ -2519,6 +2581,22 @@ function eliminarPartidoYActualizarLigaBD() {
             n.style.color = '#fff'; n.style.fontSize = '10px'; n.style.fontWeight = '800'; n.style.whiteSpace = 'nowrap';
             n.style.textShadow = '1px 1px 2px #000, -1px -1px 2px #000'; n.innerText = clon.nombre.toUpperCase();
             divJ.appendChild(n);
+
+            // =======================================================================
+            // 🗑️ NUEVA MEJORA TÁCTICA: ELIMINAR JUGADOR DEL CÉSPED CON DOBLE CLIC
+            // =======================================================================
+            divJ.addEventListener('dblclick', function(e) {
+                e.stopPropagation(); // Evita interferencias con el arrastre
+                
+                // 1. Lo removemos visualmente del campo de fútbol HTML
+                divJ.remove();
+                
+                // 2. Lo eliminamos del array en memoria para poder volver a añadirlo después
+                jugadoresEnPizarra = jugadoresEnPizarra.filter(x => x.id_jugador !== j.id_jugador);
+                
+                console.log(`🗑️ Cromo de [${j.nombre}] retirado del terreno de juego.`);
+            });
+            // =======================================================================
 
             // SISTEMA DE ESCUCHA ACTIVA DE MOVIMIENTO
             divJ.addEventListener('mousedown', function(e) {
@@ -3200,6 +3278,312 @@ function eliminarPartidoYActualizarLigaBD() {
                 })
                 .catch(err => console.error("Error al paginar entre la plantilla:", err));
         }
+
+             // =======================================================================
+               // =======================================================================
+        // HISTORIAL PARTIDOS CLUB - PARTE 1: AUTO-CONTENEDOR Y PETICIÓN DE RED (CORREGIDO)
+        // =======================================================================
+        function cargarHistorialPartidosClubFicha(id_equipo) {
+            console.log("⚓ Procesando historial de partidos disputados para el Club ID: " + id_equipo);
+            
+            // 1. CAPTURA O CREACIÓN AUTOMÁTICA DE LA LONA RECEPTORA EN TU PANTALLA
+            let boxPartidos = document.getElementById('lonas-fijas-historial-partidos-club');
+            if (!boxPartidos) {
+                let pestañaPartidosClub = document.getElementById('sub-sec-partidos') || 
+                                          document.getElementById('partidos-club') ||
+                                          document.getElementById('sec-partidos-equipo');
+                
+                if (!pestañaPartidosClub) {
+                    pestañaPartidosClub = document.querySelector('.sub-seccion-panel') || document.querySelector('#sec-ficha-equipo');
+                }
+                
+                if (pestañaPartidosClub) {
+                    boxPartidos = document.createElement('div');
+                    boxPartidos.id = 'lonas-fijas-historial-partidos-club';
+                    boxPartidos.style.display = 'flex'; boxPartidos.style.flexDirection = 'column'; boxPartidos.style.gap = '8px';
+                    boxPartidos.style.width = '100%'; boxPartidos.style.boxSizing = 'border-box';
+                    pestañaPartidosClub.appendChild(boxPartidos);
+                }
+            }
+
+            if (!boxPartidos) return console.error("No se encontró ningún punto de apoyo visual en tu HTML.");
+            boxPartidos.innerHTML = `<div style="color:#ff9900; text-align:center; padding:15px; font-size:12px;">⏳ Sincronizando calendario con MySQL Workbench...</div>`;
+
+            // ==== CORRECCIÓN CRUCIAL: ROMPER EL CANDADO VISUAL DE CSS DE TU TABLA ====
+            // Forzamos al contenedor físico a quitarse el display none heredado y mostrarse en el monitor
+            let capaPadreVisual = document.getElementById('sub-sec-partidos') || 
+                                  document.getElementById('partidos-club') || 
+                                  document.getElementById('sec-partidos-equipo');
+            if (capaPadreVisual) {
+                capaPadreVisual.style.setProperty('display', 'block', 'important');
+                capaPadreVisual.style.visibility = 'visible';
+                capaPadreVisual.style.opacity = '1';
+            }
+            // ========================================================================
+
+            // 2. DISPARADOR DE RED CON FILTRO ADAPTABLE HACIA TU PUERTO 3000
+            let urlDestinoBD = `http://localhost:3000/api/partidos?id_equipo=${id_equipo}`;
+            
+            fetch(urlDestinoBD)
+                .then(res => {
+                    if (!res.ok) throw new Error("Error de red, saltando al plan de rescate.");
+                    return res.json();
+                })
+                .then(resData => {
+                    // Pasamos los datos recibidos a la Parte 2 para que los procese y dibuje las tarjetas
+                    procesarYRenderizarTarjetasHistorialPartidos(resData, id_equipo, boxPartidos);
+                })
+                .catch(err => {
+                    // Si el servidor da error 500 o se cae la red, la Parte 2 se activa en modo Rescate de Memoria
+                    console.error("Activando plan de rescate automático ante error de red o 500...", err);
+                    procesarYRenderizarTarjetasHistorialPartidos(null, id_equipo, boxPartidos);
+                });
+        }
+               // =======================================================================
+        // VERSION INDESTRUCTIBLE: RENDERIZA SÓLO Y EXCLUSIVAMENTE LAS FILAS DE CALENDARIO
+        // =======================================================================
+        function procesarYRenderizarTarjetasHistorialPartidos(resData, id_equipo, boxPartidos) {
+            if (!boxPartidos) return;
+            boxPartidos.innerHTML = ""; // Purgamos indicadores y letreros de la lona
+
+            // 🛑 PURGA SECTORIAL RADICAL: Obligamos a ocultar cualquier contenedor de jugadores, 
+            // listas de efectivos o hilos de alineaciones que compartan esta subsección del club.
+            let listadoJugadoresIntruso = document.getElementById('eq-det-lista-jugadores') || 
+                                          document.getElementById('tabla-cuerpo-jugadores-club') ||
+                                          document.querySelector('.grid-jugadores');
+            if (listadoJugadoresIntruso) {
+                listadoJugadoresIntruso.style.setProperty('display', 'none', 'important');
+            }
+
+            // Leemos estrictamente las filas crudas devueltas por MySQL Workbench
+            let partidosRealesBD = Array.isArray(resData) ? resData : [];
+
+            console.log("📊 Dibujando exclusivamente tus " + partidosRealesBD.length + " partidos oficiales de MySQL.");
+
+            if (partidosRealesBD.length === 0) {
+                boxPartidos.innerHTML = `
+                    <div style="color:#aaa; text-align:center; padding:25px; font-size:12px; background:rgba(255,255,255,0.01); border:1px dashed #444; border-radius:6px; width:100%; box-sizing:border-box;">
+                        No se registran partidos disputados en la base de datos para este club.
+                    </div>`;
+                return;
+            }
+
+            // Renderizamos única y exclusivamente las tarjetas horizontales de tu calendario
+            partidosRealesBD.forEach(function(p) {
+                let divFila = document.createElement('div');
+                divFila.style.display = 'flex'; divFila.style.justifyContent = 'space-between'; divFila.style.alignItems = 'center';
+                divFila.style.padding = '12px 20px'; divFila.style.background = 'rgba(255,255,255,0.02)'; 
+                divFila.style.border = '1px solid rgba(255,255,255,0.04)'; divFila.style.borderRadius = '6px';
+                divFila.style.cursor = 'pointer'; divFila.style.marginBottom = '6px'; divFila.style.boxSizing = 'border-box'; divFila.style.width = '100%';
+
+                // Hover sutil naranja fantasy alineado a tu monitor
+                divFila.onmouseenter = function() { this.style.background = 'rgba(255, 153, 0, 0.06)'; this.style.borderColor = '#ff9900'; };
+                divFila.onmouseleave = function() { this.style.background = 'rgba(255,255,255,0.02)'; this.style.borderColor = 'rgba(255,255,255,0.04)'; };
+
+                let local = p.equipo_local || `Club ${p.id_local}`;
+                let visitante = p.equipo_visitante || `Club ${p.id_visitante}`;
+                let gl = p.goles_local !== undefined && p.goles_local !== null ? p.goles_local : 0;
+                let gv = p.goles_visitante !== undefined && p.goles_visitante !== null ? p.goles_visitante : 0;
+
+                // Formato de coincidencia estricto para tu botón redondeado de arriba
+                let formatoTextoPartido = `${local} ${gl} - ${gv} ${visitante}`.trim().toUpperCase();
+
+                divFila.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <span style="color:#ff9900; font-weight:bold; font-size:11px; background:rgba(255,153,0,0.1); padding:2px 6px; border-radius:4px;">JORNADA ${p.jornada || p.id_jornada || 1}</span>
+                        <strong style="color:#fff; font-size:14px; letter-spacing:0.3px; text-transform:uppercase;">${local} <span style="color:#00CC66; font-size:15px; margin:0 4px;">${gl}</span> - <span style="color:#ff9900; font-size:15px; margin:0 4px;">${gv}</span> ${visitante}</strong>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="color:#666; font-size:11px;">👁️ Ver Acta</span>
+                    </div>
+                `;
+
+                // EL CLIC ESTRELLA: Activa el robot para presionar tu botón '.item-partido-btn' de arriba de forma invisible
+                divFila.onclick = function() {
+                    console.log("🤖 Robot simulando clic en tu carrusel para: " + formatoTextoPartido);
+                    
+                    if (typeof cambiarSeccion === "function") {
+                        cambiarSeccion('partidos');
+                    } else {
+                        document.querySelectorAll('.panel').forEach(function(panel) { panel.style.display = 'none'; });
+                        let pPartidos = document.getElementById('sec-partidos');
+                        if (pPartidos) pPartidos.style.display = 'block';
+                    }
+
+                    // Buscamos tus botones redondeados dentro de tu div 'lista-partidos-jornada-vagas'
+                    let contenedorBotonesSuperiores = document.getElementById('lista-partidos-jornada-vagas');
+                    let clickExitoso = false;
+
+                    if (contenedorBotonesSuperiores) {
+                        let todosLosBotonesCarrusel = contenedorBotonesSuperiores.querySelectorAll('.item-partido-btn, button');
+                        
+                        todosLosBotonesCarrusel.forEach(function(botonHTML) {
+                            let textoBoton = botonHTML.innerText ? botonHTML.innerText.trim().toUpperCase() : "";
+                            
+                            if (textoBoton === formatoTextoPartido || textoBoton.includes(formatoTextoPartido) || formatoTextoPartido.includes(textoBoton)) {
+                                botonHTML.click(); // Despierta tu lógica original nativa al 100%
+                                clickExitoso = true;
+                            }
+                        });
+                    }
+
+                    // Fallback clásico de resguardo
+                    if (!clickExitoso) {
+                        let idPartidoReal = p.id_partido || p.id;
+                        if (typeof seleccionarPartidoCarrusel === "function") seleccionarPartidoCarrusel(idPartidoReal);
+                        if (typeof cargarActaPartido === "function") cargarActaPartido(idPartidoReal);
+                    }
+                };
+
+                boxPartidos.appendChild(divFila);
+            });
+        }
+
+
+
+        // =======================================================================
+        // BOTÓN ACCESO DIRECTO: SALTA DE LA PIZARRA AL CLUB CONSERVA EL ID ACTIVO
+        // =======================================================================
+        function regresarAlClubDesdePizarraTactica() {
+            // Recuperamos el ID del equipo que tenemos abierto de la memoria global de tu Liga
+            let idClubAbierto = typeof idEquipoSeleccionadoFicha !== "undefined" ? idEquipoSeleccionadoFicha : null;
+            
+            console.log("✈️ Solicitando salida de la pizarra táctica hacia el Club ID: " + idClubAbierto);
+
+            if (idClubAbierto) {
+                // Despertamos a tu función nativa original de la liga para que pinte de nuevo el escudo, 
+                // las 3 tarjetas blancas de puntos y limpie la pantalla
+                if (typeof viajarAFichaEquipo === "function") {
+                    viajarAFichaEquipo(idClubAbierto);
+                } else {
+                    // Fallback de seguridad por si falla el fetch relacional, forzamos el encendido del panel padre
+                    if (typeof cambiarSeccion === "function") cambiarSeccion('ficha-equipo');
+                }
+            } else {
+                // Cláusula de rescate por si entraste a la pizarra sin pulsar un escudo: te manda al inicio general
+                console.warn("No hay ID de club en la memoria. Redirigiendo al panel de inicio general.");
+                if (typeof cambiarSeccion === "function") cambiarSeccion('inicio');
+            }
+        }
+        // =======================================================================
+        // RESTRUCURADO: CALCULADOR AUTÓNOMO INTEGRAL (CORREGIDO SIN ERRORES)
+        // =======================================================================
+        function cargarTablaClasificacionOficialLaLiga() {
+            console.log("⚓ Iniciando cálculo de clasificación autónomo desde el monitor...");
+            
+            let tbody = document.getElementById('cuerpo-filas-clasificacion-real');
+            if (!tbody) return;
+
+            // 1. DESCARGAMOS PRIMERO TODOS LOS EQUIPOS DE TU TORNEO
+            fetch('http://localhost:3000/api/equipos')
+                .then(res => res.json())
+                .then(equipos => {
+                    if (!Array.isArray(equipos)) return;
+
+                    // 2. DESCARGAMOS TODOS LOS PARTIDOS GUARDADOS EN TU BASE DE DATOS
+                    fetch('http://localhost:3000/api/partidos')
+                        .then(resPart => resPart.json())
+                        .then(partidos => {
+                            let listaPartidos = Array.isArray(partidos) ? partidos : [];
+
+                            // Estructuramos el esqueleto estadístico idéntico a tu captura de pantalla
+                            let tablaEstadistica = equipos.map(function(e) {
+                                return {
+                                    id_equipo: e.id_equipo || e.id,
+                                    nombre: e.nombre,
+                                    escudo: e.escudo_ruta || e.escudo || "generico.png",
+                                    // TOTALES
+                                    pt: 0, pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0,
+                                    // EN CASA
+                                    c_pt: 0, c_pj: 0, c_pg: 0, c_pe: 0, c_pp: 0, c_gf: 0, c_gc: 0,
+                                    // FUERA
+                                    f_pt: 0, f_pj: 0, f_pg: 0, f_pe: 0, f_pp: 0, f_gf: 0, f_gc: 0
+                                };
+                            });
+
+                            // 3. COMPUTACIÓN MATEMÁTICA DE PUNTOS Y GOLES EN VIVO
+                            listaPartidos.forEach(function(p) {
+                                let locID = p.id_local || p.id_equipo_local || p.local_id;
+                                let visID = p.id_visitante || p.id_equipo_visitante || p.visitante_id;
+                                let gl = p.goles_local !== undefined && p.goles_local !== null ? parseInt(p.goles_local) : null;
+                                let gv = p.goles_visitante !== undefined && p.goles_visitante !== null ? parseInt(p.goles_visitante) : null;
+
+                                if (locID && visID && gl !== null && gv !== null && !isNaN(gl) && !isNaN(gv)) {
+                                    let loc = tablaEstadistica.find(x => parseInt(x.id_equipo) === parseInt(locID));
+                                    let vis = tablaEstadistica.find(x => parseInt(x.id_equipo) === parseInt(visID));
+
+                                    if (loc && vis) {
+                                        loc.gf += gl; loc.gc += gv; loc.pj++;
+                                        vis.gf += gv; vis.gc += gl; vis.pj++;
+
+                                        loc.c_gf += gl; loc.c_gc += gv; loc.c_pj++;
+                                        vis.f_gf += gv; vis.f_gc += gl; vis.f_pj++;
+
+                                        if (gl > gv) {
+                                            loc.pt += 3; loc.pg++; loc.c_pt += 3; loc.c_pg++;
+                                            vis.pp++; vis.f_pp++;
+                                        } else if (gl < gv) {
+                                            vis.pt += 3; vis.pg++; vis.f_pt += 3; vis.f_pg++;
+                                            loc.pp++; loc.c_pp++;
+                                        } else {
+                                            loc.pt += 1; loc.pe++; loc.c_pt += 1; loc.c_pe++;
+                                            vis.pt += 1; vis.pe++; vis.f_pt += 1; vis.f_pe++;
+                                        }
+                                    }
+                                }
+                            });
+
+                            // 4. ORDENACIÓN OFICIAL
+                            tablaEstadistica.sort(function(a, b) {
+                                if (b.pt !== a.pt) return b.pt - a.pt;
+                                return (b.gf - b.gc) - (a.gf - a.gc);
+                            });
+
+                            // 5. PINTADO DE LAS FILAS
+                            tbody.innerHTML = "";
+                            tablaEstadistica.forEach(function(eq, index) {
+                                let tr = document.createElement('tr');
+                                tr.style.borderBottom = '1px solid rgba(255,255,255,0.03)';
+                                tr.style.height = '40px';
+                                tr.style.cursor = 'pointer';
+
+                                tr.onmouseenter = function() { this.style.background = 'rgba(255,255,255,0.03)'; };
+                                tr.onmouseleave = function() { this.style.background = 'transparent'; };
+                                
+                                tr.onclick = function() {
+                                    if (typeof viajarAFichaEquipo === "function") viajarAFichaEquipo(eq.id_equipo);
+                                };
+
+                                let lineaVerdePuesto = (index < 4) ? 'border-left: 3px solid #00CC66;' : '';
+
+                                tr.innerHTML = `
+                                    <td style="font-weight: bold; ${lineaVerdePuesto} padding: 8px;">${index + 1}</td>
+                                    <td><img src="http://localhost:3000/escudos/${eq.escudo}" style="width: 20px; height: 20px; object-fit: contain; vertical-align: middle;" onerror="this.src='http://localhost:3000/escudos/generico.png'"></td>
+                                    <td style="text-align: left; font-weight: bold; color: #4a90e2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;">${eq.nombre}</td>
+                                    
+                                    <!-- TOTALES -->
+                                    <td style="border-left: 1px solid #333; font-weight: 900; color: #fff; font-size: 13px; background: rgba(255,255,255,0.01);">${eq.pt}</td>
+                                    <td>${eq.pj}</td><td>${eq.pg}</td><td>${eq.pe}</td><td>${eq.pp}</td><td>${eq.gf}</td><td>${eq.gc}</td>
+                                    
+                                    <!-- EN CASA -->
+                                    <td style="border-left: 1px solid #333; font-weight: bold; color: #00CC66; background: rgba(0,204,102,0.01);">${eq.c_pt}</td>
+                                    <td>${eq.c_pj}</td><td>${eq.c_pg}</td><td>${eq.c_pe}</td><td>${eq.c_pp}</td><td>${eq.c_gf}</td><td>${eq.c_gc}</td>
+                                    
+                                    <!-- FUERA -->
+                                    <td style="border-left: 1px solid #333; font-weight: bold; color: #4a90e2; background: rgba(74,144,226,0.01);">${eq.f_pt}</td>
+                                    <td>${eq.f_pj}</td><td>${eq.f_pg}</td><td>${eq.f_pe}</td><td>${eq.f_pp}</td><td>${eq.f_gf}</td><td>${eq.f_gc}</td>
+                                `;
+                                tbody.appendChild(tr);
+                            });
+                        })
+                        .catch(errP => console.error("Error leyendo actas de partidos para clasificar:", errP));
+                })
+                .catch(errE => {
+                    console.error("Error al descargar nómina de clubes:", errE);
+                    tbody.innerHTML = `<tr><td colspan="24" style="padding:20px; color:#ff4444;">Error al conectar con la tabla de equipos de MySQL.</td></tr>`;
+                });
+        }
+
 
 </script>
 
