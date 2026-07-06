@@ -359,60 +359,73 @@ app.get('/api/valor-equipo/:id_partido', (req, res) => {
     });
 });
 
-// 9. ALGORITMO CORREGIDO: EXTRACCIÓN MEDIANTE ÍNDICE DE ARRAY [0] PARA EL VÍDEO
-app.get('/api/jugador-detalle/:id_jugador', (req, res) => {
-    const id_j = req.params.id_jugador;
+// =======================================================================
+// OBTENER DETALLE DEL JUGADOR + HISTORIAL DE ENCUENTROS REPARADO (CERO FALLOS 500)
+// =======================================================================
+app.get('/api/jugadores/detalle/:id', (req, res) => {
+    const id_j = req.params.id;
+    console.log(`📥 Consultando de forma segura en MySQL el perfil del jugador ID: ${id_j}`);
+    
+    // 1. Consulta maestra de estadísticas acumuladas (Blindada contra nulos)
+    const queryStats = `
+        SELECT 
+            j.id_jugador, j.nombre, j.posicion, j.dorsal, j.id_equipo, j.foto_ruta,
+            COUNT(DISTINCT CASE WHEN ap.id_partido IS NOT NULL THEN ap.id_partido END) as partidos_jugados,
+            COALESCE(SUM(CASE WHEN ap.puntos IS NOT NULL THEN CAST(ap.puntos AS DECIMAL(10,1)) ELSE 0 END), 0) as puntos_totales,
+            COALESCE(AVG(CASE WHEN ap.puntos IS NOT NULL THEN CAST(ap.puntos AS DECIMAL(10,1)) ELSE 0 END), 0) as puntos_media,
+            COALESCE(SUM(CASE WHEN ap.evento LIKE '%⚽%' THEN (LENGTH(ap.evento) - LENGTH(REPLACE(ap.evento, '⚽', ''))) / LENGTH('⚽') ELSE 0 END), 0) as goles_totales,
+            COALESCE(SUM(CASE WHEN ap.evento LIKE '%🟨%' THEN 1 ELSE 0 END), 0) as amarillas_totales,
+            COALESCE(SUM(CASE WHEN ap.evento LIKE '%🟥%' THEN 1 ELSE 0 END), 0) as rojas_totales,
+           COALESCE(SUM(CASE WHEN ap.cambio IS NOT NULL THEN CAST(REGEXP_REPLACE(ap.cambio, '[^0-9]', '') AS UNSIGNED) ELSE 0 END), 0) as minutos_totales
+        FROM jugadores j
+        LEFT JOIN acta_partido ap ON j.id_jugador = ap.id_jugador
+        LEFT JOIN partidos p ON ap.id_partido = p.id_partido AND p.goles_local IS NOT NULL AND p.goles_visitante IS NOT NULL
+        WHERE j.id_jugador = ?
+        GROUP BY j.id_jugador, j.nombre, j.posicion, j.dorsal, j.id_equipo, j.foto_ruta`;
 
-    // 1. Consulta para calcular el ranking del jugador en su equipo basado en su media actual
-    const queryRank = `
-        WITH medias AS (
-            SELECT j.id_jugador, j.id_equipo, AVG(a.puntos) as media 
-            FROM acta_partido a 
-            JOIN jugadores j ON a.id_jugador = j.id_jugador 
-            WHERE a.puntos IS NOT NULL 
-            GROUP BY j.id_jugador, j.id_equipo
-        )
-        SELECT (SELECT COUNT(*) + 1 FROM medias m2 WHERE m2.id_equipo = m1.id_equipo AND m2.media > m1.media) as puesto,
-               (SELECT COUNT(*) FROM medias m3 WHERE m3.id_equipo = m1.id_equipo) as total
-        FROM medias m1 WHERE id_jugador = ?`;
-
-    // 2. Consulta para extraer todos los partidos que ha jugado, incluyendo la foto y el vídeo maestro
-    const queryHistorial = `
-        SELECT a.puntos, p.id_partido, p.id_jornada,
-               el.nombre AS local_nombre, ev.nombre AS visitante_nombre,
-               j.foto_ruta, j.video_ruta
-        FROM acta_partido a
-        JOIN partidos p ON a.id_partido = p.id_partido
-        JOIN equipos el ON p.id_local = el.id_equipo
-        JOIN equipos ev ON p.id_visitante = ev.id_equipo
-        JOIN jugadores j ON a.id_jugador = j.id_jugador
-        WHERE a.id_jugador = ? AND a.puntos IS NOT NULL
-        ORDER BY p.id_jornada DESC`;
-
-    db.query(queryRank, [id_j], (err, rankRes) => {
-        let rankingTexto = "Calificando...";
-        if (!err && rankRes && rankRes.length > 0) {
-            rankingTexto = `${rankRes[0].puesto}º de ${rankRes[0].total} jugadores`;
-        } else { 
-            rankingTexto = "1º (Único jugador)"; 
+    db.query(queryStats, [id_j], (err, rows) => {
+        if (err) {
+            console.error("🔴 Error en query de estadísticas:", err);
+            return res.status(500).json({ error: err.message });
+        }
+        
+        // Si no se encuentra el jugador, mandamos un objeto estructurado seguro de respaldo
+        if (!rows || rows.length === 0) {
+            return res.json({ id_jugador: id_j, nombre: "Jugador", historial_partidos: [] });
         }
 
-        db.query(queryHistorial, [id_j], (err, partidos) => {
-            if (err) return res.status(500).json({ error: err.message });
-            
-            // CORRECCIÓN CLAVE: Accedemos al primer elemento del array [0] para sacar el texto de la ruta
-            let vRuta = (partidos && partidos.length > 0) ? partidos[0].video_ruta : null;
-            let fRuta = (partidos && partidos.length > 0) ? partidos[0].foto_ruta : null;
+        let perfilJugador = rows[0]; // Extraemos la primera fila de forma limpia de la base de datos
 
-            res.json({
-                ranking: rankingTexto,
-                video_ruta: vRuta, 
-                foto_ruta: fRuta,
-                historial_partidos: partidos || []
-            });
+        // 2. Consulta secundaria REPARADA: Cambiamos los alias (eq_l y eq_v) para erradicar el conflicto relacional de MySQL
+        const queryPartidosDisputados = `
+            SELECT 
+                p.id_partido,
+                p.goles_local,
+                p.goles_visitante,
+                eq_l.nombre AS equipo_local,
+                eq_v.nombre AS equipo_visitante
+            FROM acta_partido ap
+            INNER JOIN partidos p ON ap.id_partido = p.id_partido
+            INNER JOIN equipos eq_l ON p.id_local = eq_l.id_equipo
+            INNER JOIN equipos eq_v ON p.id_visitante = eq_v.id_equipo
+            WHERE ap.id_jugador = ? AND p.goles_local IS NOT NULL
+            ORDER BY p.id_partido DESC`;
+
+        db.query(queryPartidosDisputados, [id_j], (errPartidos, partidosFilas) => {
+            if (errPartidos) {
+                console.error("🔴 Error relacional en query de historial de partidos disputados:", errPartidos);
+                // Si falla el historial de encuentros, devolvemos al menos el perfil base para que la ficha no se rompa
+                perfilJugador.historial_partidos = [];
+                return res.json(perfilJugador);
+            }
+            
+            // Adjuntamos la lista de partidos de forma limpia dentro del mismo objeto JSON
+            perfilJugador.historial_partidos = partidosFilas || [];
+            res.json(perfilJugador);
         });
     });
 });
+
 
 // 10. ALGORITMO: OBTENER TABLA DE CLASIFICACIÓN GENERAL ORDENADA
 app.get('/api/clasificacion', (req, res) => {
@@ -888,26 +901,16 @@ app.delete('/api/jugadas/:id', (req, res) => {
 });
 
 // =======================================================================
-// ENDPOINTS CRUD AVANZADOS PARA LA GESTIÓN DE JUGADORES (MYSQL WORKBENCH)
-// =======================================================================
-
-// =======================================================================
-// 1. OBTENER DETALLE HISTÓRICO CORREGIDO: INMUNE A VALORES NULOS O TEXTOS VACÍOS
+// OBTENER DETALLE DEL JUGADOR + HISTORIAL DE ENCUENTROS RELACIONADOS (MYSQL)
 // =======================================================================
 app.get('/api/jugadores/detalle/:id', (req, res) => {
     const id_j = req.params.id;
-    console.log(`📥 Consultando de forma segura en MySQL el perfil del jugador ID: ${id_j}`);
+    console.log(`📥 Consultando perfil e historial de partidos para el jugador ID: ${id_j}`);
     
-    // CONSULTA REPARADA: Eliminamos el REPLACE conflictivo del campo cambio. 
-    // Ahora lee de forma segura los minutos convirtiendo directamente a número o asumiendo 0 si es nulo.
-    const queryHistorialBlindada = `
+    // 1. Consulta maestra de estadísticas acumuladas
+    const queryStats = `
         SELECT 
-            j.id_jugador,
-            j.nombre,
-            j.posicion,
-            j.dorsal,
-            j.id_equipo,
-            j.foto_ruta,
+            j.*,
             COUNT(DISTINCT CASE WHEN ap.id_partido IS NOT NULL THEN ap.id_partido END) as partidos_jugados,
             COALESCE(SUM(CASE WHEN ap.puntos IS NOT NULL THEN CAST(ap.puntos AS DECIMAL(10,1)) ELSE 0 END), 0) as puntos_totales,
             COALESCE(AVG(CASE WHEN ap.puntos IS NOT NULL THEN CAST(ap.puntos AS DECIMAL(10,1)) ELSE 0 END), 0) as puntos_media,
@@ -919,27 +922,39 @@ app.get('/api/jugadores/detalle/:id', (req, res) => {
         LEFT JOIN acta_partido ap ON j.id_jugador = ap.id_jugador
         LEFT JOIN partidos p ON ap.id_partido = p.id_partido AND p.goles_local IS NOT NULL AND p.goles_visitante IS NOT NULL
         WHERE j.id_jugador = ?
-        GROUP BY j.id_jugador, j.nombre, j.posicion, j.dorsal, j.id_equipo, j.foto_ruta`;
+        GROUP BY j.id_jugador`;
 
-    db.query(queryHistorialBlindada, [id_j], (err, rows) => {
-        if (err) {
-            console.error("🔴 Error crítico de sintaxis SQL en el perfil:", err);
-            return res.status(500).json({ error: err.message });
-        }
-        
-        // Si MySQL Workbench devuelve un array, extraemos la primera fila de forma limpia
-        if (rows && rows.length > 0) {
-            res.json(rows[0]);
-        } else {
-            // Mandamos un objeto estructurado de respaldo si el jugador no tiene partidos en su historial
-            res.json({
-                id_jugador: id_j, nombre: "Jugador de Reserva", posicion: "MED", dorsal: 0,
-                partidos_jugados: 0, puntos_totales: 0, puntos_media: 0, goles_totales: 0,
-                amarillas_totales: 0, rojas_totales: 0, minutos_totales: 0
-            });
-        }
+    db.query(queryStats, [id_j], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!rows || rows.length === 0) return res.json({});
+
+        let perfilJugador = rows[0];
+
+        // 2. Consulta secundaria: Trae el listado de partidos donde participó el jugador
+        const queryPartidosDisputados = `
+            SELECT 
+                p.id_partido,
+                p.goles_local,
+                p.goles_visitante,
+                el.nombre AS equipo_local,
+                ev AS equipo_visitante
+            FROM acta_partido ap
+            INNER JOIN partidos p ON ap.id_partido = p.id_partido
+            INNER JOIN equipos el ON p.id_local = el.id_equipo
+            INNER JOIN equipos ev ON p.id_visitante = ev.id_equipo
+            WHERE ap.id_jugador = ? AND p.goles_local IS NOT NULL
+            ORDER BY p.id_partido DESC`;
+
+        db.query(queryPartidosDisputados, [id_j], (errPartidos, partidosFilas) => {
+            if (errPartidos) return res.status(500).json({ error: errPartidos.message });
+            
+            // Adjuntamos la lista de partidos dentro del mismo objeto de respuesta
+            perfilJugador.historial_partidos = partidosFilas || [];
+            res.json(perfilJugador);
+        });
     });
 });
+
 
 
 // 2. CREAR NUEVO JUGADOR EN LA BASE DE DATOS
