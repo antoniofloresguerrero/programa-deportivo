@@ -369,7 +369,7 @@
             <div class="form-box" style="padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <div>
                     <h2 id="det-jug-nombre-cabecera" style="margin:0; color:#4a90e2; text-transform:uppercase; font-size:18px; font-weight:800;">🏃 Perfil del Futbolista</h2>
-                    <small style="color:#aaa;">Historial de rendimiento, estadísticas avanzadas y edición de ficha en MySQL Workbench.</small>
+                    <small style="color:#aaa;">Ficha del Jugador y Estadísticas.</small>
                 </div>
                 <button class="btn-g" style="background:#333; color:#fff; padding:8px 15px; font-size:12px; font-weight:bold;" onclick="cambiarSeccion('sec-ficha-equipo')">⬅️ Volver a la Plantilla</button>
             </div>
@@ -379,7 +379,14 @@
                 
                 <!-- COLUMNA IZQUIERDA: TARJETA DE IDENTIDAD Y ACCIONES CRUD -->
                 <div style="background: rgba(12, 12, 12, 0.9); border-radius: 10px; border: 1px solid #333; padding: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); text-align: center;">
-                    <div id="det-jug-foto" style="width: 130px; height: 130px; border-radius: 50%; border: 3px solid #4a90e2; margin: 0 auto 15px auto; background-size: cover; background-position: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5);"></div>
+            <!-- REPARADO DE FIN DE CARRETE: aspect-ratio prohíbe al navegador estirar la foto verticalmente -->
+<div id="det-jug-foto" style="width: 135px !important; height: 135px !important; max-width: 135px !important; max-height: 135px !important; border-radius: 50% !important; border: 3px solid #4a90e2; margin: 0 auto 15px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex !important; align-items: center; justify-content: center; overflow: hidden !important; box-sizing: border-box !important; background: transparent !important;">
+    <img id="det-jug-foto-imagen-real" src="http://localhost:3000/fotos/silueta.jpg" style="width: 100% !important; height: 100% !important; min-width: 100% !important; min-height: 100% !important; aspect-ratio: 1 / 1 !important; object-fit: cover !important; object-position: center top !important; border-radius: 50% !important; display: block !important;">
+</div>
+
+
+
+
                     
                     <div style="background: rgba(74, 144, 226, 0.1); display: inline-block; padding: 3px 12px; border-radius: 20px; border: 1px solid #4a90e2; margin-bottom: 12px;">
                         <span id="det-jug-posicion" style="color: #4a90e2; font-size: 11px; font-weight: bold; text-transform: uppercase;">POSICIÓN</span>
@@ -411,7 +418,7 @@
 
                 <!-- COLUMNA DERECHA: GRILLA DE RENDIMIENTO HISTÓRICO EN CRISTAL -->
                 <div style="background: rgba(15, 15, 15, 0.95); border-radius: 10px; border: 1px solid #333; padding: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.6);">
-                    <h3 style="color:#fff; margin-top:0; font-size:15px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:10px; letter-spacing:0.5px;">📊 Rendimiento Histórico Acumulado</h3>
+                    <h3 style="color:#fff; margin-top:0; font-size:15px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:10px; letter-spacing:0.5px;">📊 Estadística</h3>
                     
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
                         <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
@@ -1958,8 +1965,7 @@ function eliminarPartidoYActualizarLigaBD() {
                     // Recorremos la plantilla oficial devuelta por MySQL
                     jugadores.forEach(j => {
                         let idReal = j.id_jugador || j.id || j.idjugador;
-
-                        // 1. DIBUJAR ESFERAS TÁCTICAS SUPERIORES CON FOTO (Como en tu captura)
+                        // 1. DIBUJAR ESFERAS TÁCTICAS SUPERIORES CON FOTO BLINDADAS (Inmune a fotos deformadas)
                         let divCirculo = document.createElement('div');
                         divCirculo.style.background = 'rgba(255,255,255,0.02)';
                         divCirculo.style.border = '1px solid rgba(255,255,255,0.04)';
@@ -1969,12 +1975,14 @@ function eliminarPartidoYActualizarLigaBD() {
                         divCirculo.style.cursor = 'pointer';
                         
                         divCirculo.innerHTML = `
-                            <div style="width: 65px; height: 65px; border-radius: 50%; border: 2px solid #4a90e2; margin: 0 auto 10px auto; background-image: url('http://localhost:3000/fotos/${j.foto_ruta || "silueta.jpg"}'); background-size: cover; background-position: center; box-shadow: 0 4px 8px rgba(0,0,0,0.4);"></div>
+                            <!-- CORRECCIÓN RADICAL: Forzamos cover, center y no-repeat por hardware con !important -->
+                            <div style="width: 65px; height: 65px; border-radius: 50%; border: 2px solid #4a90e2; margin: 0 auto 10px auto; background-image: url('http://localhost:3000/fotos/${j.foto_ruta || "silueta.jpg"}'); background-size: cover !important; background-position: center center !important; background-repeat: no-repeat !important; box-shadow: 0 4px 8px rgba(0,0,0,0.4);"></div>
                             <div style="color:#fff; font-size:12px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Nº ${j.dorsal || 0} - ${j.nombre}</div>
                             <span style="color:#00CC66; font-size:9px; font-weight:900; background:rgba(0,204,102,0.1); padding:1px 5px; border-radius:3px; display:inline-block; margin-top:5px;">${j.posicion}</span>
                         `;
                         divCirculo.onclick = function() { viajarAlPerfilDetalladoDelJugador(idReal); };
                         contenedorGridCirculos.appendChild(divCirculo);
+
 
                         // 2. DIBUJAR FILAS HORIZONTALES INFERIORES CON BORRADO 🗑️
                         let divFila = document.createElement('div');
@@ -2957,6 +2965,9 @@ function eliminarPartidoYActualizarLigaBD() {
                // =======================================================================
         // FUNCIÓN PERFIL CORREGIDA: INMUNE A REFERENCEERROR Y CON RUTA DE FOTO REAL
         // =======================================================================
+               // =======================================================================
+        // FUNCIÓN PERFIL DEFINITIVA: INMUNE A ERRORES Y CON IMAGEN BLINDADA FIJA
+        // =======================================================================
         function viajarAlPerfilDetalladoDelJugador(id_jugador) {
             idJugadorSeleccionadoPerfil = id_jugador;
             
@@ -2983,14 +2994,14 @@ function eliminarPartidoYActualizarLigaBD() {
                     document.getElementById('det-jug-posicion').innerText = j.posicion;
                     document.getElementById('det-jug-dorsal').innerText = j.dorsal || "0";
                     
-                    // CORRECCIÓN CLAVE FOTO: Limpiamos comillas residuales y usamos 'divFoto' en lugar de 'divJ'
-                    let divFoto = document.getElementById('det-jug-foto');
-                    if (divFoto) {
+                    // PASARELA DIRECTA MULTIMEDIA: Limpia comillas e inyecta en la etiqueta <img> blindada
+                    let imgReal = document.getElementById('det-jug-foto-imagen-real');
+                    if (imgReal) {
                         let nombreArchivoImagen = j.foto_ruta || j.foto || "silueta.jpg";
-                        nombreArchivoImagen = nombreArchivoImagen.replace(/['"]+/g, ''); // Limpia las comillas &quot;
+                        nombreArchivoImagen = nombreArchivoImagen.replace(/['"]+/g, ''); // Limpia las comillas residuales &quot;
                         
-                        console.log("📸 Cargando en el perfil la foto real de MySQL: " + nombreArchivoImagen);
-                        divFoto.style.backgroundImage = `url('http://localhost:3000/fotos/${nombreArchivoImagen}')`;
+                        console.log("🎯 Cargando imagen física en proporción real: " + nombreArchivoImagen);
+                        imgReal.src = `http://localhost:3000/fotos/${nombreArchivoImagen}`;
                     }
 
                     // 2. Inyectamos las estadísticas acumuladas reales de tu MySQL Workbench
@@ -3030,6 +3041,7 @@ function eliminarPartidoYActualizarLigaBD() {
                 })
                 .catch(err => console.error("Error al compilar el historial del futbolista:", err));
         }
+
 
 
         // B. GESTIÓN DEL MODAL EMERGENTE: ALTA Y RECTIFICACIÓN DE DATOS
