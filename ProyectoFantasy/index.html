@@ -611,8 +611,8 @@
     let partidoSeleccionadoActual = null;
     let jugadorSeleccionadoParaEditar = null;
 
-              // =======================================================================
-        // 📅 FUNCIÓN NATIVA ORIGINAL RESTAURADA: RECUPERA TU CARGA DE JUGADORES
+               // =======================================================================
+        // 📅 FUNCIÓN NATIVA CORREGIDA - PARTE 1: CAPAS VISUALES E INYECTOR DE LONA
         // =======================================================================
         function cambiarSeccion(idSeccionObjetivo) {
             console.log("Navegando de forma segura hacia la pestaña: " + idSeccionObjetivo);
@@ -621,63 +621,87 @@
             if (idSeccionObjetivo === 'ficha-equipo') { idSeccionObjetivo = 'sec-ficha-equipo'; }
             if (idSeccionObjetivo === 'ficha-jugador') { idSeccionObjetivo = 'sec-ficha-jugador'; }
             if (idSeccionObjetivo === 'partidos') { idSeccionObjetivo = 'sec-partidos'; }
-            if (idSeccionObjetivo === 'clasificacion') { idSeccionObjetivo = 'sec-clasificacion'; }
+            
+            // 🎯 AJUSTE SINCRO: Traducimos 'sec-clasificacion' al ID real corto 'clasificacion'
+            if (idSeccionObjetivo === 'clasificacion' || idSeccionObjetivo === 'sec-clasificacion') { 
+                idSeccionObjetivo = 'clasificacion'; 
+            }
+
+            // 🛡️ AUTO-INYECTOR INTEGRAL: Si la lona 'clasificacion' no existe en el HTML, la fabricamos
+            let panelObjetivo = document.getElementById(idSeccionObjetivo);
+            if (!panelObjetivo && idSeccionObjetivo === 'clasificacion') {
+                console.log("🛠️ Fabricando contenedor de posiciones y soldándolo al panel de inicio...");
+                panelObjetivo = document.createElement('div');
+                panelObjetivo.id = 'clasificacion';
+                panelObjetivo.className = 'panel'; // Hereda tus fondos de cristal original
+                panelObjetivo.style.width = '100%'; panelObjetivo.style.boxSizing = 'border-box'; panelObjetivo.style.padding = '20px';
+                panelObjetivo.style.display = 'none';
+
+                let panelInicioFisico = document.getElementById('sec-inicio') || document.getElementById('sec-equipos');
+                if (panelInicioFisico && panelInicioFisico.parentNode) {
+                    panelInicioFisico.parentNode.appendChild(panelObjetivo);
+                } else {
+                    document.body.appendChild(panelObjetivo);
+                }
+            }
 
             // 1. Apagamos de forma masiva todos los paneles que tengan la clase css 'panel'
             let todosLosPaneles = document.querySelectorAll('.panel');
             if (todosLosPaneles.length > 0) {
-                todosLosPaneles.forEach(function(p) {
-                    p.style.display = 'none';
-                });
+                todosLosPaneles.forEach(function(p) { p.style.display = 'none'; });
             } else {
-                let listaIdsViejos = ['sec-inicio', 'sec-partidos', 'sec-clasificacion', 'sec-ficha-equipo', 'sec-ficha-jugador', 'sec-jugadas'];
+                let listaIdsViejos = ['sec-inicio', 'sec-partidos', 'sec-clasificacion', 'sec-ficha-equipo', 'sec-ficha-jugador', 'sec-jugadas', 'clasificacion'];
                 listaIdsViejos.forEach(function(id) {
                     let cajaElemento = document.getElementById(id);
-                    if (cajaElemento) { 
-                        cajaElemento.style.display = 'none';
-                    }
+                    if (cajaElemento) { cajaElemento.style.display = 'none'; }
                 });
             }
 
             // 2. Encendemos el panel al que queremos viajar de forma segura
-            let panelObjetivo = document.getElementById(idSeccionObjetivo);
             if (panelObjetivo) {
                 panelObjetivo.style.display = 'block';
             } else {
                 console.error("⚠️ Error de navegación: La lona con ID '" + idSeccionObjetivo + "' no existe in tu HTML.");
             }
 
+            // Pasamos las órdenes de disparo automático a la Parte 2
+            ejecutarDisparadoresInternosDeLonasNativas(idSeccionObjetivo);
+        }
+        // =======================================================================
+        // 📅 FUNCIÓN NATIVA PARTE 2: ACCIONADORES AUTOMÁTICOS EN CADENA
+        // =======================================================================
+        function ejecutarDisparadoresInternosDeLonasNativas(idSeccionObjetivo) {
+            
             // =======================================================================
-            // 🤖 DISPARADOR ROBOTIZADO REPARADO: ENCIENDE TU VESTUARIO ORIGINAL
+            // 🤖 TU DISPARADOR ROBOTIZADO ORIGINAL: ENCIENDE TU VESTUARIO
             // =======================================================================
-            // Si el usuario pulsa en el menú lateral, abrimos la lona y pulsamos tu botón real
             if (idSeccionObjetivo === 'sec-partidos') {
                 setTimeout(function() {
-                    // Localizamos tu carrusel superior original de la captura de pantalla
                     let carruselOriginal = document.getElementById('lista-partidos-jornada-vagas') || 
                                            document.querySelector('.carrusel-partidos');
                     
                     if (carruselOriginal) {
-                        // Buscamos tus botones redondeados nativos que ya cargan bien tus datos
                         let primerBotonTuVersion = carruselOriginal.querySelector('.item-partido-btn') || 
                                                    carruselOriginal.querySelector('button');
                         
                         if (primerBotonTuVersion) {
                             console.log("🎯 ¡Botón nativo localizado! Ejecutando tu carga original de jugadores...");
-                            primerBotonTuVersion.click(); // 👈 PULSA TU BOTÓN BUENO RESTAURANDO TU CÉSPED AL 100%
+                            primerBotonTuVersion.click(); // Pulsación que rellena tus 22 cracks nativos
                         } else {
                             console.warn("El carrusel superior está vacío en este instante. Esperando inyección...");
                         }
                     }
-                }, 80); // Damos un margen mínimo de milisegundos para que el monitor encienda el panel
+                }, 80);
             }
             // =======================================================================
 
-            // 3. Lanzador automático de tu Clasificación original
-            if (idSeccionObjetivo === 'sec-clasificacion' && typeof cargarTablaClasificacionOficialLaLiga === "function") {
+            // 3. Lanzador automático de la clasificación corregido con el ID unificado
+            if (idSeccionObjetivo === 'clasificacion' && typeof cargarTablaClasificacionOficialLaLiga === "function") {
+                console.log("🏆 Solicitando renderizado de la tabla de posiciones reales...");
                 cargarTablaClasificacionOficialLaLiga();
             }
         }
+
 
 
        // CORREGIDO Y BLINDADO: Carga las jornadas de inicio sin congelar el navegador si MySQL está limpio
@@ -3433,13 +3457,127 @@ function eliminarPartidoYActualizarLigaBD() {
                 if (typeof cambiarSeccion === "function") cambiarSeccion('inicio');
             }
         }
-        // =======================================================================
-        // RESTRUCURADO: CALCULADOR AUTÓNOMO INTEGRAL (CORREGIDO SIN ERRORES)
+               // =======================================================================
+        // 🏆 CLASIFICACIÓN REAL PARTE 1: AUTO-MAQUETACIÓN DE LA ESTRUCTURA
         // =======================================================================
         function cargarTablaClasificacionOficialLaLiga() {
-            console.log("⚓ Iniciando cálculo de clasificación autónomo desde el monitor...");
+            console.log("⚓ Desplegando esqueleto de clasificación basado en tu endpoint...");
             
-            let tbody = document.getElementById('cuerpo-filas-clasificacion-real');
+            let contenedorPadre = document.getElementById('sec-clasificacion') || 
+                                  document.getElementById('clasificacion');
+                                  
+            if (!contenedorPadre) return console.warn("No se halló el panel contenedor de la clasificación.");
+
+            // Inyectamos el esqueleto idéntico a tu imagen con ID fijo para el vaciado
+            contenedorPadre.innerHTML = `
+                <h2 style="color: #ff9900; text-transform: uppercase; font-size: 18px; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">🏆 Clasificación Oficial del Campeonato</h2>
+                
+                <div style="width: 100%; overflow-x: auto; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); box-sizing: border-box;">
+                    <table style="width: 100%; border-collapse: collapse; color: #fff; font-size: 12px; min-width: 950px; text-align: center;">
+                        <thead style="background: rgba(255,255,255,0.02); border-bottom: 2px solid rgba(255,255,255,0.1);">
+                            <tr>
+                                <th colspan="3" style="text-align: left; padding: 10px 15px; color: #aaa; text-transform: uppercase;">Equipos del Torneo</th>
+                                <th colspan="7" style="border-left: 1px solid rgba(255,255,255,0.1); color: #ff9900; font-weight: 800;">TOTALES</th>
+                                <th colspan="7" style="border-left: 1px solid rgba(255,255,255,0.1); color: #00CC66;">EN CASA</th>
+                                <th colspan="7" style="border-left: 1px solid rgba(255,255,255,0.1); color: #4a90e2;">FUERA</th>
+                            </tr>
+                            <tr style="background: rgba(0,0,0,0.3); font-size: 11px; color: #aaa;">
+                                <th style="width: 40px; padding: 8px;">POS</th>
+                                <th style="width: 30px;"></th>
+                                <th style="text-align: left; min-width: 140px; padding-left: 5px;">CLUB</th>
+                                <th style="border-left: 1px solid rgba(255,255,255,0.1); color:#fff; font-weight:900;">PT</th>
+                                <th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th>
+                                <th style="border-left: 1px solid rgba(255,255,255,0.1); color:#00CC66; font-weight:bold;">PT</th>
+                                <th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th>
+                                <th style="border-left: 1px solid rgba(255,255,255,0.1); color:#4a90e2; font-weight:bold;">PT</th>
+                                <th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpo-filas-clasificacion-fijo">
+                            <tr>
+                                <td colspan="24" style="padding: 30px; color: #ff9900;">⏳ Solicitando cómputo matemático a /api/clasificacion-completa...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            // Cedemos el control a la Parte 2 pasándole la orden de renderizado
+            dibujarFilasDesdeEndpointClasificacionCompleta();
+        }
+
+        // =======================================================================
+        // 🏆 CLASIFICACIÓN REAL PARTE 2: VUELCA LAS COLUMNAS DE CLASIFICACION-COMPLETA
+        // =======================================================================
+        function dibujarFilasDesdeEndpointClasificacionCompleta() {
+            let tbody = document.getElementById('cuerpo-filas-clasificacion-fijo');
+            if (!tbody) return;
+
+            // Consultamos tu pasarela relacional dedicada que procesa las tres bandas
+            fetch('http://localhost:3000/api/clasificacion-completa')
+                .then(res => res.json())
+                .then(listaClasificada => {
+                    let registros = Array.isArray(listaClasificada) ? listaClasificada : [];
+                    tbody.innerHTML = "";
+
+                    if (registros.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="24" style="padding:20px; color:#aaa;">No hay datos relacionales de partidos calculados en tu sistema.</td></tr>`;
+                        return;
+                    }
+
+                    // Renderizamos mapeando tus celdas exactas: c_ para Casa y f_ para Fuera
+                    registros.forEach(function(c, index) {
+                        let tr = document.createElement('tr');
+                        tr.style.borderBottom = '1px solid rgba(255,255,255,0.03)';
+                        tr.style.height = '42px'; tr.style.cursor = 'pointer';
+
+                        tr.onmouseenter = function() { this.style.background = 'rgba(255,255,255,0.03)'; };
+                        tr.onmouseleave = function() { this.style.background = 'transparent'; };
+                        
+                        tr.onclick = function() {
+                            if (typeof viajarAFichaEquipo === "function") viajarAFichaEquipo(c.id_equipo);
+                        };
+
+                        let lineaVerdeChampions = (index < 4) ? 'border-left: 3px solid #00CC66;' : '';
+                        let archivoEscudo = (c.escudo || "generico.png").replace(/['"]+/g, '');
+
+                                               // CAPAS SÓLIDAS CONTRA FONDOS BRILLANTES: Oscurecemos las filas y remarcamos los puntos
+                        tr.innerHTML = `
+                            <td style="font-weight: 800; ${lineaVerdeChampions} padding: 10px 8px; color: #fff; background: rgba(0,0,0,0.4);">${index + 1}</td>
+                            <td style="width: 35px; text-align: center; background: rgba(0,0,0,0.4);"><img src="http://localhost:3000/escudos/${archivoEscudo}" style="width: 22px; height: 22px; object-fit: contain; vertical-align: middle;"></td>
+                            <td style="text-align: left; font-weight: 800; color: #52a0ff; padding-left: 8px; background: rgba(0,0,0,0.4); font-size: 13px;">${c.nombre}</td>
+                            
+                            <!-- 🌟 COLUMNA PT TOTALES: Fondo negro sólido, número grande blanco puro y bordes marcados -->
+                            <td style="border-left: 2px solid rgba(255,255,255,0.3); border-right: 1px solid rgba(255,255,255,0.15); font-weight: 900; color: #ffffff; font-size: 15px; background: #111111; text-shadow: 0 1px 3px #000; width: 45px;">${c.pt}</td>
+                            <td style="background: rgba(0,0,0,0.25);">${c.pj}</td><td style="background: rgba(0,0,0,0.25);">${c.pg}</td><td style="background: rgba(0,0,0,0.25);">${c.pe}</td><td style="background: rgba(0,0,0,0.25);">${c.pp}</td><td style="background: rgba(0,0,0,0.25);">${c.gf}</td><td style="background: rgba(0,0,0,0.25);">${c.gc}</td>
+                            
+                            <!-- 🟢 COLUMNA PT EN CASA: Fondo oscuro, número verde neón intenso y bordes marcados -->
+                            <td style="border-left: 2px solid rgba(255,255,255,0.3); border-right: 1px solid rgba(255,255,255,0.15); font-weight: 900; color: #00ff66; font-size: 15px; background: #161a16; text-shadow: 0 1px 3px #000; width: 45px;">${c.c_pt}</td>
+                            <td style="background: rgba(0,0,0,0.25);">${c.c_pj}</td><td style="background: rgba(0,0,0,0.25);">${c.c_pg}</td><td style="background: rgba(0,0,0,0.25);">${c.c_pe}</td><td style="background: rgba(0,0,0,0.25);">${c.c_pp}</td><td style="background: rgba(0,0,0,0.25);">${c.c_gf}</td><td style="background: rgba(0,0,0,0.25);">${c.c_gc}</td>
+                            
+                            <!-- 🔵 COLUMNA PT FUERA: Fondo oscuro, número azul brillante y bordes marcados -->
+                            <td style="border-left: 2px solid rgba(255,255,255,0.3); border-right: 2px solid rgba(255,255,255,0.3); font-weight: 900; color: #33b5ff; font-size: 15px; background: #141820; text-shadow: 0 1px 3px #000; width: 45px;">${c.f_pt}</td>
+                            <td style="background: rgba(0,0,0,0.25);">${c.f_pj}</td><td style="background: rgba(0,0,0,0.25);">${c.f_pg}</td><td style="background: rgba(0,0,0,0.25);">${c.f_pe}</td><td style="background: rgba(0,0,0,0.25);">${c.f_pp}</td><td style="background: rgba(0,0,0,0.25);">${c.f_gf}</td><td style="background: rgba(0,0,0,0.25);">${c.f_gc}</td>
+                        `;
+
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(err => {
+                    console.error("Error en la pasarela /api/clasificacion-completa:", err);
+                    tbody.innerHTML = `<tr><td colspan="24" style="padding:20px; color:#ff4444;">Error de red en la ruta /api/clasificacion-completa.</td></tr>`;
+                });
+        }
+
+
+
+
+        // =======================================================================
+        // 🏆 CLASIFICACIÓN PARTE 2: MOTORES DE RED Y COMPUTACIÓN MATEMÁTICA REAL
+        // =======================================================================
+        function procesarLlamadasYCalculoMatematicoClasificacionMySQL() {
+            // Capturamos el cuerpo receptor fijo que creamos en la Parte 1
+            let tbody = document.getElementById('cuerpo-filas-clasificacion-fijo');
             if (!tbody) return;
 
             // 1. DESCARGAMOS PRIMERO TODOS LOS EQUIPOS DE TU TORNEO
@@ -3454,22 +3592,22 @@ function eliminarPartidoYActualizarLigaBD() {
                         .then(partidos => {
                             let listaPartidos = Array.isArray(partidos) ? partidos : [];
 
-                            // Estructuramos el esqueleto estadístico idéntico a tu captura de pantalla
+                            // Estructuramos el esqueleto estadístico limpio para cada club
                             let tablaEstadistica = equipos.map(function(e) {
+                                let archivoEscudo = e.escudo_ruta || e.escudo || "generico.png";
+                                archivoEscudo = archivoEscudo.replace(/['"]+/g, ''); // Purgamos comillas
+
                                 return {
                                     id_equipo: e.id_equipo || e.id,
-                                    nombre: e.nombre,
-                                    escudo: e.escudo_ruta || e.escudo || "generico.png",
-                                    // TOTALES
+                                    nombre: e.nombre || "Club",
+                                    escudo: archivoEscudo,
                                     pt: 0, pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0,
-                                    // EN CASA
                                     c_pt: 0, c_pj: 0, c_pg: 0, c_pe: 0, c_pp: 0, c_gf: 0, c_gc: 0,
-                                    // FUERA
                                     f_pt: 0, f_pj: 0, f_pg: 0, f_pe: 0, f_pp: 0, f_gf: 0, f_gc: 0
                                 };
                             });
 
-                            // 3. COMPUTACIÓN MATEMÁTICA DE PUNTOS Y GOLES EN VIVO
+                            // 3. COMPUTACIÓN MATEMÁTICA EN VIVO DE TUS DOS PARTIDOS (CASA / FUERA / TOTALES)
                             listaPartidos.forEach(function(p) {
                                 let locID = p.id_local || p.id_equipo_local || p.local_id;
                                 let visID = p.id_visitante || p.id_equipo_visitante || p.visitante_id;
@@ -3501,19 +3639,18 @@ function eliminarPartidoYActualizarLigaBD() {
                                 }
                             });
 
-                            // 4. ORDENACIÓN OFICIAL
+                            // 4. ORDENACIÓN OFICIAL POR CRITERIOS DE LALIGA
                             tablaEstadistica.sort(function(a, b) {
                                 if (b.pt !== a.pt) return b.pt - a.pt;
                                 return (b.gf - b.gc) - (a.gf - a.gc);
                             });
 
-                            // 5. PINTADO DE LAS FILAS
+                            // 5. INYECCIÓN DINÁMICA DE FILAS EN TU MONITOR
                             tbody.innerHTML = "";
                             tablaEstadistica.forEach(function(eq, index) {
                                 let tr = document.createElement('tr');
                                 tr.style.borderBottom = '1px solid rgba(255,255,255,0.03)';
-                                tr.style.height = '40px';
-                                tr.style.cursor = 'pointer';
+                                tr.style.height = '42px'; tr.style.cursor = 'pointer';
 
                                 tr.onmouseenter = function() { this.style.background = 'rgba(255,255,255,0.03)'; };
                                 tr.onmouseleave = function() { this.style.background = 'transparent'; };
@@ -3522,35 +3659,32 @@ function eliminarPartidoYActualizarLigaBD() {
                                     if (typeof viajarAFichaEquipo === "function") viajarAFichaEquipo(eq.id_equipo);
                                 };
 
-                                let lineaVerdePuesto = (index < 4) ? 'border-left: 3px solid #00CC66;' : '';
+                                let lineaVerdeChampions = (index < 4) ? 'border-left: 3px solid #00CC66;' : '';
 
                                 tr.innerHTML = `
-                                    <td style="font-weight: bold; ${lineaVerdePuesto} padding: 8px;">${index + 1}</td>
-                                    <td><img src="http://localhost:3000/escudos/${eq.escudo}" style="width: 20px; height: 20px; object-fit: contain; vertical-align: middle;" onerror="this.src='http://localhost:3000/escudos/generico.png'"></td>
-                                    <td style="text-align: left; font-weight: bold; color: #4a90e2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;">${eq.nombre}</td>
+                                    <td style="font-weight: bold; ${lineVerdeChampions} padding: 8px;">${index + 1}</td>
+                                    <td style="width: 30px; text-align: center;"><img src="http://localhost:3000/escudos/${eq.escudo}" style="width: 22px; height: 22px; object-fit: contain; vertical-align: middle;" onerror="this.src='http://localhost:3000/escudos/generico.png'"></td>
+                                    <td style="text-align: left; font-weight: bold; color: #4a90e2; padding-left: 5px;">${eq.nombre}</td>
                                     
-                                    <!-- TOTALES -->
-                                    <td style="border-left: 1px solid #333; font-weight: 900; color: #fff; font-size: 13px; background: rgba(255,255,255,0.01);">${eq.pt}</td>
+                                    <td style="border-left: 1px solid rgba(255,255,255,0.1); font-weight: 900; color: #fff; font-size: 13px; background: rgba(255,255,255,0.01);">${eq.pt}</td>
                                     <td>${eq.pj}</td><td>${eq.pg}</td><td>${eq.pe}</td><td>${eq.pp}</td><td>${eq.gf}</td><td>${eq.gc}</td>
                                     
-                                    <!-- EN CASA -->
-                                    <td style="border-left: 1px solid #333; font-weight: bold; color: #00CC66; background: rgba(0,204,102,0.01);">${eq.c_pt}</td>
+                                    <td style="border-left: 1px solid rgba(255,255,255,0.1); font-weight: bold; color: #00CC66; background: rgba(0,204,102,0.01);">${eq.c_pt}</td>
                                     <td>${eq.c_pj}</td><td>${eq.c_pg}</td><td>${eq.c_pe}</td><td>${eq.c_pp}</td><td>${eq.c_gf}</td><td>${eq.c_gc}</td>
                                     
-                                    <!-- FUERA -->
-                                    <td style="border-left: 1px solid #333; font-weight: bold; color: #4a90e2; background: rgba(74,144,226,0.01);">${eq.f_pt}</td>
+                                    <td style="border-left: 1px solid rgba(255,255,255,0.1); font-weight: bold; color: #4a90e2; background: rgba(74,144,226,0.01);">${eq.f_pt}</td>
                                     <td>${eq.f_pj}</td><td>${eq.f_pg}</td><td>${eq.f_pe}</td><td>${eq.f_pp}</td><td>${eq.f_gf}</td><td>${eq.f_gc}</td>
                                 `;
                                 tbody.appendChild(tr);
                             });
                         })
-                        .catch(errP => console.error("Error leyendo actas de partidos para clasificar:", errP));
+                        .catch(errP => console.error("Error leyendo partidos:", errP));
                 })
-                .catch(errE => {
-                    console.error("Error al descargar nómina de clubes:", errE);
-                    tbody.innerHTML = `<tr><td colspan="24" style="padding:20px; color:#ff4444;">Error al conectar con la tabla de equipos de MySQL.</td></tr>`;
-                });
+                .catch(errE => console.error("Error leyendo equipos:", errE));
         }
+
+
+        
         // =======================================================================
         // 🔮 CAPTURADOR AUTOMÁTICO DE CLICS: DEL PERFIL DEL JUGADOR AL PARTIDO EXACTO
         // =======================================================================
