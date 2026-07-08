@@ -3551,6 +3551,66 @@ function eliminarPartidoYActualizarLigaBD() {
                     tbody.innerHTML = `<tr><td colspan="24" style="padding:20px; color:#ff4444;">Error al conectar con la tabla de equipos de MySQL.</td></tr>`;
                 });
         }
+        // =======================================================================
+        // 🔮 CAPTURADOR AUTOMÁTICO DE CLICS: DEL PERFIL DEL JUGADOR AL PARTIDO EXACTO
+        // =======================================================================
+        document.addEventListener('click', function(evento) {
+            // Buscamos si el elemento pulsado es un botón del perfil o está dentro de su caja de partidos
+            let elementoPulsado = evento.target;
+            
+            // Comprobamos si tiene el diseño de tus cápsulas de partidos disputados
+            if (elementoPulsado && (elementoPulsado.tagName === 'BUTTON' || elementoPulsado.tagName === 'DIV')) {
+                let textoFila = elementoPulsado.innerText ? elementoPulsado.innerText.trim().toUpperCase() : "";
+                
+                // Si el botón tiene formato de marcador de fútbol (lleva un guion y un cero, uno, dos...)
+                if (textoFila.includes('-') && (textoFila.includes('0') || textoFila.includes('1') || textoFila.includes('2'))) {
+                    
+                    // Verificamos si estamos dentro del bloque de partidos disputados de la temporada
+                    // (Evitamos interceptar los botones del menú principal o del carrusel superior)
+                    let esBotonDelPerfil = !elementoPulsado.classList.contains('item-partido-btn') && 
+                                           !elementoPulsado.classList.contains('menu-btn') &&
+                                           elementoPulsado.closest('.form-box, div, section');
+
+                    if (esBotonDelPerfil) {
+                        console.log("🤖 Capturador: Detectado clic en partido del perfil: " + textoFila);
+                        evento.preventDefault(); // Frenamos la navegación simple por defecto
+
+                        // 1. Viajamos limpiamente a la sección general del campo de fútbol vertical
+                        if (typeof cambiarSeccion === "function") {
+                            cambiarSeccion('partidos');
+                        }
+
+                        // 2. Activamos el robot para simular el clic en tu carrusel superior real
+                        setTimeout(function() {
+                            let carruselSuperior = document.getElementById('lista-partidos-jornada-vagas') || 
+                                                   document.querySelector('.carrusel-partidos');
+                            
+                            if (carruselSuperior) {
+                                let todosLosBotonesCarrusel = carruselSuperior.querySelectorAll('.item-partido-btn, button');
+                                let clickExitoso = false;
+
+                                todosLosBotonesCarrusel.forEach(function(botonHTML) {
+                                    let textoBotonCarrusel = botonHTML.innerText ? botonHTML.innerText.trim().toUpperCase() : "";
+                                    
+                                    // Si el texto del carrusel superior coincide con el del perfil, lo pulsamos por software
+                                    if (textoBotonCarrusel === textoFila || textoBotonCarrusel.includes(textoFila) || textoFila.includes(textoBotonCarrusel)) {
+                                        console.log("🎯 ¡Partido localizado en el carrusel! Cargando alineaciones...");
+                                        botonHTML.click(); // 👈 El clic estrella que vuelca tus 22 cracks nativos
+                                        clickExitoso = true;
+                                    }
+                                });
+
+                                // Si por diferencias de espacios no coincidieran los textos exactos, pulsamos el primero de rescate
+                                if (!clickExitoso && todosLosBotonesCarrusel.length > 0) {
+                                    console.log("🔄 Coincidencia exacta no hallada. Activando el primer partido de la jornada...");
+                                    todosLosBotonesCarrusel[0].click();
+                                }
+                            }
+                        }, 120); // Damos margen para que se encienda la lona en tu monitor
+                    }
+                }
+            }
+        });
 
 
 </script>
