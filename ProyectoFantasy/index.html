@@ -541,7 +541,7 @@
                     <!-- Tu gran terreno de juego horizontal -->
                     <div class="campo-futbol" id="campo-pizarra-jugadas" style="height: 580px !important; position: relative; z-index:2;">
                         <!-- Ficha fija inicial del Balón ⚽ Arrastrable -->
-                        <div id="ficha-balon-pizarra" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:26px; height:26px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; cursor:move; box-shadow:0 4px 8px rgba(0,0,0,0.5); z-index:12; user-select:none;">⚽</div>
+                        <div id="ficha-balon-pizarra" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:26px; height:26px;  border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; cursor:move; box-shadow:0 4px 8px rgba(0,0,0,0.5); z-index:12; user-select:none;">⚽</div>
                     </div>
                 </div>
 
@@ -611,103 +611,71 @@
     let partidoSeleccionadoActual = null;
     let jugadorSeleccionadoParaEditar = null;
 
-             // =======================================================================
               // =======================================================================
-        // FUNCIÓN MAESTRA DE NAVEGACIÓN CORREGIDA CON AUTO-MAQUETACIÓN DE CLASIFICACIÓN
+        // 📅 FUNCIÓN NATIVA ORIGINAL RESTAURADA: RECUPERA TU CARGA DE JUGADORES
         // =======================================================================
         function cambiarSeccion(idSeccionObjetivo) {
             console.log("Navegando de forma segura hacia la pestaña: " + idSeccionObjetivo);
             
-            // 1. MAPEADOR DE IDENTIFICADORES SEGUROS
-            if (idSeccionObjetivo === 'config' || idSeccionObjetivo === 'partidos') { idSeccionObjetivo = 'sec-config'; }
+            // CORRECCIÓN DE ID ORIGINAL: Sincronizamos con tus divs físicos
             if (idSeccionObjetivo === 'ficha-equipo') { idSeccionObjetivo = 'sec-ficha-equipo'; }
             if (idSeccionObjetivo === 'ficha-jugador') { idSeccionObjetivo = 'sec-ficha-jugador'; }
-            
-            // Unificamos el destino de la tabla de posiciones
-            if (idSeccionObjetivo === 'sec-clasificacion' || idSeccionObjetivo === 'clasificacion') { 
-                idSeccionObjetivo = 'clasificacion'; 
-            }
+            if (idSeccionObjetivo === 'partidos') { idSeccionObjetivo = 'sec-partidos'; }
+            if (idSeccionObjetivo === 'clasificacion') { idSeccionObjetivo = 'sec-clasificacion'; }
 
-            // 2. 🛡️ AUTO-INYECTOR INTEGRAL PREMIUM CONTRA CONTENEDORES INVISIBLES
-            let panelObjetivo = document.getElementById(idSeccionObjetivo);
-            
-            if (!panelObjetivo && idSeccionObjetivo === 'clasificacion') {
-                console.log("🛠️ Fabricando contenedor de posiciones y soldándolo al panel de inicio de forma visible...");
-                
-                panelObjetivo = document.createElement('div');
-                panelObjetivo.id = 'clasificacion';
-                panelObjetivo.className = 'panel'; // Aplica tu diseño translúcido original
-                panelObjetivo.style.width = '100%';
-                panelObjetivo.style.boxSizing = 'border-box';
-                panelObjetivo.style.padding = '20px';
-                panelObjetivo.style.display = 'none';
-
-                // Inyectamos el esqueleto idéntico a tu imagen de muestra en el propio acero del HTML
-                panelObjetivo.innerHTML = `
-                    <h2 style="color: #ff9900; text-transform: uppercase; font-size: 18px; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">🏆 Clasificación Oficial del Campeonato</h2>
-                    
-                    <div style="width: 100%; overflow-x: auto; background: rgba(0,0,0,0.4); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); box-sizing: border-box;">
-                        <table style="width: 100%; border-collapse: collapse; color: #fff; font-size: 12px; min-width: 900px; text-align: center;">
-                            <thead style="background: rgba(255,255,255,0.02); border-bottom: 2px solid rgba(255,255,255,0.1);">
-                                <tr>
-                                    <th colspan="3" style="text-align: left; padding: 10px 15px; color: #aaa; text-transform: uppercase;">Equipos del Torneo</th>
-                                    <th colspan="7" style="border-left: 1px solid #333; color: #ff9900; font-weight: 800;">TOTALES</th>
-                                    <th colspan="7" style="border-left: 1px solid #333; color: #00CC66;">EN CASA</th>
-                                    <th colspan="7" style="border-left: 1px solid #333; color: #4a90e2;">FUERA</th>
-                                </tr>
-                                <tr style="background: rgba(0,0,0,0.3); font-size: 11px; color: #aaa;">
-                                    <th style="width: 40px; padding: 8px;">POS</th>
-                                    <th style="width: 30px;"></th>
-                                    <th style="text-align: left; min-width: 150px;">CLUB</th>
-                                    <th style="border-left: 1px solid #333; color:#fff; font-weight:900;">PT</th>
-                                    <th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th>
-                                    <th style="border-left: 1px solid #333; color:#00CC66; font-weight:bold;">PT</th>
-                                    <th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th>
-                                    <th style="border-left: 1px solid #333; color:#4a90e2; font-weight:bold;">PT</th>
-                                    <th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cuerpo-filas-clasificacion-real">
-                                <tr>
-                                    <td colspan="24" style="padding: 30px; color: #ff9900;">⏳ Procesando marcadores relacionales de MySQL Workbench...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-
-                // Buscamos tu lona de escudos de inicio de bienvenida
-                let panelInicioFisico = document.getElementById('sec-inicio') || 
-                                        document.getElementById('sec-equipos') || 
-                                        document.getElementById('panel-principal');
-
-                if (panelInicioFisico && panelInicioFisico.parentNode) {
-                    panelInicioFisico.parentNode.appendChild(panelObjetivo);
-                } else {
-                    document.body.appendChild(panelObjetivo);
-                }
-            }
-
-            // 3. APAGADO MASIVO CONTROLADO DE TODAS LAS DEMÁS PESTAÑAS
+            // 1. Apagamos de forma masiva todos los paneles que tengan la clase css 'panel'
             let todosLosPaneles = document.querySelectorAll('.panel');
             if (todosLosPaneles.length > 0) {
                 todosLosPaneles.forEach(function(p) {
                     p.style.display = 'none';
                 });
+            } else {
+                let listaIdsViejos = ['sec-inicio', 'sec-partidos', 'sec-clasificacion', 'sec-ficha-equipo', 'sec-ficha-jugador', 'sec-jugadas'];
+                listaIdsViejos.forEach(function(id) {
+                    let cajaElemento = document.getElementById(id);
+                    if (cajaElemento) { 
+                        cajaElemento.style.display = 'none';
+                    }
+                });
             }
 
-            // 4. ENCENDIDO PRIORITARIO DE LA LONA SELECCIONADA
+            // 2. Encendemos el panel al que queremos viajar de forma segura
+            let panelObjetivo = document.getElementById(idSeccionObjetivo);
             if (panelObjetivo) {
-                panelObjetivo.style.setProperty('display', 'block', 'important');
-                
-                // Si acabamos de encender la clasificación, disparamos su calculador matemático de MySQL
-                if (idSeccionObjetivo === 'clasificacion') {
-                    if (typeof cargarTablaClasificacionOficialLaLiga === "function") {
-                        cargarTablaClasificacionOficialLaLiga();
-                    }
-                }
+                panelObjetivo.style.display = 'block';
             } else {
-                console.error("⚠️ Error de navegación: La lona con ID '" + idSeccionObjetivo + "' no existe en tu HTML.");
+                console.error("⚠️ Error de navegación: La lona con ID '" + idSeccionObjetivo + "' no existe in tu HTML.");
+            }
+
+            // =======================================================================
+            // 🤖 DISPARADOR ROBOTIZADO REPARADO: ENCIENDE TU VESTUARIO ORIGINAL
+            // =======================================================================
+            // Si el usuario pulsa en el menú lateral, abrimos la lona y pulsamos tu botón real
+            if (idSeccionObjetivo === 'sec-partidos') {
+                setTimeout(function() {
+                    // Localizamos tu carrusel superior original de la captura de pantalla
+                    let carruselOriginal = document.getElementById('lista-partidos-jornada-vagas') || 
+                                           document.querySelector('.carrusel-partidos');
+                    
+                    if (carruselOriginal) {
+                        // Buscamos tus botones redondeados nativos que ya cargan bien tus datos
+                        let primerBotonTuVersion = carruselOriginal.querySelector('.item-partido-btn') || 
+                                                   carruselOriginal.querySelector('button');
+                        
+                        if (primerBotonTuVersion) {
+                            console.log("🎯 ¡Botón nativo localizado! Ejecutando tu carga original de jugadores...");
+                            primerBotonTuVersion.click(); // 👈 PULSA TU BOTÓN BUENO RESTAURANDO TU CÉSPED AL 100%
+                        } else {
+                            console.warn("El carrusel superior está vacío en este instante. Esperando inyección...");
+                        }
+                    }
+                }, 80); // Damos un margen mínimo de milisegundos para que el monitor encienda el panel
+            }
+            // =======================================================================
+
+            // 3. Lanzador automático de tu Clasificación original
+            if (idSeccionObjetivo === 'sec-clasificacion' && typeof cargarTablaClasificacionOficialLaLiga === "function") {
+                cargarTablaClasificacionOficialLaLiga();
             }
         }
 

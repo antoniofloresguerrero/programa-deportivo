@@ -785,7 +785,7 @@ app.get('/jugadas', (req, res) => {
     });
 });
 
-// 3. RECUPERAR EL HISTORIAL DE MOVIMIENTOS DE UNA JUGADA (Rutas Duplicadas)
+
 // =======================================================================
 // 3. RECUPERAR EL HISTORIAL DE MOVIMIENTOS CORREGIDO (ENVÍA FILA ÚNICA)
 // =======================================================================
