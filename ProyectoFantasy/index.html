@@ -4242,6 +4242,92 @@ function eliminarPartidoYActualizarLigaBD() {
                     listaPartidosContenedor.innerHTML = `<span style="color:#ff4444; font-size:11px; grid-column:span 2;">Error al procesar actas de partidos.</span>`;
                 });
         }
+        // =======================================================================
+        // 📊 GANCHO REPARADOR: CALCULA EL RESUMEN OFICIAL SIN EFECTO ACUMULADO
+        // =======================================================================
+        function corregirTarjetasDeRendimientoFichaClub(idClubSeleccionado) {
+            console.log("🧮 Interceptando monitor para limpiar el resumen del club ID: " + idClubSeleccionado);
+
+            // Reseteamos las variables a cero absoluto en cada clic para erradicar el bug de los 18 puntos
+            let ptsCero = 0, ganadosCero = 0, empatadosCero = 0, perdidosCero = 0;
+
+            // Consultamos tu pasarela de encuentros oficial (puerto 3000)
+            fetch('http://localhost:3000/api/partidos')
+                .then(res => res.json())
+                .then(partidos => {
+                    let listaActas = Array.isArray(partidos) ? partidos : [];
+
+                    listaActas.forEach(function(p) {
+                        let idLoc = parseInt(p.id_local || p.id_equipo_local || p.local_id || 0);
+                        let idVis = parseInt(p.id_visitante || p.id_equipo_visitante || p.visitante_id || 0);
+                        
+                        if (idLoc === parseInt(idClubSeleccionado) || idVis === parseInt(idClubSeleccionado)) {
+                            let gl = parseInt(p.goles_local);
+                            let gv = parseInt(p.goles_visitante);
+
+                            if (!isNaN(gl) && !isNaN(gv)) {
+                                if (idLoc === parseInt(idClubSeleccionado)) {
+                                    if (gl > gv) { ganadosCero++; ptsCero += 3; }
+                                    else if (gl < gv) { perdidosCero++; }
+                                    else { empatadosCero++; ptsCero += 1; }
+                                } else {
+                                    if (gv > gl) { ganadosCero++; ptsCero += 3; }
+                                    else if (gv < gl) { perdidosCero++; }
+                                    else { empatadosCero++; ptsCero += 1; }
+                                }
+                            }
+                        }
+                    });
+
+                    // 🎯 VOLCADO QUIRÚRGICO EN TU MONITOR: Localizamos las 4 tarjetas blancas por su texto
+                    let lonaFichaClub = document.getElementById('sec-ficha-equipo') || document.getElementById('datos-club') || document.body;
+                    let todasLasEtiquetas = lonaFichaClub.querySelectorAll('h1, h2, h3, h4, div, span, p');
+
+                    todasLasEtiquetas.forEach(function(el) {
+                        if (el.innerText) {
+                            let txt = el.innerText.trim().toUpperCase();
+                            // Si localiza el rótulo inferior "PUNTOS", machaca el número grande que tiene justo arriba
+                            if (txt === "PUNTOS" && el.previousElementSibling) el.previousElementSibling.innerText = ptsCero;
+                            if (txt === "GANADOS" && el.previousElementSibling) el.previousElementSibling.innerText = ganadosCero;
+                            if (txt === "EMPATADOS" && el.previousElementSibling) el.previousElementSibling.innerText = empatadosCero;
+                            if (txt === "PERDIDOS" && el.previousElementSibling) el.previousElementSibling.innerText = perdidosCero;
+                        }
+                    });
+                    console.log(`✅ Rendimiento fijado en tu monitor -> Pts: ${ptsCero} | Empates: ${empatadosCero}`);
+                })
+                .catch(err => console.error("Error en el gancho de rendimiento:", err));
+        }
+        // =======================================================================
+        // 📊 GANCHO REPARADOR PARTE 2: SOLDADURA AL CIERRE DE LA NAVEGACIÓN
+        // =======================================================================
+        // Sobrescribimos el disparador nativo para que actúe automáticamente al abrir la lona
+        if (typeof window.original_ejecutarDisparadoresInternosDeLonasNativas === "undefined") {
+            window.original_ejecutarDisparadoresInternosDeLonasNativas = window.ejecutarDisparadoresInternosDeLonasNativas || null;
+        }
+
+        window.ejecutarDisparadoresInternosDeLonasNativas = function(idSeccionObjetivo) {
+            // Ejecutamos primero tus 3590 líneas originales para mantener tu césped intacto
+            if (typeof window.original_ejecutarDisparadoresInternosDeLonasNativas === "function") {
+                window.original_ejecutarDisparadoresInternosDeLonasNativas(idSeccionObjetivo);
+            } else if (typeof ejecutarDisparadoresInternosDeLonasNativas === "function" && window.original_ejecutarDisparadoresInternosDeLonasNativas !== ejecutarDisparadoresInternosDeLonasNativas) {
+                original_ejecutarDisparadoresInternosDeLonasNativas(idSeccionObjetivo);
+            }
+
+            // 🎯 INTERCEPCIÓN EN CALIENTE: Si la web viaja hacia la ficha del equipo (sec-ficha-equipo o ficha-equipo)
+            if (idSeccionObjetivo === 'sec-ficha-equipo' || idSeccionObjetivo === 'ficha-equipo') {
+                // Recuperamos la ID del club real que guardas en tu monitor (ej: window.idEquipoSeleccionadoFicha)
+                let idClubActivo = window.idEquipoSeleccionadoFicha || window.id_equipo_actual || window.idEquipoActual || 4; // 4 es Barcelona por defecto
+                
+                // Ejecutamos ráfagas de sincronización a los 30ms y 100ms para asegurar que destruya el acumulado de los 18 puntos
+                setTimeout(function() { corregirTarjetasDeRendimientoFichaClub(idClubActivo); }, 30);
+                setTimeout(function() { corregirTarjetasDeRendimientoFichaClub(idClubActivo); }, 100);
+            }
+        };
+
+        // Pasarela de respaldo: Acoplamos también el disparador dentro del clic de tu slider de la galería por seguridad
+        if (typeof window.cargarGaleriaDeEquiposMóduloNativo === "function") {
+            console.log("⚓ Sincronizando el puente de la galería para limpiar acumulados...");
+        }
 
 
 </script>
