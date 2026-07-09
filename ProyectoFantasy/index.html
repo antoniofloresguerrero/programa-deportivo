@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>LaLiga Fantasy 2025/2026 - Conexión MySQL</title>
+    <title>LaLiga Fantasy 2026/2027 - Conexión MySQL</title>
              <style>
         /* FONDO GENERAL MAESTRO EN ALTA DEFINICIÓN */
         html, body {
@@ -383,8 +383,14 @@
                 <div style="background: rgba(12, 12, 12, 0.9); border-radius: 10px; border: 1px solid #333; padding: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); text-align: center;">
             <!-- REPARADO DE FIN DE CARRETE: aspect-ratio prohíbe al navegador estirar la foto verticalmente -->
 <div id="det-jug-foto" style="width: 135px !important; height: 135px !important; max-width: 135px !important; max-height: 135px !important; border-radius: 50% !important; border: 3px solid #4a90e2; margin: 0 auto 15px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex !important; align-items: center; justify-content: center; overflow: hidden !important; box-sizing: border-box !important; background: transparent !important;">
-    <img id="det-jug-foto-imagen-real" src="http://localhost:3000/fotos/silueta.jpg" style="width: 100% !important; height: 100% !important; min-width: 100% !important; min-height: 100% !important; aspect-ratio: 1 / 1 !important; object-fit: cover !important; object-position: center top !important; border-radius: 50% !important; display: block !important;">
+    
+    <!-- CORREGIDO: Reemplazamos la ruta física silueta.jpg por un avatar vectorial SVG en texto Base64 para erradicar el error 404 de raíz -->
+    <img id="det-jug-foto-imagen-real" 
+         src="data:image/svg+xml;utf8,<svg xmlns='http://w3.org' viewBox='0 0 24 24' fill='%23666666'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" 
+         style="width: 100% !important; height: 100% !important; min-width: 100% !important; min-height: 100% !important; aspect-ratio: 1 / 1 !important; object-fit: cover !important; object-position: center top !important; border-radius: 50% !important; display: block !important;">
+
 </div>
+
 
 
 
@@ -631,26 +637,42 @@
                     panelGaleria = document.createElement('div');
                     panelGaleria.id = 'sec-equipos-galeria';
                     panelGaleria.className = 'panel'; 
+                    // 🌟 CONFIGURACIÓN CORRECTA ANTI-ESPACIO: Forzamos la subida real en el monitor
                     panelGaleria.style.width = '100%';
                     panelGaleria.style.boxSizing = 'border-box';
-                    panelGaleria.style.padding = '20px';
                     panelGaleria.style.display = 'none';
+                    
+                    // Aplicamos el formato oficial para inyectar !important en JavaScript de forma indestructible
+                    panelGaleria.style.setProperty('margin-top', '55px', 'important'); // Justo debajo de tu barra superior
+                    panelGaleria.style.setProperty('padding-top', '0px', 'important'); // Eliminamos huecos en blanco superiores
+                    panelGaleria.style.setProperty('padding-bottom', '20px', 'important');
+                    panelGaleria.style.setProperty('padding-left', '20px', 'important');
+                    panelGaleria.style.setProperty('padding-right', '20px', 'important');
 
+                   // CORREGIDO: Reducimos padding y márgenes a cero para pegar el contenido arriba
+                   // Inyectamos la estructura compactada
                     panelGaleria.innerHTML = `
-                        <h2 style="color: #ff9900; text-transform: uppercase; font-size: 18px; margin-bottom: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">🛡️ Clubes Oficiales de LaLiga</h2>
-                        <div id="rejilla-galeria-equipos-real" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; width: 100%; box-sizing: border-box; margin-bottom: 40px;">
-                            <span style="color:#00CC66; font-size:13px; font-weight:bold;">⏳ Conectando con MySQL Workbench...</span>
+                        <h2 style="color: #ff9900; text-transform: uppercase; font-size: 15px; margin: 0 0 10px 0 !important; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">🛡️ Clubes Oficiales de LaLiga</h2>
+                        
+                        <div id="rejilla-galeria-equipos-real" class="carrusel-escudos" style="max-width: 100%; margin: 0 0 15px 0 !important; justify-content: flex-start; padding: 10px !important; box-sizing: border-box;">
+                            <span style="color:#00CC66; font-size:12px; font-weight:bold;">⏳ Cargando escudos oficiales...</span>
                         </div>
 
-                        <!-- 🌟 NUEVA ZONA: Slider Horizontal del Top 5 Cracks en Puntos -->
-                        <h2 style="color: #ff9900; text-transform: uppercase; font-size: 16px; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px;">⭐ Cracks del Campeonato (Top 5 Puntos)</h2>
+                        <h2 style="color: #ff9900; text-transform: uppercase; font-size: 14px; margin: 15px 0 10px 0 !important; text-shadow: 0 2px 4px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px;">⭐ Cracks del Campeonato (Top 5 Puntos)</h2>
                         <div id="slider-top-puntuadores-real" style="display: flex; gap: 15px; overflow-x: auto; width: 100%; padding: 15px; background: rgba(10, 10, 10, 0.6); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); box-sizing: border-box; scroll-behavior: smooth;">
-                            <span style="color:#aaa; font-size:12px;">⏳ Calculando promedios de rendimiento...</span>
+                            <span style="color:#aaa; font-size:12px;">⏳ Cargando promedios reales...</span>
                         </div>
                     `;
 
+
                     let panelInicio = document.getElementById('sec-inicio') || document.body;
-                    if (panelInicio.parentNode) { panelInicio.parentNode.appendChild(panelGaleria); }
+                                        // DEFECTO REPARADO: Forzamos la inserción en la parte superior (Prepend) en lugar de mandarlo al fondo
+                    let contenedorMaestroApp = panelInicio.parentNode || document.body;
+                    if (contenedorMaestroApp) {
+                        // Lo soldamos exactamente antes del panel de inicio, obligándolo a ser el primer elemento visible
+                        contenedorMaestroApp.insertBefore(panelGaleria, panelInicio);
+                    }
+
                 }
             }
 
@@ -687,6 +709,26 @@
                     if (cajaElemento) { cajaElemento.style.display = 'none'; }
                 });
             }
+                        // [Busca el final del bloque de ocultar paneles e inyecta exactamente esto:]
+            // =======================================================================
+            // 🛡️ FILTRO ANTI-RESIDUOS: OCULTA EL CARRUSEL SUELTO DE LA PÁGINA DE INICIO
+            // =======================================================================
+            // Buscamos el carrusel de escudos original de tu pantalla principal
+            let carruselInicioFisico = document.querySelector('body > .carrusel-escudos') || 
+                                       document.getElementById('carrusel-superior-inicio') ||
+                                       document.querySelector('.carrusel-escudos:not(#rejilla-galeria-equipos-real)');
+
+            if (carruselInicioFisico) {
+                // Si el usuario viaja a la nueva galería de Equipos o a la Clasificación, fulminamos la barra inferior
+                if (idSeccionObjetivo === 'sec-equipos-galeria' || idSeccionObjetivo === 'clasificacion' || idSeccionObjetivo === 'sec-partidos') {
+                    carruselInicioFisico.style.setProperty('display', 'none', 'important');
+                } else {
+                    // Si regresa a la pantalla de inicio o bienvenida, la volvemos a encender de forma limpia
+                    carruselInicioFisico.style.setProperty('display', 'flex', 'important');
+                }
+            }
+            // =======================================================================
+
 
             // 5. ENCENDIDO PRIORITARIO DE LA PESTAÑA SOLICITADA
             if (panelObjetivo) {
@@ -1506,7 +1548,7 @@
         // Cuando todos los jugadores se hayan guardado en MySQL Workbench, refrescamos la pantalla
         Promise.all(promesas)
             .then(() => {
-                alert("⚽ ¡Alineación y posiciones guardadas con éxito en MySQL Workbench!");
+                alert("⚽ ¡Alineación y posiciones guardadas con éxito en Base de Datos");
                 partidoSeleccionadoActual.goles_local = parseInt(document.getElementById('marcador-goles-l').value) || 0;
                 partidoSeleccionadoActual.goles_visitante = parseInt(document.getElementById('marcador-goles-v').value) || 0;
                 abrirPartidoEspecificoDesdeBD(partidoSeleccionadoActual);
@@ -2909,7 +2951,7 @@ function eliminarPartidoYActualizarLigaBD() {
             })
             .then(res => res.json())
             .then(data => {
-                alert(`🏟️ ¡La jugada "${nombreEscrito}" ha sido grabada con éxito en tu MySQL Workbench!`);
+                alert(`🏟️ ¡La jugada "${nombreEscrito}" grabado con éxito en tu Base de datos!`);
                 document.getElementById('jugada-nombre-input').value = "";
                 if (typeof recuperarSelectorJugadasDeBD === "function") {
                     recuperarSelectorJugadasDeBD(typeof idEquipoSeleccionadoFicha !== "undefined" ? idEquipoSeleccionadoFicha : 1);
@@ -2947,7 +2989,7 @@ function eliminarPartidoYActualizarLigaBD() {
             let sel = document.getElementById('lista-jugadas-guardadas-sel');
             if (!sel) return;
             
-            console.log("Sincronizando el desplegable de jugadas con MySQL Workbench...");
+            console.log("Sincronizando jugada con base de datos...");
 
             fetch('http://localhost:3000/api/jugadas?id_equipo=' + id_equipo)
                 .then(res => {
@@ -3080,14 +3122,14 @@ function eliminarPartidoYActualizarLigaBD() {
             let id_jugada = document.getElementById('lista-jugadas-guardadas-sel').value;
             if (!id_jugada) return alert("Por favor, selecciona primero una jugada guardada en el desplegable para poder eliminarla.");
 
-            if (!confirm("⚠️ ¿Estás seguro de que deseas borrar esta jugada ensayada de la base de datos de forma permanente?")) return;
+            if (!confirm("⚠️ ¿Estás seguro de que deseas borrar esta jugada de la base de datos?")) return;
 
             fetch('http://localhost:3000/api/jugadas/' + id_jugada, {
                 method: 'DELETE'
             })
             .then(res => res.json())
             .then(() => {
-                alert("🗑️ Jugada eliminada correctamente de MySQL Workbench.");
+                alert("🗑️ Jugada eliminada correctamente de la base de datos.");
                 iniciarNuevaJugadaPizarra();
                 recuperarSelectorJugadasDeBD(idEquipoSeleccionadoFicha);
             })
@@ -3120,7 +3162,7 @@ function eliminarPartidoYActualizarLigaBD() {
                 if (pFicha) pFicha.style.display = 'block';
             }
 
-            console.log("📥 Consultando historial consolidado de MySQL para el jugador ID: " + id_jugador);
+            console.log("📥 Consultando historial de base de datos para el jugador ID: " + id_jugador);
 
             fetch('http://localhost:3000/api/jugadores/detalle/' + id_jugador)
                 .then(res => res.json())
@@ -3140,7 +3182,7 @@ function eliminarPartidoYActualizarLigaBD() {
                         let nombreArchivoImagen = j.foto_ruta || j.foto || "silueta.jpg";
                         nombreArchivoImagen = nombreArchivoImagen.replace(/['"]+/g, ''); // Limpia las comillas residuales &quot;
                         
-                        console.log("🎯 Cargando imagen física en proporción real: " + nombreArchivoImagen);
+                        console.log("🎯 Cargando imagen : " + nombreArchivoImagen);
                         imgReal.src = `http://localhost:3000/fotos/${nombreArchivoImagen}`;
                     }
 
@@ -3263,7 +3305,7 @@ function eliminarPartidoYActualizarLigaBD() {
         // D. BAJA DIRECTA POR CASCADA (DELETE)
         function ejecutarBajaJugadorMySQL() {
             if (!idJugadorSeleccionadoPerfil) return;
-            if (!confirm("⚠️ ¿Estás completamente seguro de que deseas dar de baja a este futbolista? Se eliminarán de forma física sus actas asociadas en tu MySQL Workbench.")) return;
+            if (!confirm("⚠️ ¿Estás completamente seguro de que deseas dar de baja a este futbolista?")) return;
 
             fetch('http://localhost:3000/api/jugadores/' + idJugadorSeleccionadoPerfil, {
                 method: 'DELETE'
@@ -3948,39 +3990,26 @@ function eliminarPartidoYActualizarLigaBD() {
         }
 
 
-               // =======================================================================
-        // ⭐ SLIDER CRACKS DEFINITIVO: BORRA EL BLOQUEO DE JUGADOR ANTERIOR
+            // =======================================================================
+        // ⭐ SLIDER TOP CRACKS PARTE 1: DESCARGA Y MAQUETACIÓN DE BOTONES
         // =======================================================================
         function cargarSliderTopPuntuadoresOoficial() {
             let sliderBox = document.getElementById('slider-top-puntuadores-real');
             if (!sliderBox) return;
+            sliderBox.innerHTML = ""; // Limpiamos residuos y el cartel de espera
 
-            console.log("⚓ Descargando cracks oficiales de tu base de datos para el Top 5...");
+            console.log("⚓ Solicitando el Top 5 de puntos real directo de acta_partido...");
 
-            fetch('http://localhost:3000/api/jugadores')
+            // Atacamos directamente a tu endpoint calibrado de acta_partido
+            fetch('http://localhost:3000/api/jugadores/top-puntos')
                 .then(res => res.json())
-                .then(jugadores => {
-                    let listaCracks = Array.isArray(jugadores) ? jugadores : [];
-                    sliderBox.innerHTML = ""; 
-
-                    if (listaCracks.length === 0) {
-                        sliderBox.innerHTML = `<span style="color:#aaa; font-size:12px; padding:10px;">⚠️ No se registran futbolistas en la base de datos.</span>`;
+                .then(top5Real => {
+                    if (!Array.isArray(top5Real) || top5Real.length === 0) {
+                        sliderBox.innerHTML = `<span style="color:#aaa; font-size:12px; padding:10px;">⚠️ No hay datos de puntos en acta_partido todavía.</span>`;
                         return;
                     }
 
-                    listaCracks.forEach(function(j) {
-                        let ptsBase = j.puntos !== undefined && j.puntos !== null ? parseFloat(j.puntos) : 
-                                      (j.pts !== undefined && j.pts !== null ? parseFloat(j.pts) : 
-                                      (j.puntos_acumulados !== undefined ? parseFloat(j.puntos_acumulados) : 0));
-                        j.puntos_reales_tabla = !isNaN(ptsBase) ? ptsBase : 0;
-                    });
-
-                    listaCracks.sort(function(a, b) {
-                        return b.puntos_reales_tabla - a.puntos_reales_tabla;
-                    });
-
-                    let top5Real = listaCracks.slice(0, 5);
-
+                    // Renderizamos simétricamente los 5 cracks de tu imagen de Workbench
                     top5Real.forEach(function(j, index) {
                         let divCard = document.createElement('div');
                         divCard.style.flex = '1'; divCard.style.minWidth = '175px';
@@ -4000,89 +4029,219 @@ function eliminarPartidoYActualizarLigaBD() {
                             this.style.background = 'rgba(255, 255, 255, 0.03)'; this.style.transform = 'scale(1)'; this.style.borderColor = colorBorde;
                         };
 
-                        let idJugadorReal = j.id_jugador || j.id || j.idjugador;
+                        let idJugadorReal = parseInt(j.id_jugador);
                         let nombreFormateado = (j.nombre || "Jugador").trim().toUpperCase();
-                        let archivoFotoReal = (j.foto_ruta || j.foto || "silueta.jpg").replace(/['"]+/g, '').trim();
+                        let archivoFotoReal = (j.foto_ruta || "silueta.jpg").replace(/['"]+/g, '').trim();
 
-                        // =======================================================================
-                        // ✈️ ACCIÓN CLIC CORREGIDA: SOREESCRIBE EL CONTROL DE ID ANTES DE VIAJAR
-                        // =======================================================================
+                        // Al hacer clic, pasamos el control a la Parte 2 inyectando los datos relacionales
                         divCard.onclick = function() {
-                            console.log("🚀 Sobreescribiendo punteros rígidos de control para la ID: " + idJugadorReal);
-                            
-                            // A. Sincronizamos las propiedades del objeto j por seguridad
-                            j.id_jugador = idJugadorReal;
-                            j.id = idJugadorReal;
-                            j.foto_ruta = archivoFotoReal;
-                            j.puntos = j.puntos_reales_tabla;
-
-                            // B. 🎯 TRUCO DE CONTROL ABSOLUTO: Localizamos todas las variables de ID del archivo
-                            // de 3590 líneas que puedan bloquear el renderizado y las forzamos al nuevo jugador
-                            let nombresVariablesDeIdentificador = [
-                                'idJugadorSeleccionado', 'id_jugador_actual', 'idJugadorActual', 
-                                'idJugador', 'jugadorSeleccionadoId', 'id_jugador_ficha', 'idFichaJugadorActual'
-                            ];
-                            
-                            nombresVariablesDeIdentificador.forEach(function(nomVar) {
-                                window[nomVar] = idJugadorReal; // Machacamos el valor antiguo
-                            });
-
-                            // C. Alimentamos las listas de memoria del frontend
-                            let variablesDeMemoriaLiga = ['listaJugadores', 'jugadoresGlobales', 'jugadores', 'misJugadores', 'listaJugadoresClub'];
-                            variablesDeMemoriaLiga.forEach(function(nombreVariable) {
-                                if (typeof window[nombreVariable] === "undefined" || !Array.isArray(window[nombreVariable])) {
-                                    window[nombreVariable] = [];
-                                }
-                                if (!window[nombreVariable].some(x => (x.id_jugador == idJugadorReal || x.id == idJugadorReal))) {
-                                    window[nombreVariable].push(j);
-                                }
-                            });
-
-                            // D. Viajamos limpiamente a la lona grande de perfiles
-                            if (typeof cambiarSeccion === "function") {
-                                cambiarSeccion('ficha-jugador');
-                            }
-
-                            // E. Despertamos tus funciones nativas enviando la nueva ID relacional limpia
-                            setTimeout(function() {
-                                if (typeof window.verPerfilJugador === "function") window.verPerfilJugador(idJugadorReal);
-                                else if (typeof verPerfilJugador === "function") verPerfilJugador(idJugadorReal);
-                                
-                                if (typeof window.mostrarPerfilJugador === "function") window.mostrarPerfilJugador(idJugadorReal);
-                                else if (typeof mostrarPerfilJugador === "function") mostrarPerfilJugador(idJugadorReal);
-                                
-                                if (typeof window.cargarEstadisticasJugador === "function") window.cargarEstadisticasJugador(idJugadorReal);
-                                else if (typeof cargarEstadisticasJugador === "function") cargarEstadisticasJugador(idJugadorReal);
-                                
-                                if (typeof window.cargarDatosJugador === "function") window.cargarDatosJugador(j);
-                                else if (typeof cargarDatosJugador === "function") cargarDatosJugador(j);
-                            }, 40);
+                            inyectarExpedienteNativoPorIdsFijos(idJugadorReal, nombreFormateado, archivoFotoReal, j);
                         };
-                        // =======================================================================
 
                         divCard.innerHTML = `
                             <div style="position: absolute; top: 8px; left: 10px; font-size: 14px;">${medalla}</div>
-                            
                             <div style="width: 58px; height: 58px; border-radius: 50%; border: 2px solid #00CC66; overflow: hidden; background: #222; box-shadow: 0 4px 10px rgba(0,0,0,0.4); margin-bottom: 8px;">
-                                <img src="http://localhost:3000/fotos/${archivoFotoReal}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='http://localhost:3000/fotos/silueta.jpg';">
+                                <img src="http://localhost:3000/fotos/${archivoFotoReal}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://w3.org\\' viewBox=\\'0 0 24 24\\' fill=\\'%23666666\\'><path d=\\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\\'/></svg>';">
                             </div>
-
                             <strong style="color: #fff; font-size: 12px; text-transform: uppercase; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; letter-spacing: 0.3px;">${nombreFormateado}</strong>
-                            <span style="color: #666; font-size: 10px; font-weight: bold; text-transform: uppercase; margin-top: 2px;">${j.posicion || "JUGADOR"}</span>
-                            
+                            <span style="color: #666; font-size: 10px; font-weight: bold; text-transform: uppercase; margin-top: 2px;">${j.posicion || "MED"}</span>
                             <div style="margin-top: 8px; background: rgba(0, 204, 102, 0.15); border: 1px solid #00CC66; color: #00CC66; font-size: 11px; font-weight: 800; padding: 2px 10px; border-radius: 20px;">
-                                ${j.puntos_reales_tabla} PTS
+                                ${parseFloat(j.puntos_totales || 0).toFixed(1)} PTS
                             </div>
                         `;
-
                         sliderBox.appendChild(divCard);
                     });
                 })
-                .catch(err => {
-                    console.error("Error al compilar el Slider Top 5 desde MySQL:", err);
-                });
+                .catch(err => console.error("Error en la Parte 1 del slider:", err));
         }
 
+        // =======================================================================
+        // ⭐ SLIDER CRACKS PARTE 2-A: CAPTURA DE MANDOS Y COLUMNA IZQUIERDA
+        // =======================================================================
+        function inyectarExpedienteNativoPorIdsFijos(idJugadorReal, nombreFormateado, archivoFotoReal, objetoTop5) {
+            console.log("🤖 Inyector Maestro: Alimentando expediente físico para ID: " + idJugadorReal);
+
+            // 1. Sincronizamos las variables globales rígidas de control de ID de tus 3590 líneas
+            window.idJugadorSeleccionado = idJugadorReal;
+            window.id_jugador_actual = idJugadorReal;
+            window.idJugadorActual = idJugadorReal;
+            window.id_jugador_ficha = idJugadorReal;
+            window.idEquipoSeleccionadoFicha = parseInt(objetoTop5.id_equipo);
+
+            // 2. Viajamos limpiamente a tu lona usando tu ID exacto de panel
+            if (typeof cambiarSeccion === "function") {
+                cambiarSeccion('sec-ficha-jugador');
+            } else {
+                document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
+                let pJugador = document.getElementById('sec-ficha-jugador');
+                if (pJugador) pJugador.style.display = 'block';
+            }
+
+            // 3. Capturamos los elementos físicos exactos de la COLUMNA IZQUIERDA de tu HTML
+            let txtNombreCabecera = document.getElementById('det-jug-nombre-cabecera');
+            let imgFotoFicha = document.getElementById('det-jug-foto-imagen-real');
+            let txtPosicion = document.getElementById('det-jug-posicion');
+            let txtNombreCompleto = document.getElementById('det-jug-nombre-completo');
+            let txtDorsal = document.getElementById('det-jug-dorsal');
+
+            // Descargamos el expediente masivo de la API para rescatar estadísticas
+            fetch('http://localhost:3000/api/jugadores')
+                .then(res => res.json())
+                .then(dataJugadores => {
+                    let listaCompleta = Array.isArray(dataJugadores) ? dataJugadores : [];
+                    let crackEncontrado = listaCompleta.find(x => parseInt(x.id_jugador || x.id) === idJugadorReal);
+
+                    // Alimentamos tus arrays globales por si tu código original los lee
+                    let nombresListasGlobales = ['listaJugadores', 'jugadoresGlobales', 'jugadores', 'misJugadores', 'listaJugadoresClub'];
+                    nombresListasGlobales.forEach(function(nomVar) {
+                        if (typeof window[nomVar] === "undefined" || !Array.isArray(window[nomVar])) { window[nomVar] = []; }
+                        if (crackEncontrado && !window[nomVar].some(x => parseInt(x.id_jugador || x.id) === idJugadorReal)) {
+                            window[nomVar].push(crackEncontrado);
+                        }
+                    });
+
+                    let dorsalBD = crackEncontrado ? (crackEncontrado.dorsal || "Fantasy") : "Fantasy";
+                    let archivoFotoFinal = crackEncontrado ? (crackEncontrado.foto_ruta || archivoFotoReal) : archivoFotoReal;
+
+                    // Estampamos los valores en tus IDs físicos de la COLUMNA IZQUIERDA
+                    if (txtNombreCabecera) txtNombreCabecera.innerText = "🏃 PERFIL: " + nombreFormateado;
+                    if (txtPosicion) txtPosicion.innerText = (objetoTop5.posicion || "MED").toUpperCase();
+                    if (txtNombreCompleto) txtNombreCompleto.innerText = (objetoTop5.nombre || "Jugador").trim();
+                    if (txtDorsal) txtDorsal.innerText = dorsalBD;
+                    
+                    if (imgFotoFicha) {
+                        imgFotoFicha.src = "http://localhost:3000/fotos/" + archivoFotoFinal.replace(/['"]+/g, '');
+                    }
+
+                    // Pasamos el flujo de datos a la Parte 2-B para rellenar la grilla de rendimiento
+                    completarGrillaDeRendimientoDerechaFicha(objetoTop5, crackEncontrado, idJugadorReal);
+                })
+                .catch(err => console.error("Error al inyectar datos en la columna izquierda:", err));
+        }
+        // =======================================================================
+        // ⭐ SLIDER CRACKS PARTE 2-B: CASILLEROS MATEMÁTICOS DE RENDIMIENTO
+        // =======================================================================
+        function completarGrillaDeRendimientoDerechaFicha(objetoTop5, crackEncontrado, idJugadorReal) {
+            // Localizamos los casilleros exactos de la GRILLA DE RENDIMIENTO de tu HTML
+            let statPtsTotales = document.getElementById('stat-jug-pts-totales');
+            let statPtsMedia = document.getElementById('stat-jug-pts-media');
+            let statPartidos = document.getElementById('stat-jug-partidos');
+            let statGoles = document.getElementById('stat-jug-goles');
+            let statTarjetas = document.getElementById('stat-jug-tarjetas');
+            let statMinutos = document.getElementById('stat-jug-minutos');
+
+            // Procesamos los promedios numéricos reales contra nulos
+            let totalPuntos = parseFloat(objetoTop5.puntos_totales || 0);
+            let totalPartidos = parseInt(objetoTop5.partidos_disputados || 1);
+            if (totalPartidos <= 0) totalPartidos = 1;
+
+            let golesBD = crackEncontrado ? (crackEncontrado.goles || crackEncontrado.goles_anotados || 0) : 0;
+            let amarillasBD = crackEncontrado ? (crackEncontrado.tarjetas_amarillas || crackEncontrado.amarillas || 0) : 0;
+            let rojasBD = crackEncontrado ? (crackEncontrado.tarjetas_rojas || crackEncontrado.rojas || 0) : 0;
+            let minutosBD = crackEncontrado ? (crackEncontrado.minutos_jugados || crackEncontrado.minutos || 0) : 0;
+
+            // Estampamos las matemáticas en la GRILLA DE RENDIMIENTO de forma fija e instantánea
+            if (statPtsTotales) statPtsTotales.innerText = totalPuntos.toFixed(1);
+            if (statPtsMedia) statPtsMedia.innerText = (totalPuntos / totalPartidos).toFixed(1) + " Pts";
+            if (statPartidos) statPartidos.innerText = totalPartidos;
+            if (statGoles) statGoles.innerText = golesBD;
+            if (statTarjetas) statTarjetas.innerText = `${amarillasBD} / ${rojasBD}`;
+            if (statMinutos) statMinutos.innerText = minutosBD + "'";
+
+            // Pasamos el flujo a la última parte para fabricar el listado inferior de botones
+            poblarListaInferiorDePartidosFicha(objetoTop5, idJugadorReal);
+        }
+        // =======================================================================
+        // ⭐ SLIDER CRACKS PARTE 2-C: EXTRACTOR DIRECTO DE NOMBRES EN MEMORIA
+        // =======================================================================
+        function poblarListaInferiorDePartidosFicha(objetoTop5, idJugadorReal) {
+            let listaPartidosContenedor = document.getElementById('perfil-jugador-lista-partidos-links');
+            if (!listaPartidosContenedor) return;
+
+            listaPartidosContenedor.innerHTML = ""; // Purgamos botones anteriores
+            let idClubBuscar = parseInt(objetoTop5.id_equipo);
+
+            console.log("⚓ Generando histórico de actas de partidos para el club ID: " + idClubBuscar);
+
+            // 1. Consultamos de forma limpia la tabla de partidos de tu servidor Node.js
+            fetch('http://localhost:3000/api/partidos')
+                .then(res => res.json())
+                .then(dataPartidos => {
+                    let partidosLista = Array.isArray(dataPartidos) ? dataPartidos : [];
+                    
+                    // Filtramos únicamente los encuentros donde haya participado el club de este futbolista
+                    let partidosDelClub = partidosLista.filter(function(p) {
+                        let locID = parseInt(p.id_local || p.id_equipo_local || p.local_id || 0);
+                        let visID = parseInt(p.id_visitante || p.id_equipo_visitante || p.visitante_id || 0);
+                        return locID === idClubBuscar || visID === idClubBuscar;
+                    });
+
+                    if (partidosDelClub.length === 0) {
+                        listaPartidosContenedor.innerHTML = `<span style="color:#666; font-size:11px; grid-column:span 2; padding:5px;">No hay encuentros registrados para este club esta jornada.</span>`;
+                        return;
+                    }
+
+                    // 2. Creamos los botones elásticos interactivos en tu monitor
+                    partidosDelClub.forEach(function(part) {
+                        let btnPartido = document.createElement('button');
+                        btnPartido.className = "btn-g";
+                        btnPartido.style.background = "rgba(255,255,255,0.03)";
+                        btnPartido.style.color = "#aaa";
+                        btnPartido.style.border = "1px solid #333";
+                        btnPartido.style.borderRadius = "4px";
+                        btnPartido.style.padding = "6px 8px";
+                        btnPartido.style.fontSize = "11px";
+                        btnPartido.style.fontWeight = "bold";
+                        btnPartido.style.cursor = "pointer";
+                        btnPartido.style.textAlign = "center";
+                        btnPartido.style.transition = "all 0.2s";
+
+                        btnPartido.onmouseenter = function() { this.style.background = "rgba(255,255,255,0.08)"; this.style.color = "#fff"; };
+                        btnPartido.onmouseleave = function() { this.style.background = "rgba(255,255,255,0.03)"; this.style.color = "#aaa"; };
+
+                        let idLocPart = parseInt(part.id_local || part.id_equipo_local || part.local_id);
+                        let idVisPart = parseInt(part.id_visitante || part.id_equipo_visitante || part.visitante_id);
+
+                        // 🔍 ALGORITMO EXTACTOR MAESTRO: Si la base de datos no envía el nombre del club,
+                        // lo leemos del almacén local 'window.listaEquipos' que creamos al rellenar los escudos de arriba
+                        let txtLocal = "LOCAL";
+                        let txtVisit = "VISITANTE";
+
+                        if (window.listaEquipos && Array.isArray(window.listaEquipos)) {
+                            let matchLoc = window.listaEquipos.find(x => parseInt(x.id_equipo || x.id) === idLocPart);
+                            let matchVis = window.listaEquipos.find(x => parseInt(x.id_equipo || x.id) === idVisPart);
+                            if (matchLoc) txtLocal = matchLoc.nombre;
+                            if (matchVis) txtVisit = matchVis.nombre;
+                        }
+
+                        // Si vinieran nombres en las celdas directas del endpoint partidos, los priorizamos
+                        if (part.nombre_local || part.local_nombre) txtLocal = part.nombre_local || part.local_nombre;
+                        if (part.nombre_visitante || part.visitante_nombre) txtVisit = part.nombre_visitante || part.visitante_nombre;
+
+                        // Limpiamos los textos a mayúsculas rígidas estables
+                        txtLocal = txtLocal.toString().trim().toUpperCase().replace(/ /g, "");
+                        txtVisit = txtVisit.toString().trim().toUpperCase().replace(/ /g, "");
+
+                        let gL = part.goles_local !== undefined && part.goles_local !== null ? part.goles_local : 0;
+                        let gV = part.goles_visitante !== undefined && part.goles_visitante !== null ? part.goles_visitante : 0;
+
+                        // Clavamos el rótulo real (Ej: REALMADRID 3 - 1 ALAVÉS)
+                        btnPartido.innerText = `${txtLocal} ${gL} - ${gV} ${txtVisit}`;
+                        listaPartidosContenedor.appendChild(btnPartido);
+                    });
+
+                    // 3. Lanzamos tus hilos de fondo por si tus 3590 líneas pintan alguna subtabla extra
+                    setTimeout(function() {
+                        if (typeof window.verPerfilJugador === "function") window.verPerfilJugador(idJugadorReal);
+                        if (typeof window.mostrarPerfilJugador === "function") window.mostrarPerfilJugador(idJugadorReal);
+                        if (typeof window.cargarEstadisticasJugador === "function") window.cargarEstadisticasJugador(idJugadorReal);
+                    }, 50);
+                })
+                .catch(err => {
+                    console.error("Error al poblar la botonera inferior de partidos:", err);
+                    listaPartidosContenedor.innerHTML = `<span style="color:#ff4444; font-size:11px; grid-column:span 2;">Error al procesar actas de partidos.</span>`;
+                });
+        }
 
 
 </script>

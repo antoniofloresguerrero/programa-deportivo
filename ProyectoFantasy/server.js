@@ -19,9 +19,6 @@ app.use('/videos', express.static(path.join(__dirname, 'videos')));
 app.use('/escudos', express.static(path.join(__dirname, 'escudos')));
 
 
-
-
-// CONFIGURACIÓN DE CONEXIÓN CON CAPTURA DE ERRORES MEJORADA
 // CONFIGURACIÓN DE CONEXIÓN ACTUALIZADA CON EL NUEVO USUARIO
 const db = mysql.createConnection({
     host: 'localhost',
@@ -40,7 +37,7 @@ db.connect(function(err) {
         console.error('==================================================');
         return;
     }
-    console.log('✅ ¡Conectado con éxito a MySQL Workbench (fantasy_liga)!');
+    console.log('✅ ¡Conectado con éxito a MySQL Workbench (flores futbol)!');
 });
 
 // 1. OBTENER JORNADAS
@@ -1047,6 +1044,70 @@ app.get('/api/partidos', (req, res) => {
 });
 
 // =======================================================================
+// 🏆 ENDPOINT TOP CRACKS: CORREGIDO CON ID_EQUIPO Y LECTURA DE ACTA_PARTIDO
+// =======================================================================
+app.get('/api/jugadores/top-puntos', (req, res) => {
+    console.log("⚓ Descargando el Top 5 de puntos real directo de acta_partido con ID de club...");
+    
+    // 🎯 REPARACIÓN DE LA QUERY: Traemos j.id_equipo haciendo un INNER JOIN limpio
+    const queryTopReal = `
+        SELECT 
+            j.id_jugador,
+            j.id_equipo,
+            j.nombre,
+            j.posicion,
+            j.foto_ruta,
+            (SELECT COUNT(*) FROM fantasy_liga.acta_partido WHERE id_jugador = j.id_jugador) AS partidos_disputados,
+            (SELECT SUM(puntos) FROM fantasy_liga.acta_partido WHERE id_jugador = j.id_jugador) AS puntos_totales
+        FROM fantasy_liga.jugadores j
+        INNER JOIN fantasy_liga.acta_partido ap ON j.id_jugador = ap.id_jugador
+        GROUP BY j.id_jugador, j.id_equipo, j.nombre, j.posicion, j.foto_ruta
+        ORDER BY puntos_totales DESC
+        LIMIT 5`;
+
+    db.query(queryTopReal, (err, results) => {
+        if (err) {
+            console.error("🔴 Error en la query del ranking real de actas:", err);
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(results || []);
+    });
+});
+
+// =======================================================================
+// 👤 PASARELA EXPEDIENTE JUGADOR: RECONTEO DE ESTADÍSTICAS REALES DESDE ACTA_PARTIDO
+// =======================================================================
+app.get('/api/jugadores/expediente/:id', (req, res) => {
+    const idJugador = parseInt(req.params.id);
+    console.log(`⚓ Extrayendo desglose de estadísticas de MySQL para el jugador ID: ${idJugador}`);
+
+    // Consulta relacional para obtener los datos del jugador y la suma de sus estadísticas en acta_partido
+    const sqlExpediente = `
+        SELECT 
+            j.id_jugador, j.nombre, j.posicion, j.foto_ruta, j.dorsal,
+            IFNULL(COUNT(ap.id_partido), 0) AS partidos_jugados,
+            IFNULL(SUM(ap.puntos), 0) AS puntos_totales,
+            IFNULL(SUM(ap.goles), 0) AS goles_anotados,
+            IFNULL(SUM(ap.amarillas), 0) AS tarjetas_amarillas,
+            IFNULL(SUM(ap.rojas), 0) AS tarjetas_rojas,
+            IFNULL(SUM(ap.minutos), 0) AS minutos_jugados
+        FROM fantasy_liga.jugadores j
+        LEFT JOIN fantasy_liga.acta_partido ap ON j.id_jugador = ap.id_jugador
+        WHERE j.id_jugador = ?
+        GROUP BY j.id_jugador, j.nombre, j.posicion, j.foto_ruta, j.dorsal`;
+
+    db.query(sqlExpediente, [idJugador], (err, rows) => {
+        if (err) {
+            console.error("🔴 Error al consultar el expediente en la base de datos:", err);
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows[0] || null);
+    });
+});
+
+
+
+// =======================================================================
 // ENPOINT CLASIFICACIÓN INTERACTIVA: CALCULO DE TRES BANDAS (WORKBENCH)
 // =======================================================================
 app.get('/api/clasificacion-completa', (req, res) => {
@@ -1124,8 +1185,7 @@ app.get('/api/clasificacion-completa', (req, res) => {
 
 
 
-app.listen(3000, () => {
-    console.lo// =======================================================================
+// =======================================================================
 // ENPOINT CLASIFICACIÓN INTERACTIVA: CALCULO DE TRES BANDAS (WORKBENCH)
 // =======================================================================
 app.get('/api/clasificacion-completa', (req, res) => {
@@ -1199,6 +1259,9 @@ app.get('/api/clasificacion-completa', (req, res) => {
             res.json(tabla);
         });
     });
-});('Servidor corriendo en http://localhost:3000');
+});
+
+app.listen(3000, () => {
+    console.log('Servidor corriendo en http://localhost:3000');
 });
 
