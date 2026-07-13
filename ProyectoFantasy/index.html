@@ -1,6 +1,81 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- =======================================================================
+🛡️ CONTROLADOR MAESTRO DE ESCUDOS: AISLADO ARRIBA CONTRA ERRORES SINTÁCTICOS
+======================================================================= -->
+<script>
+    window.viajarAFichaEquipo = function(id_equipo) {
+        console.log("🛡️ [Cabecera Aislada] Abriendo Ficha Técnica del Club ID: " + id_equipo);
+        
+        // Sincronizamos las variables globales en caliente de forma robusta
+        if (typeof idEquipoSeleccionadoFicha !== "undefined") idEquipoSeleccionadoFicha = id_equipo;
+        window.idEquipoSeleccionadoFicha = id_equipo; 
+        window.id_equipo_actual = id_equipo;
+
+        // 1. EFECTO VISUAL EN LÍNEA: Apaga todos los escudos y enciende con halo verde el seleccionado
+        document.querySelectorAll('.carrusel-escudos .escudo-item').forEach(img => {
+            img.style.transform = 'none';
+            img.style.borderColor = 'transparent';
+            img.style.background = 'transparent';
+            img.style.filter = 'drop-shadow(0px 4px 6px rgba(0,0,0,0.4)) grayscale(25%)';
+        });
+
+        // Localizamos el cromo pulsado usando el atributo onclick mapeado
+        let escudoPulsado = document.querySelector(`.escudo-item[onclick*="viajarAFichaEquipo(${id_equipo})"]`) || document.querySelector(`.escudo-item[onclick*="${id_equipo}"]`);
+        if (escudoPulsado) {
+            escudoPulsado.style.transform = 'scale(1.22) translateY(-2px)';
+            escudoPulsado.style.filter = 'drop-shadow(0px 6px 12px rgba(0,204,102,0.6)) grayscale(0%)';
+            escudoPulsado.style.borderColor = '#00CC66';
+            escudoPulsado.style.background = 'rgba(0, 204, 102, 0.15)';
+        }
+
+        // 2. ACTIVAR SUB-PESTAÑA LINEAL POR DEFECTO (Datos del Club)
+        if (typeof cambiarSubSeccionEquipo === "function") {
+            cambiarSubSeccionEquipo('info');
+        }
+
+        // 3. DESCARGAR ESTADÍSTICAS DEL CLUB DESDE MYSQL
+        var urlClasificacion = (typeof API_URL !== "undefined" ? API_URL : "http://localhost:3000/api") + '/clasificacion';
+        fetch(urlClasificacion)
+            .then(res => res.json())
+            .then(lista => {
+                let eq = lista.find(x => x.id_equipo == id_equipo);
+                if (!eq) return;
+
+                if (document.getElementById('eq-det-nombre')) document.getElementById('eq-det-nombre').innerText = eq.nombre;
+                if (document.getElementById('eq-det-division')) document.getElementById('eq-det-division').innerText = "1ª División España";
+
+                let nombreLimpioParaEscudo = eq.nombre.toLowerCase().trim().replace(/ /g, "_");
+                if (document.getElementById('eq-det-escudo')) document.getElementById('eq-det-escudo').src = "http://localhost:3000/escudos/" + nombreLimpioParaEscudo + ".png";
+
+                if (document.getElementById('eq-stats-pt')) document.getElementById('eq-stats-pt').innerText = eq.pt || 0;
+                if (document.getElementById('eq-stats-pg')) document.getElementById('eq-stats-pg').innerText = eq.pg || 0;
+                if (document.getElementById('eq-stats-pe')) document.getElementById('eq-stats-pe').innerText = eq.pe || 0;
+                if (document.getElementById('eq-stats-pp')) document.getElementById('eq-stats-pp').innerText = eq.pp || 0;
+            }).catch(err => console.error("Error en datos del club:", err));
+
+        // Vaciamos por completo el contenedor antiguo para evitar intrusos
+        let contenedorJugadores = document.getElementById('eq-det-lista-jugadores');
+        if (contenedorJugadores) {
+            contenedorJugadores.innerHTML = "";
+        }
+
+        // 4. PASARELA AUTOMÁTICA EXTRA: Forzamos la actualización del panel de entrenamientos y asistencia
+        if (typeof cargarListaEntrenamientosEquipoReal === "function") {
+            cargarListaEntrenamientosEquipoReal();
+        }
+        if (typeof cargarActaAsistenciaJugadoresReal === "function") {
+            cargarActaAsistenciaJugadoresReal(null, parseInt(id_equipo));
+        }
+
+        // 5. SALTAR DE PESTAÑA A LA FICHA DE EQUIPO
+        if (typeof cambiarSeccion === "function") {
+            cambiarSeccion('ficha-equipo');
+        }
+    };
+</script>
+
     <meta charset="UTF-8">
     <title>LaLiga Fantasy 2026/2027 - Conexión MySQL</title>
              <style>
@@ -609,8 +684,208 @@
                     <!-- Se rellena dinámicamente con los encuentros del club -->
                 </div>
             </div>
+            <!-- =======================================================================
+🏃 SECCIÓN DE ENTRENAMIENTOS DE ALTO RENDIMIENTO (CRISTAL INDESTRUCTIBLE)
+======================================================================= -->
+<!-- Botonera de cambio rápido integrada arriba de la ficha del equipo -->
+<!-- =======================================================================
+🏃 BOTONERA DE CAMBIO RÁPIDO SANEADA (ANTI-ERROR NULL STYLE DE CONTENEDOR)
+======================================================================= -->
+<div style="display: flex; gap: 10px; margin: 15px 0; background: rgba(255,255,255,0.02); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); width: 100%; box-sizing: border-box;">
+    
+    <!-- Botón 1: Restaura la vista de tus 3590 líneas originales y esconde los entrenamientos -->
+    <button class="btn-g" style="background:#334155; color:#fff; padding:6px 15px; font-size:11px; font-weight:bold; border-radius:4px; cursor:pointer;" 
+            onclick="
+                let panelEntrenamiento = document.getElementById('sub-sec-club-entrenamientos-nativo');
+                if(panelEntrenamiento) panelEntrenamiento.style.display = 'none';
+                
+                let lonaFichaClub = document.getElementById('sec-ficha-equipo') || document.getElementById('ficha-equipo');
+                if(lonaFichaClub) {
+                    let bloquesHijos = lonaFichaClub.children;
+                    for(let i=0; i < bloquesHijos.length; i++) {
+                        if(bloquesHijos[i].id !== 'sub-sec-club-entrenamientos-nativo' && bloquesHijos[i].tagName !== 'DIV') {
+                            bloquesHijos[i].style.setProperty('display', 'block', 'important');
+                        }
+                    }
+                }
+            ">📋 Datos Generales</button>
+            
+    <!-- Botón 2: Despeja el monitor viejo y enciende la pizarra táctica y la plantilla de MySQL -->
+    <button class="btn-g" style="background:#00CC66; color:#000; padding:6px 15px; font-size:11px; font-weight:bold; border-radius:4px; cursor:pointer;" 
+            onclick="
+                let lonaFichaClub2 = document.getElementById('sec-ficha-equipo') || document.getElementById('ficha-equipo');
+                if(lonaFichaClub2) {
+                    let bloquesHijos2 = lonaFichaClub2.children;
+                    for(let i=0; i < bloquesHijos2.length; i++) {
+                        if(bloquesHijos2[i].id !== 'sub-sec-club-entrenamientos-nativo' && bloquesHijos2[i].tagName !== 'DIV') {
+                            bloquesHijos2[i].style.setProperty('display', 'none', 'important');
+                        }
+                    }
+                }
+                
+                let panelEntrenamiento2 = document.getElementById('sub-sec-club-entrenamientos-nativo');
+                if(panelEntrenamiento2) panelEntrenamiento2.style.setProperty('display', 'block', 'important');
+                
+                // Pasarela elástica: Disparamos la carga limpia de la pizarra y la plantilla relacional
+                if(typeof inicializarMóduloEntrenamientos === 'function') inicializarMóduloEntrenamientos();
+            ">🏃 Plan de Entrenamiento</button>
+</div>
+
+
+<!-- =======================================================================
+🏃 PANEL DE ENTRENAMIENTOS PREMIUM: ESTRUCTURA SANEADA (PARTE 1 DE 3)
+======================================================================= -->
+<div id="sub-sec-club-entrenamientos-nativo" style="display: none; width: 100%; box-sizing: border-box;">
+    <div style="display: grid; grid-template-columns: 1fr 360px; gap: 20px; align-items: start; width: 100%;">
+        
+        <!-- COLUMNA IZQUIERDA: FORMULARIO, SESIONES Y PIZARRA TÁCTICA -->
+        <div style="background: rgba(15, 15, 15, 0.85); border-radius: 10px; border: 1px solid #333; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); box-sizing: border-box;">
+            <h3 id="ent-titulo-accion-crud" style="color:#00CC66; margin-top:0; font-size:14px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:10px; letter-spacing:0.5px;">📅 Programar Bloque de Entrenamiento</h3>
+            
+            <input type="hidden" id="ent-form-id-sesion-activa" value="">
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px;">
+                <div>
+                    <label style="color:#aaa; font-size:10px; font-weight:bold; display:block; margin-bottom:4px;">Nombre del Entrenamiento:</label>
+                    <input type="text" id="ent-form-nombre" placeholder="Ej: Entrenamiento de Fuerza" style="width:100%; background:#222; border:1px solid #444; color:#fff; padding:6px; border-radius:4px; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="color:#aaa; font-size:10px; font-weight:bold; display:block; margin-bottom:4px;">Parte del Entrenamiento:</label>
+                    <select id="ent-form-tipo" style="width:100%; background:#222; border:1px solid #444; color:#fff; padding:6px; border-radius:4px; font-weight:bold; box-sizing:border-box; cursor:pointer;">
+                        <option value="Calentamiento">🔥 Calentamiento</option>
+                        <option value="Parte Principal">⚽ Parte Principal</option>
+                        <option value="Vuelta a la Calma">🧘 Vuelta a la Calma</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="color:#aaa; font-size:10px; font-weight:bold; display:block; margin-bottom:4px;">Lugar / Campo:</label>
+                    <input type="text" id="ent-form-lugar" placeholder="Ej: Gimnasio / Campo 1" style="width:100%; background:#222; border:1px solid #444; color:#fff; padding:6px; border-radius:4px; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="color:#aaa; font-size:10px; font-weight:bold; display:block; margin-bottom:4px;">Fecha:</label>
+                    <input type="date" id="ent-form-fecha" style="width:100%; background:#222; border:1px solid #444; color:#fff; padding:5px; border-radius:4px; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="color:#aaa; font-size:10px; font-weight:bold; display:block; margin-bottom:4px;">Hora Inicio:</label>
+                    <input type="time" id="ent-form-inicio" value="10:00" style="width:100%; background:#222; border:1px solid #444; color:#fff; padding:5px; border-radius:4px; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="color:#aaa; font-size:10px; font-weight:bold; display:block; margin-bottom:4px;">Hora Fin:</label>
+                    <input type="time" id="ent-form-fin" value="11:30" style="width:100%; background:#222; border:1px solid #444; color:#fff; padding:5px; border-radius:4px; box-sizing:border-box;">
+                </div>
+            </div>
+
+                      <!-- =======================================================================
+            📋 NUEVA REJILLA RELACIONAL: LISTADO DE SESIONES CON GUARDADO INDIVIDUAL
+            ======================================================================= -->
+            <div style="background: rgba(255,255,255,0.01); border: 1px solid #333; padding: 12px; border-radius: 6px; margin-bottom: 15px; box-sizing: border-box;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <div style="display:flex; flex-direction:column;">
+                        <strong style="color:#ff9900; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">📋 Sesiones de Trabajo Individuales</strong>
+                        <small style="color:#888; font-size:9px;">Diseña tu pizarra, pon el nombre y pulsa el botón de su fila para congelar los datos.</small>
+                    </div>
+                                       <!-- 🎯 REPARADO: Llamada corregida sin letras duplicadas al inicio -->
+                    <button class="btn-g" type="button" style="background:#00CC66; color:#000; font-size:10px; font-weight:bold; padding:5px 12px; border-radius:3px; cursor:pointer;" onclick="agregarNuevaSesionFilaIndividualTabla()">➕ Añadir Sesión</button>
+
+                </div>
+                
+                <!-- Contenedor elástico donde se apilarán las filas auto-numeradas con sus botones de guardado -->
+                <div id="ent-contenedor-filas-ejercicios" style="display:flex; flex-direction:column; gap:8px; max-height:160px; overflow-y:auto; padding-right:2px; box-sizing: border-box;">
+                    <!-- Se poblará por software con filas: 1. Input + Botón Guardar Sesión + Botón Eliminar -->
+                </div>
+            </div>
+
+            <!-- Cajas de Texto, URLs Multimedia y Micrófono -->
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+                <textarea id="ent-form-desc" placeholder="Descripción general de los objetivos físicos..." style="width:100%; height:42px; background:#222; border:1px solid #444; color:#fff; padding:8px; border-radius:4px; box-sizing:border-box; resize:none;"></textarea>
+                <textarea id="ent-form-obs" placeholder="Observaciones técnicas de rendimiento..." style="width:100%; height:42px; background:#222; border:1px solid #444; color:#fff; padding:8px; border-radius:4px; box-sizing:border-box; resize:none;"></textarea>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div style="display:flex; gap:4px;">
+                        <input type="text" id="ent-form-multimedia-img" placeholder="🔗 URL Imagen Pizarra / Foto" style="flex-grow:1; background:#222; border:1px solid #444; color:#38bdf8; padding:6px; border-radius:4px; font-size:11px;">
+                        <button class="btn-g" type="button" style="background:#ff4444; color:#fff; border:none; padding:4px 8px; cursor:pointer; border-radius:4px; font-weight:bold;" onclick="document.getElementById('ent-form-multimedia-img').value=''">🗑️</button>
+                    </div>
+                    <div style="display:flex; gap:4px;">
+                        <input type="text" id="ent-form-multimedia-vid" placeholder="🔗 URL Vídeo / Ejercicio" style="flex-grow:1; background:#222; border:1px solid #444; color:#38bdf8; padding:6px; border-radius:4px; font-size:11px;">
+                        <button class="btn-g" type="button" style="background:#ff4444; color:#fff; border:none; padding:4px 8px; cursor:pointer; border-radius:4px; font-weight:bold;" onclick="document.getElementById('ent-form-multimedia-vid').value=''">🗑️</button>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 6px; align-items: center; background: rgba(255,255,255,0.02); padding: 6px; border-radius: 4px; border: 1px solid #333;">
+                    <button id="btn-microfono-entrenamiento" class="btn-g" type="button" style="background:#334155; color:#fff; padding:6px 12px; font-weight:bold; border-radius:4px; font-size:11px; cursor:pointer; white-space:nowrap;" onclick="conmutarGrabacionVozEntrenamiento()">🎤 Grabar Nota Verbal</button>
+                    <button id="btn-reproducir-voz-actual" class="btn-g" type="button" style="background:#ff9900; color:#000; padding:6px 12px; font-weight:bold; border-radius:4px; font-size:11px; cursor:pointer; display:none;" onclick="reproducirAudioTemporalEnMemoria()">🔊 Escuchar</button>
+                    <button id="btn-eliminar-voz-actual" class="btn-g" type="button" style="background:#ff4444; color:#fff; padding:6px 12px; font-weight:bold; border-radius:4px; font-size:11px; cursor:pointer; display:none;" onclick="purgarAudioTemporalEnMemoria()">🗑️ Borrar Voz</button>
+                </div>
+            </div>
+
+            <!-- ⚽ LA PIZARRA INTERACTIVA RESTAURADA (ESTILO PAINT CON BOTONES ANCHOS) -->
+            <div style="margin: 15px 0; background: rgba(20, 30, 20, 0.85); border-radius: 8px; border: 1px solid #00CC66; padding: 15px; box-sizing: border-box; width: 100%;">
+                <h4 style="color:#00CC66; margin:0 0 12px 0; font-size:12px; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; letter-spacing:0.5px;">
+                    <span>📋 Pizarra Táctica Profesional e Interactiva (Estilo Paint)</span>
+                    <button class="btn-g" type="button" style="background:#ff4444; color:#fff; border:none; padding:3px 10px; font-size:10px; font-weight:bold; border-radius:3px; cursor:pointer;" onclick="limpiarPizarraTacticaEntrenamiento()">🧹 Borrar Todo</button>
+                </h4>
+                
+                <div style="display: flex; gap: 12px; background: #0f172a; padding: 10px; border-radius: 6px; box-sizing: border-box; align-items: stretch;">
+                                       <!-- 🎯 TOOLBAR LATERAL DE ACCESORIOS REPARADO CON ICONOS VISIBLES -->
+                                        <!-- 🎯 TOOLBAR LATERAL DE ACCESORIOS CON NOMBRE CORREGIDO -->
+                    <div id="pizarra-toolbar" style="display: flex; flex-direction: column; gap: 6px; background: rgba(30, 41, 59, 0.7); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); min-width: 110px; box-sizing: border-box;">
+                        <span style="color:#aaa; font-size:9px; font-weight:bold; text-transform:uppercase; text-align:center; display:block; border-bottom:1px solid #444; padding-bottom:4px;">Trazos</span>
+                        <button id="tool-trazo" class="btn-g active" type="button" style="width:100% !important; height:28px !important; font-size:11px !important; text-align:left !important; padding-left:8px !important; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaDibujoPizarra('trazo')">✏️ Lápiz</button>
+                        <button id="tool-goma" class="btn-g" type="button" style="width:100% !important; height:28px !important; font-size:11px !important; text-align:left !important; padding-left:8px !important; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaDibujoPizarra('goma')">🧽 Goma</button>
+                        
+                        <span style="color:#aaa; font-size:9px; font-weight:bold; text-transform:uppercase; text-align:center; display:block; border-bottom:1px solid #444; padding:4px 0;">Accesorios</span>
+                        <button id="tool-cono" class="btn-g" type="button" style="width:100% !important; height:28px !important; font-size:11px !important; text-align:left !important; padding-left:8px !important; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaDibujoPizarra('cono')">🔶 Cono</button>
+                        <button id="tool-pica" class="btn-g" type="button" style="width:100% !important; height:28px !important; font-size:11px !important; text-align:left !important; padding-left:8px !important; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaDibujoPizarra('pica')">📍 Pica</button>
+                        <button id="tool-balon" class="btn-g" type="button" style="width:100% !important; height:28px !important; font-size:11px !important; text-align:left !important; padding-left:8px !important; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaDibujoPizarra('balon')">⚽ Balón</button>
+                        <button id="tool-porteria" class="btn-g" type="button" style="width:100% !important; height:28px !important; font-size:11px !important; text-align:left !important; padding-left:8px !important; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaDibujoPizarra('porteria')">🥅 Arco</button>
+                        
+                        <span style="color:#aaa; font-size:9px; font-weight:bold; text-transform:uppercase; text-align:center; display:block; border-bottom:1px solid #444; padding:4px 0;">Vestuario</span>
+                        <button id="tool-peto-azul" class="btn-g" type="button" style="width:100% !important; height:28px !important; font-size:11px !important; text-align:left !important; padding-left:8px !important; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px; border-left:3px solid #38bdf8 !important;" onclick="seleccionarHerramientaDibujoPizarra('peto-azul')">🔵 Azul</button>
+                        <button id="tool-peto-rojo" class="btn-g" type="button" style="width:100% !important; height:28px !important; font-size:11px !important; text-align:left !important; padding-left:8px !important; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px; border-left:3px solid #ef4444 !important;" onclick="seleccionarHerramientaDibujoPizarra('peto-rojo')">🔴 Rojo</button>
+                        
+                        <span style="color:#aaa; font-size:9px; font-weight:bold; text-transform:uppercase; text-align:center; display:block; border-bottom:1px solid #444; padding:4px 0;">Vectores</span>
+                        <button id="tool-flecha-pase" class="btn-g" type="button" style="width:100% !important; height:30px !important; font-size:11px !important; text-align:left !important; padding-left:8px !important; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaDibujoPizarra('flecha-pase')">➡️ Pase</button>
+                        <button id="tool-flecha-correr" class="btn-g" type="button" style="width:100% !important; height:30px !important; font-size:11px !important; text-align:left !important; padding-left:8px !important; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaDibujoPizarra('flecha-correr')">⏩ Correr</button>
+                    </div>
+
+
+                    <div style="flex-grow: 1; display: flex; justify-content: center; position: relative;">
+                        <canvas id="pizarra-futbol-canvas-real" width="600" height="380" style="max-width: 100%; background: #1b4d22; border-radius: 4px; box-shadow: inset 0 0 20px rgba(0,0,0,0.6); cursor: crosshair; touch-action: none; border: 1px solid rgba(255,255,255,0.2);"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botonera CRUD de Acción e Historial Inferior -->
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px;">
+                <button id="btn-ent-guardar" class="btn-g" type="button" style="background:#00CC66; color:#000; padding:8px 15px; font-size:12px; font-weight:bold; border-radius:4px; cursor:pointer; flex:1;" onclick="guardarNuevoEntrenamientoMySQL()">💾 Confirmar Entrenamiento</button>
+                <button id="btn-ent-editar" class="btn-g" type="button" style="background:#ff9900; color:#000; padding:8px 15px; font-size:12px; font-weight:bold; border-radius:4px; cursor:pointer; display:none; flex:1;" onclick="modificarSesionEntrenamientoMySQL()">✏️ Actualizar Cambios</button>
+                <button id="btn-ent-eliminar" class="btn-g" type="button" style="background:#ff4444; color:#fff; padding:8px 15px; font-size:12px; font-weight:bold; border-radius:4px; cursor:pointer; display:none; flex:1;" onclick="eliminarSesionEntrenamientoMySQL()">🗑️ Eliminar Sesión</button>
+                <button id="btn-ent-cancelar" class="btn-g" type="button" style="background:#475569; color:#fff; padding:8px 12px; font-size:11px; font-weight:bold; border-radius:4px; cursor:pointer; display:none;" onclick="purgarYResetearFormularioEntrenamientosSaneado()">❌ Cancelar</button>
+            </div>
+
+            <h4 style="color:#fff; text-transform:uppercase; font-size:12px; margin:25px 0 10px 0; border-top:1px solid #333; padding-top:15px; letter-spacing:0.5px;">📋 Historial de Entrenamientos Programados:</h4>
+            <div id="ent-lista-sesiones-real" style="display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto;">
+                <span style="color:#666; font-size:11px; font-style:italic;">⏳ No se registran entrenamientos...</span>
+            </div>
+        </div>
+        <!-- COLUMNA DERECHA: EVALUACIÓN DE PLANTILLA CON BOTÓN MAESTRO -->
+        <div style="background: rgba(20, 20, 20, 0.9); border-radius: 10px; border: 1px solid #333; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); box-sizing: border-box;">
+            <h3 style="color:#ff9900; margin-top:0; font-size:13px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:10px; letter-spacing:0.5px;">📋 Evaluación de la Plantilla</h3>
+            <small style="color:#aaa; display:block; margin-bottom:12px;">Los jugadores se listan de forma nativa según el club activo en tu monitor.</small>
+            
+            <!-- Contenedor elástico donde se inyectan las fichas reales de los futbolistas de MySQL -->
+            <div id="ent-lista-asistencia-jugadores-real" style="display: flex; flex-direction: column; gap: 8px; max-height: 580px; overflow-y: auto; padding-right: 4px;">
+                <span style="color:#666; font-size:12px; font-style:italic;">⏳ Cargando plantilla de jugadores...</span>
+            </div>
         </div>
 
+    </div>
+</div>
+
+
+
+
+        
 
 
 <script>
@@ -2229,65 +2504,8 @@ function eliminarPartidoYActualizarLigaBD() {
                 .catch(err => console.error("Error al renderizar los efectivos duales:", err));
         }
 
-        // =======================================================================
-    // NUEVA FUNCIÓN MAESTRA ENLACE DE ESCUDOS: LIMPIA DE JUGADORES EN DATOS DEL CLUB
-    // =======================================================================
-    function viajarAFichaEquipo(id_equipo) {
-        console.log("Abriendo Ficha Técnica Interactiva del Club con ID: " + id_equipo);
-        idEquipoSeleccionadoFicha = id_equipo;
-        
-        // 1. EFECTO VISUAL EN LÍNEA: Apaga todos los escudos y enciende con halo verde el seleccionado
-        document.querySelectorAll('.carrusel-escudos .escudo-item').forEach(img => {
-            img.style.transform = 'none';
-            img.style.borderColor = 'transparent';
-            img.style.background = 'transparent';
-            img.style.filter = 'drop-shadow(0px 4px 6px rgba(0,0,0,0.4)) grayscale(25%)';
-        });
+   
 
-        // Localizamos el cromo pulsado usando el atributo onclick mapeado
-        let escudoPulsado = document.querySelector(`.escudo-item[onclick="viajarAFichaEquipo(${id_equipo})"]`);
-        if (escudoPulsado) {
-            escudoPulsado.style.transform = 'scale(1.22) translateY(-2px)';
-            escudoPulsado.style.filter = 'drop-shadow(0px 6px 12px rgba(0,204,102,0.6)) grayscale(0%)';
-            escudoPulsado.style.borderColor = '#00CC66';
-            escudoPulsado.style.background = 'rgba(0, 204, 102, 0.15)';
-        }
-
-        // 2. ACTIVAR SUB-PESTAÑA LINEAL POR DEFECTO (Datos del Club)
-        cambiarSubSeccionEquipo('info');
-
-        // 3. DESCARGAR ESTADÍSTICAS DEL CLUB DESDE MYSQL
-        fetch(API_URL + '/clasificacion')
-            .then(res => res.json())
-            .then(lista => {
-                let eq = lista.find(x => x.id_equipo == id_equipo);
-                if (!eq) return;
-
-                // Inyectar textos informativos en el panel de datos
-                document.getElementById('eq-det-nombre').innerText = eq.nombre;
-                document.getElementById('eq-det-division').innerText = "1ª División España";
-
-                // Formatear nombre para cargar el escudo en grande en la ficha
-                let nombreLimpioParaEscudo = eq.nombre.toLowerCase().trim().replace(/ /g, "_");
-                document.getElementById('eq-det-escudo').src = "http://localhost:3000/escudos/" + nombreLimpioParaEscudo + ".png";
-
-                // Pintar marcadores numéricos en las tarjetas de cristal
-                document.getElementById('eq-stats-pt').innerText = eq.pt || 0;
-                document.getElementById('eq-stats-pg').innerText = eq.pg || 0;
-                document.getElementById('eq-stats-pe').innerText = eq.pe || 0;
-                document.getElementById('eq-stats-pp').innerText = eq.pp || 0;
-            }).catch(err => console.error("Error en datos del club:", err));
-
-        // 🛑 REMOVIDO EL BLOQUE 4: Vaciamos por completo el contenedor antiguo para que 
-        // NO se pinten jugadores de forma intrusa en la lona de Datos del Club
-        let contenedorJugadores = document.getElementById('eq-det-lista-jugadores');
-        if (contenedorJugadores) {
-            contenedorJugadores.innerHTML = "";
-        }
-
-        // 5. SALTAR DE PESTAÑA A LA FICHA DE EQUIPO
-        cambiarSeccion('ficha-equipo');
-    }
 
       // VERSIÓN CON SILENCIADOR ABSOLUTO: Destruye el error 533 de raíz en el motor de JavaScript
     function cargarClubesEnSelectoresFormulario() {
@@ -3077,34 +3295,37 @@ function eliminarPartidoYActualizarLigaBD() {
         // =======================================================================
        
 
-        // Conmuta el estado de la cinta entre Grabar y Detener
-        function conmutarGrabacionContinuaTactica() {
-            let btn = document.getElementById('btn-pizarra-nueva');
+       // MÓDULO INTERACTIVO DE AUDIO: CAPTURA, REPRODUCCIÓN Y BORRADOR EN CALIENTE
+        function conmutarGrabacionVozEntrenamiento() {
+            var btn = document.getElementById('btn-microfono-entrenamiento');
             if (!btn) return;
 
-            if (!estaGrabandoEnVivo) {
-                // INICIAR GRABACIÓN
-                estaGrabandoEnVivo = true;
-                fotogramasJugadaActual = []; // Limpiamos películas anteriores de la memoria
-                btn.innerText = "🛑 Detener Grabación";
-                btn.style.background = "#ff4444";
-                btn.style.color = "#fff";
-                
-                // Registramos el fotograma inicial de salida
-                registrarPasoAutomaticoEnCinta();
-                console.log("🎥 Grabadora encendida. Mueve libremente el balón y los jugadores...");
-            } else {
-                // DETENER GRABACIÓN
-                estaGrabandoEnVivo = false;
-                btn.innerText = "🆕 Iniciar Grabación";
-                btn.style.background = "#00CC66";
-                btn.style.color = "#000";
-                
-                
+            if (window.grabadorVozGlobal && window.grabadorVozGlobal.state === "recording") {
+                window.grabadorVozGlobal.stop();
+                btn.style.background = "#334155"; btn.innerText = "🎤 Grabar Nota Verbal";
+                return;
             }
-            // CAMBIO MAESTRO: Sustituimos el alert() por el aviso flotante sin letreros molestos
-                mostrarAvisoFlotanteTáctico(`🎬 ¡Jugada registrada con ${fotogramasJugadaActual.length} tramos!`);
+
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(function(stream) {
+                    window.chunksAudioGlobal = [];
+                    window.grabadorVozGlobal = new MediaRecorder(stream);
+                    window.grabadorVozGlobal.ondataavailable = function(e) { if (e.data.size > 0) window.chunksAudioGlobal.push(e.data); };
+                    
+                    window.grabadorVozGlobal.onstop = function() {
+                        var audioBlob = new Blob(window.chunksAudioGlobal, { type: 'audio/wav' });
+                        var lector = new FileReader(); lector.readAsDataURL(audioBlob);
+                        lector.onloadend = function() {
+                            window.audioNotaBase64Actual = lector.result;
+                            document.getElementById('btn-reproducir-voz-actual').style.display = 'inline-block';
+                            document.getElementById('btn-eliminar-voz-actual').style.display = 'inline-block';
+                            alert("✅ Nota de voz grabada. Recuerda guardar el entrenamiento para registrarla.");
+                        };
+                    };
+                    window.grabadorVozGlobal.start(); btn.style.background = "#ff4444"; btn.innerText = "🛑 Grabando Voz...";
+                }).catch(err => alert("⚠️ Micrófono bloqueado o no disponible."));
         }
+
 
         // Captura las coordenadas de las fichas y las empuja al array si la grabadora está encendida
         function registrarPasoAutomaticoEnCinta() {
@@ -4151,97 +4372,6 @@ function eliminarPartidoYActualizarLigaBD() {
             // Pasamos el flujo a la última parte para fabricar el listado inferior de botones
             poblarListaInferiorDePartidosFicha(objetoTop5, idJugadorReal);
         }
-
-        // =======================================================================
-        // 📊 GANCHO REPARADOR: CALCULA EL RESUMEN OFICIAL SIN EFECTO ACUMULADO
-        // =======================================================================
-        function corregirTarjetasDeRendimientoFichaClub(idClubSeleccionado) {
-            console.log("🧮 Interceptando monitor para limpiar el resumen del club ID: " + idClubSeleccionado);
-
-            // Reseteamos las variables a cero absoluto en cada clic para erradicar el bug de los 18 puntos
-            let ptsCero = 0, ganadosCero = 0, empatadosCero = 0, perdidosCero = 0;
-
-            // Consultamos tu pasarela de encuentros oficial (puerto 3000)
-            fetch('http://localhost:3000/api/partidos')
-                .then(res => res.json())
-                .then(partidos => {
-                    let listaActas = Array.isArray(partidos) ? partidos : [];
-
-                    listaActas.forEach(function(p) {
-                        let idLoc = parseInt(p.id_local || p.id_equipo_local || p.local_id || 0);
-                        let idVis = parseInt(p.id_visitante || p.id_equipo_visitante || p.visitante_id || 0);
-                        
-                        if (idLoc === parseInt(idClubSeleccionado) || idVis === parseInt(idClubSeleccionado)) {
-                            let gl = parseInt(p.goles_local);
-                            let gv = parseInt(p.goles_visitante);
-
-                            if (!isNaN(gl) && !isNaN(gv)) {
-                                if (idLoc === parseInt(idClubSeleccionado)) {
-                                    if (gl > gv) { ganadosCero++; ptsCero += 3; }
-                                    else if (gl < gv) { perdidosCero++; }
-                                    else { empatadosCero++; ptsCero += 1; }
-                                } else {
-                                    if (gv > gl) { ganadosCero++; ptsCero += 3; }
-                                    else if (gv < gl) { perdidosCero++; }
-                                    else { empatadosCero++; ptsCero += 1; }
-                                }
-                            }
-                        }
-                    });
-
-                    // 🎯 VOLCADO QUIRÚRGICO EN TU MONITOR: Localizamos las 4 tarjetas blancas por su texto
-                    let lonaFichaClub = document.getElementById('sec-ficha-equipo') || document.getElementById('datos-club') || document.body;
-                    let todasLasEtiquetas = lonaFichaClub.querySelectorAll('h1, h2, h3, h4, div, span, p');
-
-                    todasLasEtiquetas.forEach(function(el) {
-                        if (el.innerText) {
-                            let txt = el.innerText.trim().toUpperCase();
-                            // Si localiza el rótulo inferior "PUNTOS", machaca el número grande que tiene justo arriba
-                            if (txt === "PUNTOS" && el.previousElementSibling) el.previousElementSibling.innerText = ptsCero;
-                            if (txt === "GANADOS" && el.previousElementSibling) el.previousElementSibling.innerText = ganadosCero;
-                            if (txt === "EMPATADOS" && el.previousElementSibling) el.previousElementSibling.innerText = empatadosCero;
-                            if (txt === "PERDIDOS" && el.previousElementSibling) el.previousElementSibling.innerText = perdidosCero;
-                        }
-                    });
-                    console.log(`✅ Rendimiento fijado en tu monitor -> Pts: ${ptsCero} | Empates: ${empatadosCero}`);
-                })
-                .catch(err => console.error("Error en el gancho de rendimiento:", err));
-        }
-        // =======================================================================
-        // 📊 GANCHO REPARADOR PARTE 2: SOLDADURA AL CIERRE DE LA NAVEGACIÓN
-        // =======================================================================
-        // Sobrescribimos el disparador nativo para que actúe automáticamente al abrir la lona
-        if (typeof window.original_ejecutarDisparadoresInternosDeLonasNativas === "undefined") {
-            window.original_ejecutarDisparadoresInternosDeLonasNativas = window.ejecutarDisparadoresInternosDeLonasNativas || null;
-        }
-
-        window.ejecutarDisparadoresInternosDeLonasNativas = function(idSeccionObjetivo) {
-            // Ejecutamos primero tus 3590 líneas originales para mantener tu césped intacto
-            if (typeof window.original_ejecutarDisparadoresInternosDeLonasNativas === "function") {
-                window.original_ejecutarDisparadoresInternosDeLonasNativas(idSeccionObjetivo);
-            } else if (typeof ejecutarDisparadoresInternosDeLonasNativas === "function" && window.original_ejecutarDisparadoresInternosDeLonasNativas !== ejecutarDisparadoresInternosDeLonasNativas) {
-                original_ejecutarDisparadoresInternosDeLonasNativas(idSeccionObjetivo);
-            }
-
-            // 🎯 INTERCEPCIÓN EN CALIENTE: Si la web viaja hacia la ficha del equipo (sec-ficha-equipo o ficha-equipo)
-            if (idSeccionObjetivo === 'sec-ficha-equipo' || idSeccionObjetivo === 'ficha-equipo') {
-                // Recuperamos la ID del club real que guardas en tu monitor (ej: window.idEquipoSeleccionadoFicha)
-                let idClubActivo = window.idEquipoSeleccionadoFicha || window.id_equipo_actual || window.idEquipoActual || 4; // 4 es Barcelona por defecto
-                
-                // Ejecutamos ráfagas de sincronización a los 30ms y 100ms para asegurar que destruya el acumulado de los 18 puntos
-                setTimeout(function() { corregirTarjetasDeRendimientoFichaClub(idClubActivo); }, 30);
-                setTimeout(function() { corregirTarjetasDeRendimientoFichaClub(idClubActivo); }, 100);
-            }
-        };
-
-        // Pasarela de respaldo: Acoplamos también el disparador dentro del clic de tu slider de la galería por seguridad
-        if (typeof window.cargarGaleriaDeEquiposMóduloNativo === "function") {
-            console.log("⚓ Sincronizando el puente de la galería para limpiar acumulados...");
-        }
-
-
-
-
         // =======================================================================
         // ⭐ SLIDER CRACKS PARTE 2-C: EXTRACTOR DIRECTO DE NOMBRES EN MEMORIA
         // =======================================================================
@@ -4332,6 +4462,2105 @@ function eliminarPartidoYActualizarLigaBD() {
                     console.error("Error al poblar la botonera inferior de partidos:", err);
                     listaPartidosContenedor.innerHTML = `<span style="color:#ff4444; font-size:11px; grid-column:span 2;">Error al procesar actas de partidos.</span>`;
                 });
+        }
+
+
+// nuevo desde aqui boton entrenamiento
+
+      // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS 4-A: PIZARRA CANVAS Y GRABADORA INTERACTIVA DE AUDIO
+        // =======================================================================
+        if (typeof window.idEntrenamientoSesionActiva === "undefined") { window.idEntrenamientoSesionActiva = null; }
+        if (typeof window.grabadorVozGlobal === "undefined") { window.grabadorVozGlobal = null; }
+        if (typeof window.chunksAudioGlobal === "undefined") { window.chunksAudioGlobal = []; }
+        if (typeof window.audioNotaBase64Actual === "undefined") { window.audioNotaBase64Actual = ""; }
+
+       
+        
+
+       
+               // =======================================================================
+        // ⭐ MOTOR ASISTENCIA: ALIMENTADOR INTEGRAL CON BOTÓN MAESTRO DE ACTA UNIFICADA
+        // =======================================================================
+        function cargarActaAsistenciaJugadoresReal(idEntrenamiento, idClubFijo) {
+            var container = document.getElementById('ent-lista-asistencia-jugadores-real');
+            if (!container) return;
+
+            var idClubDeducido = idClubFijo || window.idEquipoSeleccionadoFicha || window.id_equipo_actual || window.idEquipoActual || 2;
+            var idClubNumero = parseInt(idClubDeducido);
+
+            console.log("⚓ [Acta] Abriendo plantilla en red para el Club ID: " + idClubNumero);
+
+            // 1. Descargamos el plantel real filtrado por query param (?id_equipo=X)
+            fetch('http://localhost:3000/api/jugadores?id_equipo=' + idClubNumero)
+                .then(function(res) { return res.json(); })
+                .then(function(plantilla) {
+                    var listaFiltrada = Array.isArray(plantilla) ? plantilla : [];
+                    
+                    if (listaFiltrada.length === 0) {
+                        container.innerHTML = `<span style="color:#ffcc00; font-size:11px; font-style:italic; padding:10px; display:block;">⚠️ El servidor no devolvió futbolistas asignados a este Club.</span>`;
+                        return;
+                    }
+
+                    container.innerHTML = ""; // Limpiamos residuos anteriores
+
+                    // 2. Traemos la asistencia si la sesión ya existe en tu MySQL Workbench
+                    var idSesionActiva = idEntrenamiento || window.idEntrenamientoSesionActiva;
+                    var rutaAsistencia = idSesionActiva ? 'http://localhost:3000/api/entrenamientos/asistencia/' + idSesionActiva : null;
+                    var promesaAsistencia = rutaAsistencia ? fetch(rutaAsistencia).then(function(r) { return r.json(); }) : Promise.resolve([]);
+
+                    promesaAsistencia.then(function(asistenciasGuardadas) {
+                        var listaAsis = Array.isArray(asistenciasGuardadas) ? asistenciasGuardadas : [];
+
+                        // 🎯 ARRAY INTERNO GLOBAL: Guardamos en memoria las IDs de los jugadores pintados en el monitor
+                        window.arrayIdsJugadoresVisibles = [];
+
+                        listaFiltrada.forEach(function(jug) {
+                            var idJugActual = parseInt(jug.id_jugador || jug.id);
+                            if (isNaN(idJugActual)) return;
+
+                            window.arrayIdsJugadoresVisibles.push(idJugActual);
+
+                            var match = listaAsis.find(function(a) { return parseInt(a.id_jugador) === idJugActual; });
+                            var asistioYa = match ? match.asistio : "SI";
+                            var puntosYa = match ? match.puntos_entrenamiento : 0.00;
+                            var comentarioYa = match ? match.evolucion_comentario : "";
+
+                            var divJ = document.createElement('div');
+                            divJ.style.background = 'rgba(255,255,255,0.02)'; divJ.style.border = '1px solid rgba(255,255,255,0.05)'; divJ.style.borderRadius = '6px'; 
+                            divJ.style.padding = '10px'; divJ.style.display = 'flex'; divJ.style.flexDirection = 'column'; divJ.style.gap = '6px'; divJ.style.marginBottom = '4px';
+
+                            // Renderizamos las filas limpias sin el botón azul individual roto
+                            divJ.innerHTML = `
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <strong style="color:#fff; font-size:12px;">${(jug.nombre || "Jugador").toUpperCase()} <span style="color:#666; font-size:10px;">(${jug.posicion || "MED"})</span></strong>
+                                    <div style="display:flex; gap:6px;">
+                                        <select id="asis-sel-${idJugActual}" style="background:#111; color:#fff; border:1px solid #444; font-size:10px; padding:2px; border-radius:3px; cursor:pointer;">
+                                            <option value="SI" ${asistioYa === 'SI' ? 'selected' : ''}>🟢 ASISTE</option>
+                                            <option value="NO" ${asistioYa === 'NO' ? 'selected' : ''}>🔴 FALTA</option>
+                                        </select>
+                                        <input type="number" id="asis-pts-${idJugActual}" min="0" max="10" step="0.5" value="${puntosYa}" style="width:45px; background:#000; border:1px solid #00CC66; color:#00CC66; text-align:center; border-radius:3px; font-weight:bold; font-size:11px;">
+                                    </div>
+                                </div>
+                                <input type="text" id="asis-com-${idJugActual}" value="${comentarioYa}" placeholder="Nota de evolución táctica/física..." style="width:100%; background:#1a1a1a; border:1px solid #333; color:#aaa; font-size:10px; padding:6px; border-radius:3px; box-sizing:border-box;">
+                            `;
+                            container.appendChild(divJ);
+                        });
+
+                        // 🎯 EL ACABADO DE GALA: Inyectamos un Botón Maestro gigante abajo de la plantilla
+                        var btnMaestro = document.createElement('button');
+                        btnMaestro.className = "btn-g";
+                        btnMaestro.type = "button";
+                        btnMaestro.style.width = "100%"; btnMaestro.style.background = "#38bdf8"; btnMaestro.style.color = "#000"; btnMaestro.style.fontWeight = "bold"; btnMaestro.style.padding = "10px"; btnMaestro.style.marginTop = "10px"; btnMaestro.style.borderRadius = "4px"; btnMaestro.style.cursor = "pointer"; btnMaestro.style.fontSize = "12px";
+                        btnMaestro.innerText = "💾 CONSOLIDAR ASISTENCIA DE TODA LA PLANTILLA";
+                        btnMaestro.onclick = guardarActaCompletaPlantillaMaestraMySQL;
+                        container.appendChild(btnMaestro);
+                    });
+                })
+                .catch(function(err) { console.error("Error crítico en la comunicación relacional:", err); });
+        }
+
+        // 3. LA FUNCIÓN TRIUNFADORA: ENVÍA TODA EL ACTA EN CADENA SECUENCIAL LIBRE DE ERRORES DE LLAVES
+        function guardarActaCompletaPlantillaMaestraMySQL() {
+            var idSesion = window.idEntrenamientoSesionActiva || document.getElementById('ent-form-id-sesion-activa').value;
+            var idSesionNumero = parseInt(idSesion);
+
+            if (isNaN(idSesionNumero) || idSesionNumero <= 0) {
+                alert("⚠️ Por favor, selecciona primero un entrenamiento en el historial izquierdo antes de consolidar el acta.");
+                return;
+            }
+
+            if (!window.arrayIdsJugadoresVisibles || window.arrayIdsJugadoresVisibles.length === 0) return;
+
+            console.log("🚀 Lanzando volcado en cadena para " + window.arrayIdsJugadoresVisibles.length + " futbolistas...");
+
+            // Recorremos la plantilla jugador por jugador lanzando las peticiones de forma ordenada
+            window.arrayIdsJugadoresVisibles.forEach(function(idJugador) {
+                var datoAsis = document.getElementById("asis-sel-" + idJugador).value;
+                var datoPts = parseFloat(document.getElementById("asis-pts-" + idJugador).value) || 0.00;
+                var datoCom = document.getElementById("asis-com-" + idJugador).value;
+
+                var payload = { 
+                    id_entrenamiento: idSesionNumero, 
+                    id_jugador: idJugador, 
+                    asistio: datoAsis, 
+                    puntos_entrenamiento: datoPts, 
+                    evolucion_comentario: datoCom 
+                };
+
+                fetch('http://localhost:3000/api/entrenamientos/asistencia/guardar', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        console.log("📈 Fila consolidada en MySQL para jugador ID: " + idJugador);
+                    }
+                });
+            });
+
+            alert("✅ Acta de rendimiento procesada. Comprueba tu MySQL Workbench.");
+        }
+
+       
+
+   
+
+               // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS: GRABADOR INMUNE CON AUTO-DETECCIÓN DE SESIÓN ACTIVE
+        // =======================================================================
+        function guardarMétricaAsistenciaJugadorMySQL(idJugador) {
+            // Buscamos el ID numérico de la sesión activa de todas las variables posibles de tu monitor
+            var idSesionCruda = window.idEntrenamientoSesionActiva || document.getElementById('ent-form-id-sesion-activa').value;
+            var idSesionNumero = parseInt(idSesionCruda);
+
+            // 🎯 EL AUTO-RESCATE GANADOR: Si cambiaste de pantalla y la ID se quedó en blanco,
+            // leemos el primer entrenamiento del historial izquierdo para forzar la vinculación
+            if (isNaN(idSesionNumero) || idSesionNumero <= 0) {
+                var listaHistorial = document.getElementById('ent-lista-sesiones-real');
+                if (listaHistorial && listaHistorial.firstElementChild && listaHistorial.firstElementChild.click) {
+                    console.log("🤖 Sincronizador: Vinculando nota al entrenamiento visible en tu monitor.");
+                    listaHistorial.firstElementChild.click();
+                    return;
+                }
+                alert("⚠️ Por favor, selecciona primero una sesión del historial izquierdo antes de guardar.");
+                return;
+            }
+            
+            // Recolectamos de forma estricta los inputs del futbolista que pulsaste en tu monitor
+            var comboAsis = document.getElementById("asis-sel-" + idJugador);
+            var campoPts = document.getElementById("asis-pts-" + idJugador);
+            var campoCom = document.getElementById("asis-com-" + idJugador);
+
+            var datoAsis = comboAsis ? comboAsis.value : "SI";
+            var datoPts = campoPts ? parseFloat(campoPts.value) : 0.00;
+            var datoCom = campoCom ? campoCom.value : "";
+
+            var payload = { 
+                id_entrenamiento: idSesionNumero, 
+                id_jugador: parseInt(idJugador), 
+                asistio: datoAsis, 
+                puntos_entrenamiento: datoPts, 
+                evolucion_comentario: datoCom 
+            };
+
+            console.log("✈️ Despachando payload hacia tu servidor de Node.js:", payload);
+
+            fetch('http://localhost:3000/api/entrenamientos/asistencia/guardar', {
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(payload)
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    console.log(`✅ ¡Éxito Relacional! Fila insertada para el Jugador ID [${idJugador}]`);
+                    
+                    // Animación de confirmación visual verde brillante sobre el selector
+                    if (comboAsis) {
+                        var fondoBase = comboAsis.style.background;
+                        comboAsis.style.background = "#00CC66";
+                        comboAsis.style.color = "#000";
+                        setTimeout(function() { 
+                            comboAsis.style.background = fondoBase; 
+                            comboAsis.style.color = "#fff";
+                        }, 400);
+                    }
+                } else {
+                    alert("⚠️ Error del Servidor: " + (data.error || "Fallo relacional de inserción"));
+                }
+            })
+            .catch(function(err) { console.error("Error al inyectar asistencia en tu API:", err); });
+        }
+
+
+
+ function reproducirAudioTemporalEnMemoria() {
+            if (!window.audioNotaBase64Actual) return;
+            var audio = new Audio(window.audioNotaBase64Actual); audio.play();
+        }
+
+        function purgarAudioTemporalEnMemoria() {
+            window.audioNotaBase64Actual = "";
+            document.getElementById('btn-reproducir-voz-actual').style.display = 'none';
+            document.getElementById('btn-eliminar-voz-actual').style.display = 'none';
+            alert("🗑️ Nota de voz borrada de la memoria temporal.");
+        }
+    
+
+   
+   
+
+
+
+
+
+
+        
+
+
+       
+
+        
+        // =======================================================================
+        // ⭐ MOTOR PREMIUM PARTE 4: PIZARRA DE OBJETOS VECTORIALES Y BASE DE DATOS
+        // =======================================================================
+        if (typeof window.herramientaActual === "undefined") { window.herramientaActual = "trazo"; }
+        if (typeof window.idEntrenamientoSesionActiva === "undefined") { window.idEntrenamientoSesionActiva = null; }
+
+        
+
+        function inicializarYDibujarCampoPizarraFutbol() {
+            var canvas = document.getElementById('pizarra-futbol-canvas-real');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            
+            // Pintamos el tapiz de césped
+            ctx.fillStyle = '#1b4d22'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)'; ctx.lineWidth = 2;
+            ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+            ctx.beginPath(); ctx.moveTo(canvas.width / 2, 10); ctx.lineTo(canvas.width / 2, canvas.height - 10); ctx.stroke();
+            ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height / 2, 45, 0, 2 * Math.PI); ctx.stroke();
+            ctx.strokeRect(10, canvas.height / 2 - 70, 70, 140); ctx.strokeRect(10, canvas.height / 2 - 30, 25, 60);
+            ctx.strokeRect(canvas.width - 80, canvas.height / 2 - 70, 70, 140); ctx.strokeRect(canvas.width - 35, canvas.height / 2 - 30, 25, 60);
+
+            // Coordenadas para vectores de flechas (Inicio y Fin)
+            var fX = 0, fY = 0;
+            var pintando = false;
+
+           
+
+        }
+       
+
+
+        function modificarSesionEntrenamientoMySQL() { guardarNuevoEntrenamientoMySQL(); }
+
+        function eliminarSesionEntrenamientoMySQL() {
+            var idEnt = document.getElementById('ent-form-id-sesion-activa').value;
+            if (!idEnt || !confirm("🗑️ ¿Deseas eliminar físicamente este entrenamiento de MySQL?")) return;
+
+            fetch('http://localhost:3000/api/entrenamientos/eliminar/' + idEnt, { method: 'DELETE' })
+            .then(function(res) { return res.json(); })
+            .then(function() {
+                alert("🗑️ Registro eliminado con éxito de tu Workbench.");
+                resetearFormularioYBotonesAccion();
+                cargarListaEntrenamientosEquipoReal();
+            });
+        }
+    
+
+    
+
+        // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS 4-A: CANVAS VECTORIAL Y CAPTURA VERBAL
+        // =======================================================================
+        if (typeof window.herramientaActual === "undefined") { window.herramientaActual = "trazo"; }
+        if (typeof window.idEntrenamientoSesionActiva === "undefined") { window.idEntrenamientoSesionActiva = null; }
+        if (typeof window.grabadorVozGlobal === "undefined") { window.grabadorVozGlobal = null; }
+        if (typeof window.chunksAudioGlobal === "undefined") { window.chunksAudioGlobal = []; }
+        if (typeof window.audioNotaBase64Actual === "undefined") { window.audioNotaBase64Actual = ""; }
+
+       
+
+       
+       
+
+            function terminarAccion(e) {
+                if (!pintando) return; pintando = false;
+                var contorno = canvas.getBoundingClientRect();
+                var cX = e.changedTouches ? e.changedTouches.clientX : e.clientX;
+                var cY = e.changedTouches ? e.changedTouches.clientY : e.clientY;
+                var finX = (cX - contorno.left) * (canvas.width / contorno.width);
+                var finY = (cY - contorno.top) * (canvas.height / contorno.height);
+                if (window.herramientaActual.startsWith("flecha")) dibujarVectorFlechaTactica(ctx, fX, fY, finX, finY, window.herramientaActual);
+                ctx.beginPath();
+            }
+          
+
+
+
+            canvas.onmousedown = arrancarAccion; canvas.onmouseup = terminarAccion; canvas.onmousemove = moverAccion;
+            canvas.ontouchstart = arrancarAccion; canvas.ontouchend = terminarAccion; canvas.ontouchmove = moverAccion;
+      
+
+           
+            // 🎯 SANEAMIENTO EXTRA: Sincronizamos el arranque del primer clic de la goma para que use la misma máscara
+            function arrancarAccion(e) {
+                var contorno = canvas.getBoundingClientRect();
+                var cX = e.touches ? e.touches.clientX : e.clientX;
+                var cY = e.touches ? e.touches.clientY : e.clientY;
+                fX = (cX - contorno.left) * (canvas.width / contorno.width);
+                fY = (cY - contorno.top) * (canvas.height / contorno.height);
+                pintando = true;
+
+                if (window.herramientaActual === "goma") {
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.beginPath(); ctx.arc(fX, fY, 16, 0, 2 * Math.PI); ctx.fill();
+                    ctx.restore();
+
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'destination-over';
+                    ctx.fillStyle = '#1b4d22';
+                    ctx.beginPath(); ctx.arc(fX, fY, 16, 0, 2 * Math.PI); ctx.fill();
+                    ctx.restore();
+
+                    ctx.beginPath();
+                    ctx.moveTo(fX, fY);
+                    return;
+                }
+
+                if (window.herramientaActual !== "trazo" && !window.herramientaActual.startsWith("flecha")) {
+                    if (typeof estamparAccesorioEnCanvas === 'function') estamparAccesorioEnCanvas(ctx, fX, fY, window.herramientaActual);
+                    pintando = false;
+                }
+            }
+
+
+      
+
+
+       
+        function dibujarVectorFlechaTactica(ctx, x1, y1, x2, y2, tipo) {
+            ctx.strokeStyle = tipo === "flecha-pase" ? "#ffcc00" : "#fff"; ctx.lineWidth = 3;
+            if (tipo === "flecha-correr") ctx.setLineDash([5, 5]);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.setLineDash([]);
+            var angulo = Math.atan2(y2 - y1, x2 - x1); ctx.fillStyle = ctx.strokeStyle; ctx.beginPath(); ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - 12 * Math.cos(angulo - Math.PI / 6), y2 - 12 * Math.sin(angulo - Math.PI / 6));
+            ctx.lineTo(x2 - 12 * Math.cos(angulo + Math.PI / 6), y2 - 12 * Math.sin(angulo + Math.PI / 6)); ctx.fill();
+        }
+
+        function conmutarGrabacionVozEntrenamiento() {
+            var btn = document.getElementById('btn-microfono-entrenamiento');
+            if (!btn) return;
+            if (window.grabadorVozGlobal && window.grabadorVozGlobal.state === "recording") { window.grabadorVozGlobal.stop(); btn.style.background = "#334155"; btn.innerText = "🎤 Grabar Nota Verbal"; return; }
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+                window.chunksAudioGlobal = []; window.grabadorVozGlobal = new MediaRecorder(stream);
+                window.grabadorVozGlobal.ondataavailable = function(e) { if (e.data.size > 0) window.chunksAudioGlobal.push(e.data); };
+                window.grabadorVozGlobal.onstop = function() {
+                    var audioBlob = new Blob(window.chunksAudioGlobal, { type: 'audio/wav' });
+                    var lector = new FileReader(); lector.readAsDataURL(audioBlob);
+                    lector.onloadend = function() {
+                        window.audioNotaBase64Actual = lector.result;
+                        document.getElementById('btn-reproducir-voz-actual').style.display = 'inline-block';
+                        document.getElementById('btn-eliminar-voz-actual').style.display = 'inline-block';
+                        alert("✅ Nota de voz grabada.");
+                    };
+                };
+                window.grabadorVozGlobal.start(); btn.style.background = "#ff4444"; btn.innerText = "🛑 Grabando...";
+            }).catch(err => alert("⚠️ Micrófono no disponible."));
+        }
+        function reproducirAudioTemporalEnMemoria() { if (window.audioNotaBase64Actual) { var audio = new Audio(window.audioNotaBase64Actual); audio.play(); } }
+        function purgarAudioTemporalEnMemoria() { window.audioNotaBase64Actual = ""; document.getElementById('btn-reproducir-voz-actual').style.display = 'none'; document.getElementById('btn-eliminar-voz-actual').style.display = 'none'; alert("🗑️ Nota verbal purgada."); }
+        function limpiarPizarraTacticaEntrenamiento() { inicializarYDibujarCampoPizarraFutbol(); }
+        // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS 4-A: CANVA VECTORIAL Y TOOLBAR DE ACCESORIOS
+        // =======================================================================
+        if (typeof window.herramientaActual === "undefined") { window.herramientaActual = "trazo"; }
+        if (typeof window.idEntrenamientoSesionActiva === "undefined") { window.idEntrenamientoSesionActiva = null; }
+        if (typeof window.grabadorVozGlobal === "undefined") { window.grabadorVozGlobal = null; }
+        if (typeof window.chunksAudioGlobal === "undefined") { window.chunksAudioGlobal = []; }
+        if (typeof window.audioNotaBase64Actual === "undefined") { window.audioNotaBase64Actual = ""; }
+
+        
+
+        
+      
+            function terminarAccion(e) {
+                if (!pintando) return; pintando = false;
+                var contorno = canvas.getBoundingClientRect();
+                var cX = e.changedTouches ? e.changedTouches.clientX : e.clientX;
+                var cY = e.changedTouches ? e.changedTouches.clientY : e.clientY;
+                var finX = (cX - contorno.left) * (canvas.width / contorno.width);
+                var finY = (cY - contorno.top) * (canvas.height / contorno.height);
+                if (window.herramientaActual.startsWith("flecha")) dibujarVectorFlechaTactica(ctx, fX, fY, finX, finY, window.herramientaActual);
+                ctx.beginPath();
+            }
+         
+        function limpiarPizarraTacticaEntrenamiento() { inicializarYDibujarCampoPizarraFutbol(); }
+        // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS 4-B: ESTAMPADO DE ELEMENTOS Y SUITE DE AUDIO
+        // =======================================================================
+        function estamparAccesorioEnCanvas(ctx, x, y, tipo) {
+            ctx.font = "20px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            if (tipo === "cono") ctx.fillText("🔶", x, y);
+            if (tipo === "pica") ctx.fillText("📍", x, y);
+            if (tipo === "balon") ctx.fillText("⚽", x, y);
+            if (tipo === "porteria") ctx.fillText("🥅", x, y);
+            if (tipo === "peto-azul") { ctx.fillStyle = "#38bdf8"; ctx.beginPath(); ctx.arc(x, y, 10, 0, 2 * Math.PI); ctx.fill(); ctx.fillStyle = "#fff"; ctx.font = "10px Arial"; ctx.fillText("A", x, y); }
+            if (tipo === "peto-rojo") { ctx.fillStyle = "#ef4444"; ctx.beginPath(); ctx.arc(x, y, 10, 0, 2 * Math.PI); ctx.fill(); ctx.fillStyle = "#fff"; ctx.font = "10px Arial"; ctx.fillText("R", x, y); }
+        }
+
+        function dibujarVectorFlechaTactica(ctx, x1, y1, x2, y2, tipo) {
+            ctx.strokeStyle = tipo === "flecha-pase" ? "#ffcc00" : "#fff"; ctx.lineWidth = 3;
+            if (tipo === "flecha-correr") ctx.setLineDash([4, 4]); // 🏁 Línea de puntos para carrera
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.setLineDash([]);
+            var angulo = Math.atan2(y2 - y1, x2 - x1); ctx.fillStyle = ctx.strokeStyle; ctx.beginPath(); ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - 12 * Math.cos(angulo - Math.PI / 6), y2 - 12 * Math.sin(angulo - Math.PI / 6));
+            ctx.lineTo(x2 - 12 * Math.cos(angulo + Math.PI / 6), y2 - 12 * Math.sin(angulo + Math.PI / 6)); ctx.fill();
+        }
+
+        function conmutarGrabacionVozEntrenamiento() {
+            var btn = document.getElementById('btn-microfono-entrenamiento');
+            if (!btn) return;
+            if (window.grabadorVozGlobal && window.grabadorVozGlobal.state === "recording") { window.grabadorVozGlobal.stop(); btn.style.background = "#334155"; btn.innerText = "🎤 Grabar Nota Verbal"; return; }
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+                window.chunksAudioGlobal = []; window.grabadorVozGlobal = new MediaRecorder(stream);
+                window.grabadorVozGlobal.ondataavailable = function(e) { if (e.data.size > 0) window.chunksAudioGlobal.push(e.data); };
+                window.grabadorVozGlobal.onstop = function() {
+                    var audioBlob = new Blob(window.chunksAudioGlobal, { type: 'audio/wav' });
+                    var lector = new FileReader(); lector.readAsDataURL(audioBlob);
+                    lector.onloadend = function() {
+                        window.audioNotaBase64Actual = lector.result;
+                        document.getElementById('btn-reproducir-voz-actual').style.display = 'inline-block';
+                        document.getElementById('btn-eliminar-voz-actual').style.display = 'inline-block';
+                        alert("✅ Nota de voz grabada.");
+                    };
+                };
+                window.grabadorVozGlobal.start(); btn.style.background = "#ff4444"; btn.innerText = "🛑 Grabando...";
+            }).catch(err => alert("⚠️ Micrófono no disponible."));
+        }
+
+        function reproducirAudioTemporalEnMemoria() { if (window.audioNotaBase64Actual) { var audio = new Audio(window.audioNotaBase64Actual); audio.play(); } }
+        function purgarAudioTemporalEnMemoria() { window.audioNotaBase64Actual = ""; document.getElementById('btn-reproducir-voz-actual').style.display = 'none'; document.getElementById('btn-eliminar-voz-actual').style.display = 'none'; alert("🗑️ Nota verbal purgada."); }
+    
+
+        function modificarSesionEntrenamientoMySQL() { guardarNuevoEntrenamientoMySQL(); }
+
+              // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS 4-C2: RESETEADOR DE ALTA FIDELIDAD ANTI-NULLS
+        // =======================================================================
+        function resetearFormularioYBotonesAccion() {
+            console.log("🧹 Purgando de forma segura los selectores del monitor...");
+
+            // 🎯 ESCUDO CONTRA ELEMENTOS HÚERFANOS: Limpiamos cada ID una por una. 
+            // Si alguna no existe en tu HTML, el 'try' absorbe el fallo en silencio y continúa
+            var idsTextoALimpiar = [
+                'ent-form-id-sesion-activa', 'ent-form-nombre', 'ent-form-lugar', 
+                'ent-form-fecha', 'ent-form-desc', 'ent-form-obs', 
+                'ent-form-multimedia-img', 'ent-form-multimedia-vid'
+            ];
+
+            idsTextoALimpiar.forEach(function(id) {
+                try {
+                    var el = document.getElementById(id);
+                    if (el) el.value = "";
+                } catch(e) { console.warn("Elemento no encontrado en tu HTML:", id); }
+            });
+
+            // Reseteamos el selector de la parte del entrenamiento por defecto
+            try {
+                var selectTipo = document.getElementById('ent-form-tipo');
+                if (selectTipo) selectTipo.value = "Calentamiento";
+            } catch(e) {}
+
+            // Vaciamos el contenedor dinámico de ejercicios secuenciales (1, 2, 3...)
+            try {
+                var contenedorEjercicios = document.getElementById('ent-contenedor-filas-ejercicios');
+                if (contenedorEjercicios) {
+                    contenedorEjercicios.innerHTML = "";
+                    window.contadorEjerciciosSesion = 0;
+                    // Le regalamos una primera fila limpia por defecto para empezar a escribir
+                    if (typeof agregarFilaEjercicioDinamicoTabla === "function") {
+                        agregarFilaEjercicioDinamicoTabla("");
+                    }
+                }
+            } catch(e) {}
+            
+            // Ocultamos de forma segura la botonera interactiva de notas de voz
+            window.audioNotaBase64Actual = "";
+            try {
+                if (document.getElementById('btn-reproducir-voz-actual')) document.getElementById('btn-reproducir-voz-actual').style.display = 'none';
+                if (document.getElementById('btn-eliminar-voz-actual')) document.getElementById('btn-eliminar-voz-actual').style.display = 'none';
+            } catch(e) {}
+
+            // Restauramos los textos principales y la botonera elástica al Modo Programar Alta
+            try {
+                if (document.getElementById('ent-titulo-accion-crud')) document.getElementById('ent-titulo-accion-crud').innerText = "📅 Programar Bloque de Entrenamiento";
+                if (document.getElementById('btn-ent-guardar')) document.getElementById('btn-ent-guardar').style.display = 'inline-block';
+                if (document.getElementById('btn-ent-editar')) document.getElementById('btn-ent-editar').style.display = 'none';
+                if (document.getElementById('btn-ent-eliminar')) document.getElementById('btn-ent-eliminar').style.display = 'none';
+                if (document.getElementById('btn-ent-cancelar')) document.getElementById('btn-ent-cancelar').style.display = 'none';
+            } catch(e) {}
+
+            // Limpiamos los trazos de la pizarra de juego tipo Paint
+            if (typeof limpiarPizarraTacticaEntrenamiento === "function") {
+                limpiarPizarraTacticaEntrenamiento();
+            }
+        }
+
+        // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS 4-C2: HISTORIAL RELACIONAL Y BORRADO DE REGISTROS
+        // =======================================================================
+        function eliminarSesionEntrenamientoMySQL() {
+            var idEnt = document.getElementById('ent-form-id-sesion-activa').value;
+            if (!idEnt || !confirm("🗑️ ¿Deseas eliminar físicamente este entrenamiento de MySQL?")) return;
+
+            fetch('http://localhost:3000/api/entrenamientos/eliminar/' + idEnt, { method: 'DELETE' })
+            .then(function(res) { return res.json(); })
+            .then(function() {
+                alert("🗑️ Registro eliminado con éxito de tu Workbench.");
+                resetearFormularioYBotonesAccion();
+                cargarListaEntrenamientosEquipoReal();
+            });
+        }
+
+  
+            // =======================================================================
+        // ⭐ MOTOR PREMIUM REPARADO: PARTE 4-A (INICIALIZADOR Y EVENTOS CANVAS)
+        // =======================================================================
+        if (typeof window.herramientaActual === "undefined") { window.herramientaActual = "trazo"; }
+        if (typeof window.idEntrenamientoSesionActiva === "undefined") { window.idEntrenamientoSesionActiva = null; }
+        if (typeof window.grabadorVozGlobal === "undefined") { window.grabadorVozGlobal = null; }
+        if (typeof window.chunksAudioGlobal === "undefined") { window.chunksAudioGlobal = []; }
+        if (typeof window.audioNotaBase64Actual === "undefined") { window.audioNotaBase64Actual = ""; }
+
+        function inicializarMóduloEntrenamientos() {
+            console.log("🏃 Despertando plataforma táctica interactiva...");
+            inicializarYDibujarCampoPizarraFutbol();
+            
+            // 🎯 LLAMADA INTERSECTORA: Apuntamos al nuevo motor inmune
+            if (typeof purgarYResetearFormularioEntrenamientosSaneado === 'function') {
+                purgarYResetearFormularioEntrenamientosSaneado();
+            }
+            if (typeof cargarListaEntrenamientosEquipoReal === 'function') {
+                cargarListaEntrenamientosEquipoReal();
+            }
+        }
+
+
+// =======================================================================
+// 🛡️ SUPRESOR DE NULOS ABSOLUTO: FIN DE LOS ERRORES DE POR VIDA (REPARADO)
+// =======================================================================
+
+// 1. Forzamos la sobreescritura en la raíz del navegador para congelar copias viejas
+window.resetearFormularioYBotonesAccion = function() { return; };
+
+// 2. Declaramos la función tradicional con un escudo elástico de vaciado seguro
+function resetearFormularioYBotonesAccion() {
+    console.log("🧹 [Escudo Activo] Ejecutando purga elástica libre de properties of null...");
+    
+    // 🎯 REGLA DE RETORNO INMEDIATO: Si el formulario no está renderizado en el HTML,
+    // el script frena aquí mismo de forma segura y evita que salte el error .value
+    var validadorFicha = document.getElementById('ent-form-nombre');
+    if (!validadorFicha || validadorFicha === null) {
+        console.log("⏳ El panel no está montado en esta lona. Saltando reseteo de forma segura.");
+        return; 
+    }
+
+    // Si el validador confirma que el panel existe, vaciamos las IDs con validación estricta
+    var todasLasIdsDelFormulario = [
+        'ent-form-id-sesion-activa', 'ent-form-nombre', 'ent-form-lugar', 
+        'ent-form-fecha', 'ent-form-inicio', 'ent-form-fin', 
+        'ent-form-desc', 'ent-form-obs', 'ent-form-multimedia-img', 
+        'ent-form-multimedia-vid', 'ent-form-tipo'
+    ];
+
+    todasLasIdsDelFormulario.forEach(function(id) {
+        var campo = document.getElementById(id);
+        if (campo !== null && typeof campo !== "undefined") {
+            if (id === 'ent-form-tipo') { campo.value = "Calentamiento"; }
+            else { campo.value = ""; }
+        }
+    });
+
+    // Vaciamos el contenedor dinámico de ejercicios secuenciales (1, 2, 3...)
+    var contenedorEjercicios = document.getElementById('ent-contenedor-filas-ejercicios');
+    if (contenedorEjercicios !== null) {
+        contenedorEjercicios.innerHTML = "";
+        window.contadorEjerciciosSesion = 0;
+        if (typeof agregarFilaEjercicioDinamicoTabla === "function") agregarFilaEjercicioDinamicoTabla("");
+    }
+    
+    // Ocultación de botones de notas de voz verbales
+    window.audioNotaBase64Actual = "";
+    if (document.getElementById('btn-reproducir-voz-actual')) document.getElementById('btn-reproducir-voz-actual').style.display = 'none';
+    if (document.getElementById('btn-eliminar-voz-actual')) document.getElementById('btn-eliminar-voz-actual').style.display = 'none';
+
+    // Restauración visual de los rótulos principales al Modo Programar Alta
+    if (document.getElementById('ent-titulo-accion-crud')) document.getElementById('ent-titulo-accion-crud').innerText = "📅 Programar Bloque de Entrenamiento";
+    if (document.getElementById('btn-ent-guardar')) document.getElementById('btn-ent-guardar').style.display = 'inline-block';
+    if (document.getElementById('btn-ent-editar')) document.getElementById('btn-ent-editar').style.display = 'none';
+    if (document.getElementById('btn-ent-eliminar')) document.getElementById('btn-ent-eliminar').style.display = 'none';
+    if (document.getElementById('btn-ent-cancelar')) document.getElementById('btn-ent-cancelar').style.display = 'none';
+
+    if (typeof limpiarPizarraTacticaEntrenamiento === "function") limpiarPizarraTacticaEntrenamiento();
+}
+
+        
+
+   
+        function limpiarPizarraTacticaEntrenamiento() { inicializarYDibujarCampoPizarraFutbol(); }
+    
+
+        function estamparAccesorioEnCanvas(ctx, x, y, tipo) {
+            ctx.font = "20px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            if (tipo === "cono") ctx.fillText("🔶", x, y);
+            if (tipo === "pica") ctx.fillText("📍", x, y);
+            if (tipo === "balon") ctx.fillText("⚽", x, y);
+            if (tipo === "porteria") ctx.fillText("🥅", x, y);
+            if (tipo === "peto-azul") { ctx.fillStyle = "#38bdf8"; ctx.beginPath(); ctx.arc(x, y, 10, 0, 2 * Math.PI); ctx.fill(); ctx.fillStyle = "#fff"; ctx.font = "10px Arial"; ctx.fillText("A", x, y); }
+            if (tipo === "peto-rojo") { ctx.fillStyle = "#ef4444"; ctx.beginPath(); ctx.arc(x, y, 10, 0, 2 * Math.PI); ctx.fill(); ctx.fillStyle = "#fff"; ctx.font = "10px Arial"; ctx.fillText("R", x, y); }
+        }
+
+        function dibujarVectorFlechaTactica(ctx, x1, y1, x2, y2, tipo) {
+            ctx.strokeStyle = tipo === "flecha-pase" ? "#ffcc00" : "#fff"; ctx.lineWidth = 3;
+            
+            // 🎯 SOLUCIÓN AL CONFILCTO SINTÁCTICO: Calibramos la matriz de puntos con [5, 5] para evitar el error de Chrome
+            if (tipo === "flecha-correr") {
+                ctx.setLineDash([5, 5]); 
+            } else {
+                ctx.setLineDash([]);
+            }
+            
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.setLineDash([]);
+            
+            var angulo = Math.atan2(y2 - y1, x2 - x1); ctx.fillStyle = ctx.strokeStyle; ctx.beginPath(); ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - 12 * Math.cos(angulo - Math.PI / 6), y2 - 12 * Math.sin(angulo - Math.PI / 6));
+            ctx.lineTo(x2 - 12 * Math.cos(angulo + Math.PI / 6), y2 - 12 * Math.sin(angulo + Math.PI / 6)); ctx.fill();
+        }
+        // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS 4-C1: SUITE MULTIMEDIA Y VOLCADO A BASE DE DATOS
+        // =======================================================================
+        function conmutarGrabacionVozEntrenamiento() {
+            var btn = document.getElementById('btn-microfono-entrenamiento');
+            if (!btn) return;
+            if (window.grabadorVozGlobal && window.grabadorVozGlobal.state === "recording") { window.grabadorVozGlobal.stop(); btn.style.background = "#334155"; btn.innerText = "🎤 Grabar Nota Verbal"; return; }
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+                window.chunksAudioGlobal = []; window.grabadorVozGlobal = new MediaRecorder(stream);
+                window.grabadorVozGlobal.ondataavailable = function(e) { if (e.data.size > 0) window.chunksAudioGlobal.push(e.data); };
+                window.grabadorVozGlobal.onstop = function() {
+                    var audioBlob = new Blob(window.chunksAudioGlobal, { type: 'audio/wav' });
+                    var lector = new FileReader(); lector.readAsDataURL(audioBlob);
+                    lector.onloadend = function() {
+                        window.audioNotaBase64Actual = lector.result;
+                        document.getElementById('btn-reproducir-voz-actual').style.display = 'inline-block';
+                        document.getElementById('btn-eliminar-voz-actual').style.display = 'inline-block';
+                        alert("✅ Nota de voz grabada.");
+                    };
+                };
+                window.grabadorVozGlobal.start(); btn.style.background = "#ff4444"; btn.innerText = "🛑 Grabando...";
+            }).catch(err => alert("⚠️ Micrófono no disponible."));
+        }
+
+        function reproducirAudioTemporalEnMemoria() { if (window.audioNotaBase64Actual) { var audio = new Audio(window.audioNotaBase64Actual); audio.play(); } }
+        function purgarAudioTemporalEnMemoria() { window.audioNotaBase64Actual = ""; document.getElementById('btn-reproducir-voz-actual').style.display = 'none'; document.getElementById('btn-eliminar-voz-actual').style.display = 'none'; alert("🗑️ Nota verbal purgada."); }
+
+    
+
+
+        function modificarSesionEntrenamientoMySQL() { guardarNuevoEntrenamientoMySQL(); }
+        // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS 4-C2: HISTORIAL, ELIMINACIÓN Y REESTABLECIMIENTO
+        // =======================================================================
+        function eliminarSesionEntrenamientoMySQL() {
+            var idEnt = document.getElementById('ent-form-id-sesion-activa').value;
+            if (!idEnt || !confirm("🗑️ ¿Deseas eliminar físicamente este entrenamiento de MySQL?")) return;
+            fetch('http://localhost:3000/api/entrenamientos/eliminar/' + idEnt, { method: 'DELETE' })
+            .then(function() {
+                alert("🗑️ Registro eliminado con éxito de tu Workbench.");
+                resetearFormularioYBotonesAccion();
+                cargarListaEntrenamientosEquipoReal();
+            });
+        }
+
+        function resetearFormularioYBotonesAccion() {
+            document.getElementById('ent-form-id-sesion-activa').value = "";
+            document.getElementById('ent-form-nombre').value = "";
+            document.getElementById('ent-form-lugar').value = "";
+            document.getElementById('ent-form-tipo').value = "Técnico";
+            document.getElementById('ent-form-fecha').value = "";
+            document.getElementById('ent-form-inicio').value = "10:00";
+            document.getElementById('ent-form-fin').value = "12:00";
+            document.getElementById('ent-form-secciones').value = "";
+            document.getElementById('ent-form-desc').value = "";
+            document.getElementById('ent-form-obs').value = "";
+            document.getElementById('ent-form-multimedia-img').value = "";
+            document.getElementById('ent-form-multimedia-vid').value = "";
+            window.audioNotaBase64Actual = "";
+            if(document.getElementById('btn-reproducir-voz-actual')) document.getElementById('btn-reproducir-voz-actual').style.display = 'none';
+            if(document.getElementById('btn-eliminar-voz-actual')) document.getElementById('btn-eliminar-voz-actual').style.display = 'none';
+            if(document.getElementById('ent-titulo-accion-crud')) document.getElementById('ent-titulo-accion-crud').innerText = "📅 Programar Nueva Sesión de Trabajo";
+            if(document.getElementById('btn-ent-guardar')) document.getElementById('btn-ent-guardar').style.display = 'inline-block';
+            if(document.getElementById('btn-ent-editar')) document.getElementById('btn-ent-editar').style.display = 'none';
+            if(document.getElementById('btn-ent-eliminar')) document.getElementById('btn-ent-eliminar').style.display = 'none';
+            if(document.getElementById('btn-ent-cancelar')) document.getElementById('btn-ent-cancelar').style.display = 'none';
+            limpiarPizarraTacticaEntrenamiento();
+        }
+
+ 
+     
+   
+
+        // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS PARTE 2: INYECTOR SECUENCIAL DE EJERCICIOS (1, 2, 3...)
+        // =======================================================================
+        if (typeof window.contadorEjerciciosSesion === "undefined") { window.contadorEjerciciosSesion = 0; }
+
+               // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS PARTE 2: INYECTOR SECUENCIAL SANEADO (SIN ERRATAS)
+        // =======================================================================
+        function agregarFilaEjercicioDinamicoTabla(valorTextoPreestablecido) {
+            var contenedor = document.getElementById('ent-contenedor-filas-ejercicios');
+            if (!contenedor) return;
+
+            if (typeof window.contadorEjerciciosSesion === "undefined") { window.contadorEjerciciosSesion = 0; }
+            window.contadorEjerciciosSesion++;
+            
+            var numeroFilaActual = window.contadorEjerciciosSesion;
+            var textoInyectar = valorTextoPreestablecido || "";
+
+            var divFila = document.createElement('div');
+            divFila.id = "ent-fila-ejer-id-" + numeroFilaActual;
+            divFila.className = "ent-fila-ejercicio-clase";
+            
+            // 🎯 SOLUCIÓN AL REFERENCEERROR: Corregimos divS por divFila para que compile limpio en Chrome
+            divFila.style.display = "flex"; 
+            divFila.style.alignItems = "center"; 
+            divFila.style.gap = "6px"; 
+            divFila.style.width = "100%";
+
+            divFila.innerHTML = `
+                <!-- Indicador numérico estanco secuencial -->
+                <span class="ent-num-secuencia-ejer" style="background:#ff9900; color:#000; font-weight:bold; font-size:11px; width:22px; height:22px; display:flex; justify-content:center; align-items:center; border-radius:3px; flex-shrink:0;">${numeroFilaActual}</span>
+                
+                <!-- Input de texto para indicar flexiones, biceps, etc. -->
+                <input type="text" class="ent-input-ejer-texto" placeholder="Ej: flexiones, bíceps, carrera..." value="${textoInyectar}" style="flex-grow:1; background:#111; border:1px solid #444; color:#fff; padding:5px 8px; border-radius:4px; font-size:11px; box-sizing:border-box;">
+                
+                <!-- Botón de eliminación rápida por estación -->
+                <button class="btn-g" type="button" style="background:#ff4444; color:#fff; border:none; padding:4px 8px; cursor:pointer; border-radius:4px; font-weight:bold; font-size:10px;" onclick="eliminarFilaEjercicioEspecificoMonitor(${numeroFilaActual})">🗑️</button>
+            `;
+            contenedor.appendChild(divFila);
+            if (typeof reordenarYRenumerarEjerciciosTablaPantalla === "function") {
+                reordenarYRenumerarEjerciciosTablaPantalla();
+            }
+        }
+
+
+        function eliminarFilaEjercicioEspecificoMonitor(idFila) {
+            var fila = document.getElementById("ent-fila-ejer-id-" + idFila);
+            if (fila && fila.parentNode) {
+                fila.parentNode.removeChild(fila);
+            }
+            reordenarYRenumerarEjerciciosTablaPantalla();
+        }
+
+               // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS PARTE 2: REORDENADOR ACORAZADO INMUNE A LECTURAS NULL
+        // =======================================================================
+        function reordenarYRenumerarEjerciciosTablaPantalla() {
+            var contenedor = document.getElementById('ent-contenedor-filas-ejercicios');
+            if (!contenedor) return;
+            
+            // 🎯 BLINDAJE EXTRA: Forzamos la existencia de la matriz global en el acto
+            if (typeof window.pizarrasPorEjercicio === "undefined" || window.pizarrasPorEjercicio === null) {
+                window.pizarrasPorEjercicio = {};
+            }
+
+            var filasVivas = contenedor.getElementsByClassName('ent-fila-ejercicio-clase');
+            var nuevaMatrizTemporal = {};
+
+            for (var i = 0; i < filasVivas.length; i++) {
+                var nuevaIdSecuencial = i + 1;
+                
+                // Extraemos el número de la fila limpiando el ID string de forma segura
+                var antiguaIdCruda = filasVivas[i].id.replace("ent-fila-ejer-id-", "");
+                var antiguaId = parseInt(antiguaIdCruda) || (i + 1);
+
+                // 🎯 VERIFICACIÓN ESTRICTA ANTI-TYPERROR: 
+                // Solo si el objeto y la ID existen físicamente dentro de la memoria, se lee su valor.
+                // Si da indefinido, el script inyecta un string en blanco y continúa sin congelar el monitor.
+                if (window.pizarrasPorEjercicio && typeof window.pizarrasPorEjercicio[antiguaId] !== "undefined" && window.pizarrasPorEjercicio[antiguaId] !== null) {
+                    nuevaMatrizTemporal[nuevaIdSecuencial] = window.pizarrasPorEjercicio[antiguaId];
+                } else {
+                    nuevaMatrizTemporal[nuevaIdSecuencial] = ""; // Asignación elástica de seguridad
+                }
+
+                // Sincronizamos las etiquetas físicas de la rejilla en tu pantalla
+                filasVivas[i].id = "ent-fila-ejer-id-" + nuevaIdSecuencial;
+                var spanNumero = filasVivas[i].querySelector('.ent-num-secuencia-ejer');
+                if (spanNumero) spanNumero.innerText = nuevaIdSecuencial;
+            }
+
+            // Machacamos el objeto viejo con el nuevo árbol limpio indexado y libre de nulos
+            window.pizarrasPorEjercicio = nuevaMatrizTemporal;
+            window.contadorEjerciciosSesion = filasVivas.length;
+
+            // Calibramos los punteros para que no desborden las casillas en tu pantalla
+            if (window.ejercicioActivoId !== null && window.contadorEjerciciosSesion > 0) {
+                if (window.ejercicioActivoId > window.contadorEjerciciosSesion) {
+                    window.ejercicioActivoId = window.contadorEjerciciosSesion;
+                }
+            } else if (window.contadorEjerciciosSesion > 0) {
+                window.ejercicioActivoId = 1;
+            }
+        }
+
+
+             // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS: SERIALIZADOR BLINDADO QUE OBLIGA A GRABAR DIBUJOS
+        // =======================================================================
+        function serializarEjerciciosYMatrizPizarrasParaMySQL() {
+            var contenedor = document.getElementById('ent-contenedor-filas-ejercicios');
+            if (!contenedor) return "";
+
+            var filasVivas = contenedor.getElementsByClassName('ent-fila-ejercicio-clase');
+            var listaEstructurada = [];
+
+            // 🎯 CAPTURA DE TRÁFICO PROTEGIDA: Localizamos el canvas físico
+            var canvas = document.getElementById('pizarra-futbol-canvas-real');
+            if (canvas) {
+                // Si la variable global de control se quedó colgada en null, deducimos el ejercicio activo
+                // forzando a que se guarde en la sesión '1' (o en la que esté activa en la interfaz)
+                var idEjercicioDestinoReal = window.ejercicioActivoId || 1;
+                
+                console.log("📸 Capturando instantánea tipo Paint para el ejercicio número: " + idEjercicioDestinoReal);
+                if (!window.pizarrasPorEjercicio) window.pizarrasPorEjercicio = {};
+                window.pizarrasPorEjercicio[idEjercicioDestinoReal] = canvas.toDataURL();
+            }
+
+            for (var i = 0; i < filasVivas.length; i++) {
+                var idSecuencial = i + 1;
+                var inputTexto = filasVivas[i].querySelector('.ent-input-ejer-texto');
+                var textoLimpio = inputTexto ? inputTexto.value.trim() : "";
+
+                // Limpiamos residuos Base64 si se hubieran incrustado por error en la casilla de texto
+                if (textoLimpio.startsWith("data:image")) {
+                    textoLimpio = "Sesión " + idSecuencial;
+                }
+
+                if (textoLimpio !== "") {
+                    // Empaquetamos de forma estricta: { numero, nombre_ejercicio, pizarra_base64 }
+                    listaEstructurada.push({
+                        numero: idSecuencial,
+                        nombre_ejercicio: textoLimpio,
+                        pizarra_base64: window.pizarrasPorEjercicio[idSecuencial] || ""
+                    });
+                }
+            }
+            return JSON.stringify(listaEstructurada);
+        }
+
+  
+
+       
+        function modificarSesionEntrenamientoMySQL() { guardarNuevoEntrenamientoMySQL(); }
+
+ 
+
+        // Descompresor de datos: Al hacer clic en el historial, reconstruye la rejilla numerada
+        function deserializarYRepoblarEjerciciosTablaDesdeMySQL(stringComas) {
+            var contenedor = document.getElementById('ent-contenedor-filas-ejercicios');
+            if (!contenedor) return;
+            
+            contenedor.innerHTML = ""; // Purgamos residuos del cromo anterior
+            window.contadorEjerciciosSesion = 0;
+
+            if (!stringComas || stringComas.trim() === "") {
+                // Si la sesión no tenía rutinas guardadas, le regalamos la primera fila vacía para rellenar
+                agregarFilaEjercicioDinamicoTabla("");
+                return;
+            }
+
+            var listaEjercicios = stringComas.split(",");
+            listaEjercicios.forEach(function(ejerTexto) {
+                var textoFormateado = ejerTexto.trim();
+                if (textoFormateado !== "") {
+                    agregarFilaEjercicioDinamicoTabla(textoFormateado);
+                }
+            });
+        }
+   
+
+ 
+        // =======================================================================
+        // 🛡️ CONTROL TOTAL: RESETEADOR INTERACTIVO INMUNE A DUPLICADOS Y NULOS
+        // =======================================================================
+        window.resetearFormularioYBotonesAccion = function() {
+            console.log("🧹 [Fuerza Bruta] Iniciando purga elástica de selectores del monitor...");
+
+            // 1. VACIADO ULTRA-SEGURO ELEMENTO POR ELEMENTO (NUNCA DARÁ ERROR CON .value)
+            var inputNombre = document.getElementById('ent-form-nombre');
+            if (inputNombre !== null) { inputNombre.value = ""; }
+
+            var inputLugar = document.getElementById('ent-form-lugar');
+            if (inputLugar !== null) { inputLugar.value = ""; }
+
+            var inputFecha = document.getElementById('ent-form-fecha');
+            if (inputFecha !== null) { inputFecha.value = ""; }
+
+            var inputDesc = document.getElementById('ent-form-desc');
+            if (inputDesc !== null) { inputDesc.value = ""; }
+
+            var inputObs = document.getElementById('ent-form-obs');
+            if (inputObs !== null) { inputObs.value = ""; }
+
+            var inputIdSesion = document.getElementById('ent-form-id-sesion-activa');
+            if (inputIdSesion !== null) { inputIdSesion.value = ""; }
+
+            var inputImg = document.getElementById('ent-form-multimedia-img');
+            if (inputImg !== null) { inputImg.value = ""; }
+
+            var inputVid = document.getElementById('ent-form-multimedia-vid');
+            if (inputVid !== null) { inputVid.value = ""; }
+
+            var selectTipo = document.getElementById('ent-form-tipo');
+            if (selectTipo !== null) { selectTipo.value = "Calentamiento"; }
+
+            // 2. PURGA DEL CONTENEDOR SECUENCIAL DE EJERCICIOS (1, 2, 3...)
+            try {
+                var contenedorEjercicios = document.getElementById('ent-contenedor-filas-ejercicios');
+                if (contenedorEjercicios !== null) {
+                    contenedorEjercicios.innerHTML = "";
+                    window.contadorEjerciciosSesion = 0;
+                    // Le regalamos una primera fila limpia por defecto para escribir
+                    if (typeof window.agregarFilaEjercicioDinamicoTabla === "function") {
+                        window.agregarFilaEjercicioDinamicoTabla("");
+                    } else if (typeof agregarFilaEjercicioDinamicoTabla === "function") {
+                        agregarFilaEjercicioDinamicoTabla("");
+                    }
+                }
+            } catch(e) { console.log("Contenedor de ejercicios ausente en esta lona."); }
+
+            // 3. OCULTACIÓN DE BOTONES INTERACTIVOS DE AUDIO VERBAL
+            window.audioNotaBase64Actual = "";
+            var btnRepro = document.getElementById('btn-reproducir-voz-actual');
+            if (btnRepro !== null) { btnRepro.style.display = 'none'; }
+            
+            var btnElimVoz = document.getElementById('btn-eliminar-voz-actual');
+            if (btnElimVoz !== null) { btnElimVoz.style.display = 'none'; }
+
+            // 4. RESTAURACIÓN MAESTRA DE LA BOTONERA AL MODO ALTA
+            var tituloForm = document.getElementById('ent-titulo-accion-crud');
+            if (tituloForm !== null) { tituloForm.innerText = "📅 Programar Bloque de Entrenamiento"; }
+
+            var btnGuardar = document.getElementById('btn-ent-guardar');
+            if (btnGuardar !== null) { btnGuardar.style.display = 'inline-block'; }
+
+            var btnEditar = document.getElementById('btn-ent-editar');
+            if (btnEditar !== null) { btnEditar.style.display = 'none'; }
+
+            var btnEliminar = document.getElementById('btn-ent-eliminar');
+            if (btnEliminar !== null) { btnEliminar.style.display = 'none'; }
+
+            var btnCancelar = document.getElementById('btn-ent-cancelar');
+            if (btnCancelar !== null) { btnCancelar.style.display = 'none'; }
+
+            // 5. LIMPIEZA DE TIZAS EN EL TAPETE VERDE DE JUEGO TIPO PAINT
+            if (typeof window.limpiarPizarraTacticaEntrenamiento === "function") {
+                window.limpiarPizarraTacticaEntrenamiento();
+            } else if (typeof limpiarPizarraTacticaEntrenamiento === "function") {
+                limpiarPizarraTacticaEntrenamiento();
+            }
+        };
+
+
+        // =======================================================================
+        // 🛡️ MOTOR INDESTRUCTIBLE: PURGA ELÁSTICA CON NOMBRE CAMBIADO ANTI-HOISTING
+        // =======================================================================
+        function purgarYResetearFormularioEntrenamientosSaneado() {
+            console.log("🧹 [Fuerza Bruta] Limpiando lona deportiva con motor renombrado...");
+
+            // Vaciamos los casilleros principales del monitor asegurando que existan en el DOM
+            var nom = document.getElementById('ent-form-nombre'); if (nom !== null) nom.value = "";
+            var lug = document.getElementById('ent-form-lugar'); if (lug !== null) lug.value = "";
+            var fec = document.getElementById('ent-form-fecha'); if (fec !== null) fec.value = "";
+            var dsc = document.getElementById('ent-form-desc'); if (dsc !== null) dsc.value = "";
+            var obs = document.getElementById('ent-form-obs'); if (obs !== null) obs.value = "";
+            var idS = document.getElementById('ent-form-id-sesion-activa'); if (idS !== null) idS.value = "";
+            var img = document.getElementById('ent-form-multimedia-img'); if (img !== null) img.value = "";
+            var vid = document.getElementById('ent-form-multimedia-vid'); if (vid !== null) vid.value = "";
+
+            var selectTipo = document.getElementById('ent-form-tipo');
+            if (selectTipo !== null) selectTipo.value = "Calentamiento";
+
+            // Vaciamos el contenedor dinámico de ejercicios secuenciales (1, 2, 3...)
+            var contenedorEjercicios = document.getElementById('ent-contenedor-filas-ejercicios');
+            if (contenedorEjercicios !== null) {
+                contenedorEjercicios.innerHTML = "";
+                window.contadorEjerciciosSesion = 0;
+                if (typeof agregarFilaEjercicioDinamicoTabla === "function") agregarFilaEjercicioDinamicoTabla("");
+            }
+            
+            // Ocultamos la botonera de notas de voz verbales
+            window.audioNotaBase64Actual = "";
+            var btnRepro = document.getElementById('btn-reproducir-voz-actual'); if (btnRepro !== null) btnRepro.style.display = 'none';
+            var btnElimV = document.getElementById('btn-eliminar-voz-actual'); if (btnElimV !== null) btnElimV.style.display = 'none';
+
+            // Restauramos los textos principales al Modo Programar Alta
+            var tituloForm = document.getElementById('ent-titulo-accion-crud'); if (tituloForm !== null) tituloForm.innerText = "📅 Programar Bloque de Entrenamiento";
+            var btnG = document.getElementById('btn-ent-guardar'); if (btnG !== null) btnG.style.display = 'inline-block';
+            var btnE = document.getElementById('btn-ent-editar'); if (btnE !== null) btnE.style.display = 'none';
+            var btnD = document.getElementById('btn-ent-eliminar'); if (btnD !== null) btnD.style.display = 'none';
+            var btnC = document.getElementById('btn-ent-cancelar'); if (btnC !== null) btnC.style.display = 'none';
+
+            // Limpiamos los trazos de la pizarra de juego tipo Paint
+            if (typeof limpiarPizarraTacticaEntrenamiento === "function") limpiarPizarraTacticaEntrenamiento();
+        }
+
+        // 🎯 ANULACIÓN ABSOLUTA EN EL FLUJO DE ALTA Y DE CANCELACIÓN:
+        // Vinculamos el alias para que cuando tus botones o scripts llamen a la función vieja, 
+        // redirijan el tráfico de forma automática hacia la función nueva limpia.
+        function resetearFormularioYBotonesAccion() { purgarYResetearFormularioEntrenamientosSaneado(); }
+
+
+        // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS PARTE 2: PERSISTENCIA MULTI-PIZARRA RELACIONAL
+        // =======================================================================
+        if (typeof window.pizarrasPorEjercicio === "undefined") { window.pizarrasPorEjercicio = {}; }
+        if (typeof window.ejercicioActivoId === "undefined") { window.ejercicioActivoId = null; }
+        if (typeof window.contadorEjerciciosSesion === "undefined") { window.contadorEjerciciosSesion = 0; }
+
+                function agregarFilaEjercicioDinamicoTabla(valorTextoPreestablecido, datosPizarraPreestablecidos) {
+            var contenedor = document.getElementById('ent-contenedor-filas-ejercicios');
+            if (!contenedor) return;
+
+            if (typeof window.contadorEjerciciosSesion === "undefined") { window.contadorEjerciciosSesion = 0; }
+            window.contadorEjerciciosSesion++;
+            var numeroFilaActual = window.contadorEjerciciosSesion;
+            var textoInyectar = valorTextoPreestablecido || "";
+
+            if (datosPizarraPreestablecidos) {
+                if (!window.pizarrasPorEjercicio) window.pizarrasPorEjercicio = {};
+                window.pizarrasPorEjercicio[numeroFilaActual] = datosPizarraPreestablecidos;
+            }
+
+            var divFila = document.createElement('div');
+            divFila.id = "ent-fila-ejer-id-" + numeroFilaActual;
+            divFila.className = "ent-fila-ejercicio-clase";
+            divFila.style.display = "flex"; divFila.style.alignItems = "center"; divFila.style.gap = "6px"; divFila.style.width = "100%"; divFila.style.padding = "3px 0";
+
+            divFila.onclick = function(e) {
+                if (e.target.tagName !== 'BUTTON') { conmutarEjercicioTácticoActivo(numeroFilaActual); }
+            };
+
+            divFila.innerHTML = `
+                <span class="ent-num-secuencia-ejer" style="background:#ff9900; color:#000; font-weight:bold; font-size:11px; width:22px; height:22px; display:flex; justify-content:center; align-items:center; border-radius:3px; flex-shrink:0; cursor:pointer;">${numeroFilaActual}</span>
+                <input type="text" class="ent-input-ejer-texto" placeholder="Ej: flexiones, rondo, partidillo..." value="${textoInyectar}" style="flex-grow:1; background:#111; border:1px solid #444; color:#fff; padding:5px 8px; border-radius:4px; font-size:11px; box-sizing:border-box;">
+                <button class="btn-g" type="button" style="background:#ff4444; color:#fff; border:none; padding:4px 8px; cursor:pointer; border-radius:4px; font-weight:bold; font-size:10px;" onclick="eliminarFilaEjercicioEspecificoMonitor(${numeroFilaActual}); event.stopPropagation();">🗑️</button>
+            `;
+            contenedor.appendChild(divFila);
+            
+            // 🎯 LLAMADA RENOMBRADA: Apuntamos al nuevo motor inmune
+            if (typeof purgarYRenumerarEstacionesDinamicasPizarra === "function") {
+                purgarYRenumerarEstacionesDinamicasPizarra();
+            }
+            if (window.ejercicioActivoId === null) { conmutarEjercicioTácticoActivo(numeroFilaActual); }
+        }
+
+        function eliminarFilaEjercicioEspecificoMonitor(idFila) {
+            var fila = document.getElementById("ent-fila-ejer-id-" + idFila);
+            if (fila && fila.parentNode) fila.parentNode.removeChild(fila);
+            if (window.pizarrasPorEjercicio) delete window.pizarrasPorEjercicio[idFila];
+            if (window.ejercicioActivoId === idFila) { window.ejercicioActivoId = null; }
+            if (typeof purgarYRenumerarEstacionesDinamicasPizarra === "function") purgarYRenumerarEstacionesDinamicasPizarra();
+        }
+
+
+                // =======================================================================
+        // ⭐ MOTOR MULTI-PIZARRA DEFINITIVO: CAMBIO DE SESIÓN CON CARGA DE DATOS REAL
+        // =======================================================================
+        function conmutarEjercicioTácticoActivo(nuevoId) {
+            var canvas = document.getElementById('pizarra-futbol-canvas-real');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+
+            var idLimpia = parseInt(nuevoId);
+            if (isNaN(idLimpia)) return;
+
+            // 1. GUARDADO INMEDIATO: Salvamos el dibujo actual antes de movernos de pestaña
+            if (window.ejercicioActivoId !== null && window.ejercicioActivoId !== undefined) {
+                var idVieja = parseInt(window.ejercicioActivoId);
+                if (!window.pizarrasPorEjercicio) window.pizarrasPorEjercicio = {};
+                window.pizarrasPorEjercicio[idVieja] = canvas.toDataURL();
+                
+                // Quitamos el borde de selección visual en tu pantalla
+                var filaVieja = document.getElementById("ent-fila-ejer-id-" + idVieja);
+                if (filaVieja) filaVieja.style.borderLeft = "none";
+            }
+
+            // 2. ACTUALIZAMOS EL PUNTERO: Fijamos la sesión que acabas de pulsar
+            window.ejercicioActivoId = idLimpia;
+            console.log("🎯 Monitor -> Cambiando visualmente a la Sesión Número: " + idLimpia);
+
+            // Resaltamos con una barra verde brillante el ejercicio activo en tu interfaz
+            var filaNueva = document.getElementById("ent-fila-ejer-id-" + idLimpia);
+            if (filaNueva) {
+                filaNueva.style.borderLeft = "3px solid #00CC66";
+                filaNueva.style.paddingLeft = "4px";
+            }
+
+            // 3. CARGA REAL EN PANTALLA: Extraemos el dibujo Base64 guardado para esta sesión
+            var dibujoBase64 = (window.pizarrasPorEjercicio && window.pizarrasPorEjercicio[idLimpia]) ? window.pizarrasPorEjercicio[idLimpia] : null;
+
+            if (dibujoBase64 && dibujoBase64.startsWith("data:image")) {
+                // Si la sesión tiene una pizarra guardada (ya sea nueva o recuperada de MySQL), la pintamos
+                var img = new Image();
+                img.src = dibujoBase64;
+                img.onload = function() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                    console.log("🎨 ¡Éxito! Cargados los iconos, balones y flechas de la sesión: " + idLimpia);
+                };
+            } else {
+                // Si la sesión está limpia y no tiene dibujos, repintamos el césped y las líneas blancas impecables
+                ctx.fillStyle = '#1b4d22'; 
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)'; ctx.lineWidth = 2;
+                ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+                ctx.beginPath(); ctx.moveTo(canvas.width / 2, 10); ctx.lineTo(canvas.width / 2, canvas.height - 10); ctx.stroke();
+                ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height / 2, 45, 0, 2 * Math.PI); ctx.stroke();
+                ctx.strokeRect(10, canvas.height / 2 - 70, 70, 140); ctx.strokeRect(10, canvas.height / 2 - 30, 25, 60);
+                ctx.strokeRect(canvas.width - 80, canvas.height / 2 - 70, 70, 140); ctx.strokeRect(canvas.width - 35, canvas.height / 2 - 30, 25, 60);
+            }
+        }
+
+   // CONTROL DE DIBUJO FLUIDO: Aseguramos que los trazos se guarden siempre en la sesión activa correcta
+        function moverAccionLogicaReal(ctx, canvas, x, y) {
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            if (window.herramientaActual === "goma") {
+                ctx.lineWidth = 36; ctx.strokeStyle = "#1b4d22";
+            } else if (window.herramientaActual === "trazo") {
+                ctx.lineWidth = 3; ctx.strokeStyle = "#38bdf8";
+            } else { return; }
+            ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
+            
+            // Guardamos el trazo en caliente en el diccionario de la sesión activa
+            if (window.ejercicioActivoId !== null) {
+                if (!window.pizarrasPorEjercicio) window.pizarrasPorEjercicio = {};
+                window.pizarrasPorEjercicio[window.ejercicioActivoId] = canvas.toDataURL();
+            }
+        }
+
+
+
+        function eliminarFilaEjercicioEspecificoMonitor(idFila) {
+            var fila = document.getElementById("ent-fila-ejer-id-" + idFila);
+            if (fila && fila.parentNode) fila.parentNode.removeChild(fila);
+            delete window.pizarrasPorEjercicio[idFila];
+            
+            if (window.ejercicioActivoId === idFila) {
+                window.ejercicioActivoId = null;
+            }
+            reordenarYRenumerarEjerciciosTablaPantalla();
+        }
+
+        function reordenarYRenumerarEjerciciosTablaPantalla() {
+            var contenedor = document.getElementById('ent-contenedor-filas-ejercicios');
+            if (!contenedor) return;
+            
+            var filasVivas = contenedor.getElementsByClassName('ent-fila-ejercicio-clase');
+            var nuevaMatrizTemporal = {};
+
+            for (var i = 0; i < filasVivas.length; i++) {
+                var nuevaIdSecuencial = i + 1;
+                var antiguaId = parseInt(filasVivas[i].id.replace("ent-fila-ejer-id-", ""));
+
+                // Si el ejercicio tenía una pizarra asignada, recolocamos su índice matemático
+                if (window.pizarrasPorEjercicio[antiguaId]) {
+                    nuevaMatrizTemporal[nuevaIdSecuencial] = window.pizarrasPorEjercicio[antiguaId];
+                }
+
+                filasVivas[i].id = "ent-fila-ejer-id-" + nuevaIdSecuencial;
+                var spanNumero = filasVivas[i].querySelector('.ent-num-secuencia-ejer');
+                if (spanNumero) spanNumero.innerText = nuevaIdSecuencial;
+            }
+
+            window.pizarrasPorEjercicio = nuevaMatrizTemporal;
+            window.contadorEjerciciosSesion = filasVivas.length;
+
+            if (window.ejercicioActivoId !== null && window.contadorEjerciciosSesion > 0) {
+                if (window.ejercicioActivoId > window.contadorEjerciciosSesion) {
+                    window.ejercicioActivoId = window.contadorEjerciciosSesion;
+                }
+            } else if (window.contadorEjerciciosSesion > 0) {
+                window.ejercicioActivoId = 1;
+            }
+        }
+        // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS PARTE 3-A: COMPRESOR MULTI-PIZARRA Y GUARDADO
+        // =======================================================================
+        function serializarEjerciciosYMatrizPizarrasParaMySQL() {
+            var contenedor = document.getElementById('ent-contenedor-filas-ejercicios');
+            if (!contenedor) return "";
+
+            var filasVivas = contenedor.getElementsByClassName('ent-fila-ejercicio-clase');
+            var listaEstructurada = [];
+
+            var canvas = document.getElementById('pizarra-futbol-canvas-real');
+            if (canvas && window.ejercicioActivoId !== null) {
+                window.pizarrasPorEjercicio[window.ejercicioActivoId] = canvas.toDataURL();
+            }
+
+            for (var i = 0; i < filasVivas.length; i++) {
+                var idSecuencial = i + 1;
+                var inputTexto = filasVivas[i].querySelector('.ent-input-ejer-texto');
+                var textoLimpio = inputTexto ? inputTexto.value.trim() : "";
+
+                if (textoLimpio !== "") {
+                    listaEstructurada.push({
+                        numero: idSecuencial,
+                        nombre_ejercicio: textoLimpio,
+                        pizarra_base64: window.pizarrasPorEjercicio[idSecuencial] || ""
+                    });
+                }
+            }
+            return JSON.stringify(listaEstructurada);
+        }
+
+     
+
+        function modificarSesionEntrenamientoMySQL() { guardarNuevoEntrenamientoMySQL(); }
+
+     
+
+
+
+
+
+   
+
+        // =======================================================================
+        // 🛡️ MOTOR INDESTRUCTIBLE REBAUTIZADO ANTI-HOISTING DE INDEFINIDOS
+        // =======================================================================
+        function purgarYRenumerarEstacionesDinamicasPizarra() {
+            console.log("🧽 [Fuerza Bruta] Re-indexando estaciones con motor renombrado...");
+            
+            var contenedor = document.getElementById('ent-contenedor-filas-ejercicios');
+            if (!contenedor) return;
+            
+            // Forzamos a que la variable global nazca como objeto si está vacía
+            if (!window.pizarrasPorEjercicio || typeof window.pizarrasPorEjercicio === "undefined") {
+                window.pizarrasPorEjercicio = {};
+            }
+
+            var filasVivas = contenedor.getElementsByClassName('ent-fila-ejercicio-clase');
+            var nuevaMatrizTemporal = {};
+
+            for (var i = 0; i < filasVivas.length; i++) {
+                var nuevaIdSecuencial = i + 1;
+                var antiguaIdCruda = filasVivas[i].id.replace("ent-fila-ejer-id-", "");
+                var antiguaId = parseInt(antiguaIdCruda) || (i + 1);
+
+                // Evitamos el error comprobando la existencia de la propiedad de forma estricta
+                if (window.pizarrasPorEjercicio && typeof window.pizarrasPorEjercicio[antiguaId] !== "undefined" && window.pizarrasPorEjercicio[antiguaId] !== null) {
+                    nuevaMatrizTemporal[nuevaIdSecuencial] = window.pizarrasPorEjercicio[antiguaId];
+                } else {
+                    nuevaMatrizTemporal[nuevaIdSecuencial] = ""; // Relleno elástico seguro
+                }
+
+                filasVivas[i].id = "ent-fila-ejer-id-" + nuevaIdSecuencial;
+                var spanNumero = filasVivas[i].querySelector('.ent-num-secuencia-ejer');
+                if (spanNumero) spanNumero.innerText = nuevaIdSecuencial;
+            }
+
+            window.pizarrasPorEjercicio = nuevaMatrizTemporal;
+            window.contadorEjerciciosSesion = filasVivas.length;
+
+            if (window.ejercicioActivoId !== null && window.contadorEjerciciosSesion > 0) {
+                if (window.ejercicioActivoId > window.contadorEjerciciosSesion) {
+                    window.ejercicioActivoId = window.contadorEjerciciosSesion;
+                }
+            } else if (window.contadorEjerciciosSesion > 0) {
+                window.ejercicioActivoId = 1;
+            }
+        }
+
+        // Anulación total de la función vieja duplicada por si es invocada en otro tramo
+        function reordenarYRenumerarEjerciciosTablaPantalla() { purgarYRenumerarEstacionesDinamicasPizarra(); }
+
+
+        // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS PARTE 2: GESTOR INDEPENDIENTE DE SESIONES
+        // =======================================================================
+        if (typeof window.pizarrasPorEjercicio === "undefined") { window.pizarrasPorEjercicio = {}; }
+        if (typeof window.textosPorEjercicio === "undefined") { window.textosPorEjercicio = {}; }
+        if (typeof window.contadorEjerciciosSesion === "undefined") { window.contadorEjerciciosSesion = 0; }
+        if (typeof window.ejercicioActivoId === "undefined") { window.ejercicioActivoId = null; }
+
+           // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS: INYECTOR DE FILAS INMUNE A LECTURAS UNDEFINED
+        // =======================================================================
+        function agregarNuevaSesionFilaIndividualTabla(textoPreestablecido, base64Preestablecido) {
+            var contenedor = document.getElementById('ent-contenedor-filas-ejercicios');
+            if (!contenedor) return;
+
+            // 🎯 EL ESCUDO DE ORO: Si por cualquier motivo los diccionarios globales están vacíos o indefinidos,
+            // los forzamos a nacer como objetos limpios en el acto. Esto erradica el error 'setting 2' de por vida.
+            if (!window.pizarrasPorEjercicio || typeof window.pizarrasPorEjercicio === "undefined") { window.pizarrasPorEjercicio = {}; }
+            if (!window.textosPorEjercicio || typeof window.textosPorEjercicio === "undefined") { window.textosPorEjercicio = {}; }
+            if (!window.descripcionesPorEjercicio || typeof window.descripcionesPorEjercicio === "undefined") { window.descripcionesPorEjercicio = {}; }
+            if (!window.observacionesPorEjercicio || typeof window.observacionesPorEjercicio === "undefined") { window.observacionesPorEjercicio = {}; }
+            if (typeof window.contadorEjerciciosSesion === "undefined") { window.contadorEjerciciosSesion = 0; }
+
+            window.contadorEjerciciosSesion++;
+            var numeroFila = window.contadorEjerciciosSesion;
+            
+            // Si cargamos los datos reales de MySQL Workbench, alimentamos las propiedades del monitor
+            if (textoPreestablecido) window.textosPorEjercicio[numeroFila] = textoPreestablecido;
+            if (base64Preestablecido) window.pizarrasPorEjercicio[numeroFila] = base64Preestablecido;
+
+            var txtInyectar = textoPreestablecido || "";
+
+            var divFila = document.createElement('div');
+            divFila.id = "ent-fila-ejer-id-" + numeroFila;
+            divFila.className = "ent-fila-ejercicio-clase";
+            divFila.style.display = "flex";
+            divFila.style.alignItems = "center";
+            divFila.style.gap = "6px";
+            divFila.style.width = "100%";
+            divFila.style.padding = "2px 0";
+
+            divFila.onclick = function(e) {
+                if (e.target.tagName !== 'BUTTON') {
+                    if (typeof visualizarPizarraDeSesionEspecifica === "function") {
+                        visualizarPizarraDeSesionEspecifica(numeroFila);
+                    }
+                }
+            };
+
+            divFila.innerHTML = `
+                <span class="ent-num-secuencia-ejer" style="background:#ff9900; color:#000; font-weight:bold; font-size:11px; width:22px; height:22px; display:flex; justify-content:center; align-items:center; border-radius:3px; flex-shrink:0;">${numeroFila}</span>
+                <input type="text" class="ent-input-ejer-texto" id="ent-input-texto-sesion-${numeroFila}" placeholder="Ej: flexiones, bíceps, rondo..." value="${txtInyectar}" style="flex-grow:1; background:#111; border:1px solid #444; color:#fff; padding:5px 8px; border-radius:4px; font-size:11px; box-sizing:border-box;">
+                <button class="btn-g" type="button" id="btn-guardar-estacion-${numeroFila}" style="background:#38bdf8; color:#000; font-size:10px; font-weight:bold; padding:5px 10px; border-radius:4px; border:none; cursor:pointer; white-space:nowrap;" onclick="congelarYGuardarDatosDeSesionFila(${numeroFila}); event.stopPropagation();">💾 Guardar Sesión ${numeroFila}</button>
+                <button class="btn-g" type="button" style="background:#ff4444; color:#fff; border:none; padding:5px 8px; cursor:pointer; border-radius:4px; font-weight:bold; font-size:10px;" onclick="eliminarSesionFilaIndividual(${numeroFila}); event.stopPropagation();">🗑️</button>
+            `;
+
+            contenedor.appendChild(divFila);
+            if (typeof reordenarYRenumerarEstacionesDinamicasPizarra === "function") {
+                reordenarYRenumerarEstacionesDinamicasPizarra();
+            }
+        }
+
+
+    
+
+
+
+        function eliminarSesionFilaIndividual(idFila) {
+            var fila = document.getElementById("ent-fila-ejer-id-" + idFila);
+            if (fila && fila.parentNode) fila.parentNode.removeChild(fila);
+            delete window.pizarrasPorEjercicio[idFila];
+            delete window.textosPorEjercicio[idFila];
+            if (window.ejercicioActivoId === idFila) window.ejercicioActivoId = null;
+            reordenarYRenumerarEstacionesDinamicasPizarra();
+        }
+
+         // =======================================================================
+        // 🛡️ MOTOR HISTORIAL: CONECTOR DE LLAMADA SÍNCRONA MAESTRA (PROCESADO REAL)
+        // =======================================================================
+        function cargarListaEntrenamientosEquipoReal() {
+            var idClub = window.idEquipoSeleccionadoFicha || window.id_equipo_actual || window.idEquipoActual || 2;
+            var listaBox = document.getElementById('ent-lista-sesiones-real');
+            if (!listaBox) return;
+
+            console.log("✈️ Consultando entrenamientos en MySQL Workbench para el Club ID: " + idClub);
+
+            fetch('http://localhost:3000/api/entrenamientos/equipo/' + idClub)
+                .then(function(res) { return res.json(); })
+                .then(function(sesiones) {
+                    
+                    // 🎯 LA SOLDADURA MAESTRA DE ORO: 
+                    // Enlazamos físicamente los datos descargados con la función de desempaquetado.
+                    // Ahora, cada vez que cambies de club o cargues la web, esta instrucción obligará
+                    // al monitor a dibujar los inputs, los textos y la lona táctica de golpe.
+                    if (typeof procesarYMostrarSesionesHistorialMonitor === "function") {
+                        procesarYMostrarSesionesHistorialMonitor(sesiones, idClub);
+                    } else {
+                        console.error("⚠️ Alerta: procesarYMostrarSesionesHistorialMonitor no está declarada arriba.");
+                    }
+                    
+                })
+                .catch(function(err) { 
+                    console.error("🔴 Error en el fetch de entrenamientos:", err); 
+                    listaBox.innerHTML = `<span style="color:#ff4444; font-size:11px;">⚠️ Error de conexión con el backend de Node.</span>`;
+                });
+        }
+
+
+
+  
+
+
+
+           // =======================================================================
+        // ⭐ MOTOR PREMIUM: PERSISTENCIA TOTAL DE TEXTOS Y PIZARRAS POR SESIÓN
+        // =======================================================================
+        if (typeof window.descripcionesPorEjercicio === "undefined") { window.descripcionesPorEjercicio = {}; }
+        if (typeof window.observacionesPorEjercicio === "undefined") { window.observacionesPorEjercicio = {}; }
+
+     
+
+
+
+
+        // =======================================================================
+        // ⭐ MOTOR PREMIUM: REORDENADOR ACORAZADO SANEADO (ANTI-ERROR 25 Y REF: D)
+        // =======================================================================
+        function reordenarYRenumerarEstacionesDinamicasPizarra() {
+            var contenedor = document.getElementById('ent-contenedor-filas-ejercicios');
+            if (!contenedor) return;
+            
+            var filasVivas = contenedor.getElementsByClassName('ent-fila-ejercicio-clase');
+            var nuevaPizarras = {}, nuevosTextos = {}, nuevaDescripciones = {}, nuevaObservaciones = {};
+
+            console.log("⚙️ Reordenador -> Indexando de forma estricta " + filasVivas.length + " sesiones...");
+
+            // 🎯 REAJUSTE DE CONTADOR DE SEGURIDAD: Sincronizamos el contador global directamente
+            // con el número exacto de filas físicas que hay en la pantalla para evitar que suba a 25.
+            window.contadorEjerciciosSesion = filasVivas.length;
+
+            for (var i = 0; i < filasVivas.length; i++) {
+                var nuevoId = i + 1; // Genera estrictamente 1, 2, 3...
+                var antiguaIdCruda = filasVivas[i].id.replace("ent-fila-ejer-id-", "");
+                var antiguaId = parseInt(antiguaIdCruda) || (i + 1);
+
+                // Migramos los datos de los diccionarios a su nuevo casillero numérico alineado
+                if (window.pizarrasPorEjercicio && window.pizarrasPorEjercicio[antiguaId]) nuevaPizarras[nuevoId] = window.pizarrasPorEjercicio[antiguaId];
+                if (window.textosPorEjercicio && window.textosPorEjercicio[antiguaId]) nuevosTextos[nuevoId] = window.textosPorEjercicio[antiguaId];
+                if (window.descripcionesPorEjercicio && window.descripcionesPorEjercicio[antiguaId]) nuevaDescripciones[nuevoId] = window.descripcionesPorEjercicio[antiguaId];
+                if (window.observacionesPorEjercicio && window.observacionesPorEjercicio[antiguaId]) nuevaObservaciones[nuevoId] = window.observacionesPorEjercicio[antiguaId];
+
+                // 1. Forzamos la ID del contenedor físico en tu monitor
+                filasVivas[i].id = "ent-fila-ejer-id-" + nuevoId;
+                
+                // 2. Saneamos el evento de clic de la fila para que cambie de sesión de forma estante
+                filasVivas[i].setAttribute("data-id-sesion", nuevoId);
+                filasVivas[i].onclick = function(e) {
+                    if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+                        var idClick = parseInt(this.getAttribute("data-id-sesion"));
+                        if (typeof visualizarPizarraDeSesionEspecifica === "function") {
+                            visualizarPizarraDeSesionEspecifica(idClick);
+                        }
+                    }
+                };
+
+                // 3. Sincronizamos las etiquetas de identificación de los inputs de texto
+                var inputTxt = filasVivas[i].querySelector('.ent-input-ejer-texto');
+                if (inputTxt) {
+                    inputTxt.id = "ent-input-texto-sesion-" + nuevoId;
+                }
+                
+                // 🎯 4. LA SOLUCIÓN AL REFERENCEERROR 'D': Eliminamos las funciones anónimas complejas.
+                // Usamos atributos puros del DOM ('data-index') para que el navegador asimile el número de 
+                // forma nativa e instantánea al pulsar el botón de guardar.
+                var btnG = filasVivas[i].querySelector('.btn-g[id^="btn-guardar-estacion-"]');
+                if (btnG) { 
+                    btnG.id = "btn-guardar-estacion-" + nuevoId; 
+                    btnG.innerText = "💾 Guardar Sesión " + nuevoId; 
+                    btnG.setAttribute("data-index-boton", nuevoId);
+                    btnG.onclick = function(e) {
+                        var idBotonReal = parseInt(this.getAttribute("data-index-boton"));
+                        if (typeof congelarYGuardarDatosDeSesionFila === "function") {
+                            congelarYGuardarDatosDeSesionFila(idBotonReal);
+                        }
+                        e.stopPropagation();
+                    };
+                }
+
+                // 5. Refrescamos el indicador numérico de color naranja visual del monitor
+                var spanNum = filasVivas[i].querySelector('.ent-num-secuencia-ejer');
+                if (spanNum) spanNum.innerText = nuevoId;
+            }
+
+            // Machacamos las variables de memoria con los diccionarios limpios de saltos
+            window.pizarrasPorEjercicio = nuevaPizarras; 
+            window.textosPorEjercicio = nuevosTextos; 
+            window.descripcionesPorEjercicio = nuevaDescripciones;
+            window.observacionesPorEjercicio = nuevaObservaciones;
+
+            if (window.ejercicioActivoId === null && window.contadorEjerciciosSesion > 0) {
+                window.ejercicioActivoId = 1;
+            }
+        }
+
+
+        // =======================================================================
+        // ⭐ MOTOR PREMIUM: SELECTOR DE PESTAÑAS INDEPENDIENTE CON VACIADO EXTRACTO
+        // =======================================================================
+        function visualizarPizarraDeSesionEspecifica(idSesion) {
+            var canvas = document.getElementById('pizarra-futbol-canvas-real');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+
+            var idNuevaLimpia = parseInt(idSesion);
+            if (isNaN(idNuevaLimpia)) return;
+
+            // Aseguramos la existencia de las matrices globales en el hilo de memoria
+            if (!window.descripcionesPorEjercicio) window.descripcionesPorEjercicio = {};
+            if (!window.observacionesPorEjercicio) window.observacionesPorEjercicio = {};
+            if (!window.pizarrasPorEjercicio) window.pizarrasPorEjercicio = {};
+            if (!window.textosPorEjercicio) window.textosPorEjercicio = {};
+
+            // 🎯 FIJACIÓN MAESTRA DEL PUNTERO: Clavamos estrictamente la sesión que has pulsado
+            window.ejercicioActivoId = idNuevaLimpia;
+            console.log("🎯 Monitor -> Saltando a la Sesión Estanca Independiente: " + idNuevaLimpia);
+
+            // Resaltado visual con la barra verde a la izquierda de la fila seleccionada
+            var todasLasFilas = document.getElementsByClassName('ent-fila-ejercicio-clase');
+            for (var i = 0; i < todasLasFilas.length; i++) { todasLasFilas[i].style.borderLeft = "none"; }
+            
+            var filaNueva = document.getElementById("ent-fila-ejer-id-" + idNuevaLimpia);
+            if (filaNueva) { 
+                filaNueva.style.borderLeft = "3px solid #00CC66"; 
+                filaNueva.style.paddingLeft = "4px"; 
+            }
+
+            // 🎯 REPOBLAMOS O VACIAMOS LOS CUADROS DE TEXTO DE ABAJO DE FORMA CONTROLADA
+            // Si la sesión que pulsas tiene datos guardados por su botón, los pinta.
+            // Si no tiene nada (está vacía), FORZAMOS al cuadro a vaciarse ("") para que no arrastre restos de la otra sesión.
+            var inputDesc = document.getElementById('ent-form-desc');
+            if (inputDesc !== null) { 
+                inputDesc.value = window.descripcionesPorEjercicio[idNuevaLimpia] !== undefined ? window.descripcionesPorEjercicio[idNuevaLimpia] : ""; 
+            }
+            
+            var inputObs = document.getElementById('ent-form-obs');
+            if (inputObs !== null) { 
+                inputObs.value = window.observacionesPorEjercicio[idNuevaLimpia] !== undefined ? window.observacionesPorEjercicio[idNuevaLimpia] : ""; 
+            }
+
+            // 🎯 REPOBLAMOS O VACIAMOS EL LIENZO GRÁFICO TIPO PAINT
+            var mapaBase64Recuperado = window.pizarrasPorEjercicio[idNuevaLimpia];
+            if (mapaBase64Recuperado && mapaBase64Recuperado.startsWith("data:image")) {
+                var imgTactica = new Image(); 
+                imgTactica.src = mapaBase64Recuperado;
+                imgTactica.onload = function() { 
+                    ctx.clearRect(0, 0, canvas.width, canvas.height); 
+                    ctx.drawImage(imgTactica, 0, 0); 
+                    console.log("🎨 ¡Éxito! Pintado el lienzo estanco de la Sesión: " + idNuevaLimpia);
+                };
+            } else {
+                // 🌟 Si la sesión está limpia y no tiene dibujos guardados, limpiamos el canvas pintando el césped base
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                if (typeof inicializarYDibujarCampoPizarraFutbol === "function") {
+                    inicializarYDibujarCampoPizarraFutbol();
+                }
+            }
+        }
+
+        // =======================================================================
+        // ⭐ MOTOR PREMIUM: CONGELADOR DE SESIÓN MANUAL SEGURO (SANEADO SIN ERRATAS)
+        // =======================================================================
+        function congelarYGuardarDatosDeSesionFila(idSesion) 
+        {
+            console.log("💾 Iniciando guardado manual estanco para la Sesión ID: " + idSesion);
+            
+            var canvas = document.getElementById('pizarra-futbol-canvas-real');
+            var inputTexto = document.getElementById('ent-input-texto-sesion-' + idSesion);
+            var inputDesc = document.getElementById('ent-form-desc');
+            var inputObs = document.getElementById('ent-form-obs');
+            
+            if (!canvas || !inputTexto) {
+                console.error("⚠️ Error: Elementos HTML ausentes para la sesión " + idSesion);
+                return;
+            }
+
+            var textoLimpio = inputTexto.value.trim();
+            if (textoLimpio === "") {
+                alert("⚠️ Por favor escribe el nombre de la sesión " + idSesion + " antes de guardarla.");
+                return;
+            }
+
+            // 🎯 ASIGNACIÓN PLANA TRANSPARENTE: Guardamos todo por separado en la memoria viva
+            if (!window.pizarrasPorEjercicio) window.pizarrasPorEjercicio = {};
+            if (!window.textosPorEjercicio) window.textosPorEjercicio = {};
+            if (!window.descripcionesPorEjercicio) window.descripcionesPorEjercicio = {};
+            if (!window.observacionesPorEjercicio) window.observacionesPorEjercicio = {};
+
+            window.pizarrasPorEjercicio[idSesion] = canvas.toDataURL();
+            window.textosPorEjercicio[idSesion] = textoLimpio;
+            window.descripcionesPorEjercicio[idSesion] = inputDesc ? inputDesc.value : "";
+            window.observacionesPorEjercicio[idSesion] = inputObs ? inputObs.value : "";
+
+            // Animación verde elástica de confirmación visual en el botón de tu monitor
+            var btnFila = document.getElementById('btn-guardar-estacion-' + idSesion);
+            if (btnFila) {
+                var colorOriginal = btnFila.style.background;
+                var textoOriginal = btnFila.innerText;
+                
+                btnFila.style.background = "#00CC66";
+                btnFila.innerText = "✅ Guardada " + idSesion;
+                
+                setTimeout(function() {
+                    btnFila.style.background = colorOriginal || "#38bdf8";
+                    btnFila.innerText = textoOriginal || ("💾 Guardar Sesión " + idSesion);
+                }, 1200);
+            }
+            console.log("✅ [Éxito] Datos de la Sesión " + idSesion + " congelados en memoria sin fugas.");
+        }
+
+
+
+
+     
+
+
+
+
+        // 🎯 3. EMPAQUETADOR FINAL JSON: Une textos, descripciones y dibujos en el payload para MySQL
+        function serializarMatrizSesionesPreGuardadas() {
+            var contenedor = document.getElementById('ent-contenedor-filas-ejercicios');
+            if (!contenedor) return "";
+
+            // Forzamos la captura del último segundo de lo que haya en la pantalla
+            if (window.ejercicioActivoId !== null) {
+                var canvas = document.getElementById('pizarra-futbol-canvas-real');
+                if (canvas) window.pizarrasPorEjercicio[window.ejercicioActivoId] = canvas.toDataURL();
+                var cDesc = document.getElementById('ent-form-desc'); if (cDesc) window.descripcionesPorEjercicio[window.ejercicioActivoId] = cDesc.value;
+                var cObs = document.getElementById('ent-form-obs'); if (cObs) window.observacionesPorEjercicio[window.ejercicioActivoId] = cObs.value;
+            }
+
+            var filasVivas = contenedor.getElementsByClassName('ent-fila-ejercicio-clase');
+            var listaEstructurada = [];
+
+            for (var i = 0; i < filasVivas.length; i++) {
+                var idSecuencial = i + 1;
+                var inputTexto = filasVivas[i].querySelector('.ent-input-ejer-texto');
+                var textoLimpio = inputTexto ? inputTexto.value.trim() : (window.textosPorEjercicio[idSecuencial] || "");
+
+                if (textoLimpio !== "") {
+                    listaEstructurada.push({
+                        numero: idSecuencial,
+                        nombre_ejercicio: textoLimpio,
+                        pizarra_base64: window.pizarrasPorEjercicio[idSecuencial] || "",
+                        // 🌟 INYECCIÓN EXTRA COMPLETA: Guardamos la descripción y observaciones de cada sesión por separado
+                        descripcion_sesion: window.descripcionesPorEjercicio[idSecuencial] || "",
+                        observaciones_sesion: window.observacionesPorEjercicio[idSecuencial] || ""
+                    });
+                }
+            }
+            return JSON.stringify(listaEstructurada);
+        }
+
+      
+
+        function modificarSesionEntrenamientoMySQL() { guardarNuevoEntrenamientoMySQL(); }
+
+        // =======================================================================
+        // ⭐ MOTOR ENTRENAMIENTOS PARTE 3-A: CONSOLIDADOR DE SESIONES Y GUARDADO
+        // =======================================================================
+        function serializarMatrizSesionesPreGuardadas() {
+            var contenedor = document.getElementById('ent-contenedor-filas-ejercicios');
+            if (!contenedor) return "";
+
+            var filasVivas = contenedor.getElementsByClassName('ent-fila-ejercicio-clase');
+            var listaEstructurada = [];
+
+            for (var i = 0; i < filasVivas.length; i++) {
+                var idSecuencial = i + 1;
+                var inputTexto = filasVivas[i].querySelector('.ent-input-ejer-texto');
+                var textoLimpio = inputTexto ? inputTexto.value.trim() : (window.textosPorEjercicio[idSecuencial] || "");
+
+                if (textoLimpio !== "") {
+                    listaEstructurada.push({
+                        numero: idSecuencial,
+                        nombre_ejercicio: textoLimpio,
+                        pizarra_base64: window.pizarrasPorEjercicio[idSecuencial] || ""
+                    });
+                }
+            }
+            return JSON.stringify(listaEstructurada);
+        }
+
+           // =======================================================================
+        // 🛡️ FRONTEND: PASARELA DE ENVÍO DE DATOS PURIFICADA (MÉTODO TRADICIONAL CORREGIDO)
+        // =======================================================================
+        function guardarNuevoEntrenamientoMySQL() {
+            var idClub = window.idEquipoSeleccionadoFicha || window.id_equipo_actual || window.idEquipoActual || 2;
+            var nom = document.getElementById('ent-form-nombre').value;
+            var lug = document.getElementById('ent-form-lugar').value;
+            var tipo = document.getElementById('ent-form-tipo').value;
+            var fecha = document.getElementById('ent-form-fecha').value;
+            var ini = document.getElementById('ent-form-inicio').value;
+            var fin = document.getElementById('ent-form-fin').value;
+            var desc = document.getElementById('ent-form-desc') ? document.getElementById('ent-form-desc').value : "";
+            var obs = document.getElementById('ent-form-obs') ? document.getElementById('ent-form-obs').value : "";
+            
+            var imgUrl = document.getElementById('ent-form-multimedia-img') ? document.getElementById('ent-form-multimedia-img').value : "";
+            var vidUrl = document.getElementById('ent-form-multimedia-vid') ? document.getElementById('ent-form-multimedia-vid').value : "";
+
+            // Aseguramos la captura del último segundo de lo que haya en la pantalla antes de empaquetar
+            if (window.ejercicioActivoId !== null && window.ejercicioActivoId !== undefined) {
+                var canvas = document.getElementById('pizarra-futbol-canvas-real');
+                if (canvas) window.pizarrasPorEjercicio[window.ejercicioActivoId] = canvas.toDataURL();
+                var cDesc = document.getElementById('ent-form-desc'); if (cDesc) window.descripcionesPorEjercicio[window.ejercicioActivoId] = cDesc.value;
+                var cObs = document.getElementById('ent-form-obs'); if (cObs) window.observacionesPorEjercicio[window.ejercicioActivoId] = cObs.value;
+            }
+
+            // Construimos el array estructurado nativo
+            var listaEstructurada = [];
+            var contenedor = document.getElementById('ent-contenedor-filas-ejercicios');
+            if (contenedor) {
+                var filasVivas = contenedor.getElementsByClassName('ent-fila-ejercicio-clase');
+                for (var i = 0; i < filasVivas.length; i++) {
+                    var idSecuencial = i + 1;
+                    var inputTexto = filasVivas[i].querySelector('.ent-input-ejer-texto');
+                    var textoLimpio = inputTexto ? inputTexto.value.trim() : (window.textosPorEjercicio[idSecuencial] || "");
+
+                    if (textoLimpio !== "" && !textoLimpio.startsWith("data:image")) {
+                        listaEstructurada.push({
+                            numero: idSecuencial,
+                            nombre_ejercicio: textoLimpio,
+                            pizarra_base64: window.pizarrasPorEjercicio[idSecuencial] || "",
+                            descripcion_sesion: window.descripcionesPorEjercicio[idSecuencial] || "",
+                            observaciones_sesion: window.observacionesPorEjercicio[idSecuencial] || ""
+                        });
+                    }
+                }
+            }
+
+            if (!nom || !fecha) { alert("⚠️ Por favor rellene los campos Nombre del Entrenamiento y Fecha."); return; }
+
+            // Enviamos el objeto plano sin pre-serializar para que Express lo asimile nativo
+            var payload = {
+                id_entrenamiento: document.getElementById('ent-form-id-sesion-activa').value || null,
+                id_equipo: parseInt(idClub), 
+                nombre: nom, 
+                descripcion: desc, 
+                lugar_entrenamiento: lug, 
+                fecha: fecha,
+                hora_inicio: ini, 
+                hora_fin: fin, 
+                tipo_entrenamiento: tipo, 
+                secciones_bloques: JSON.stringify(listaEstructurada), // Forzamos la cadena JSON limpia
+                observaciones: obs, 
+                multimedia_ruta: imgUrl || vidUrl || "", 
+                pizarra_datos: "MODO_SEPARADO_REAL", 
+                audio_nota: window.audioNotaBase64Actual || ""
+            };
+
+            fetch('http://localhost:3000/api/entrenamientos/guardar', {
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(payload)
+            })
+            .then(function(res) { return res.json(); })
+            .then(function() {
+                alert("💾 ¡Cambios consolidados! Circuitos y pizarras guardadas en MySQL Workbench.");
+                if (typeof purgarYResetearFormularioEntrenamientosSaneado === "function") purgarYResetearFormularioEntrenamientosSaneado();
+                cargarListaEntrenamientosEquipoReal();
+            })
+            .catch(function(err) { console.error("Error al inyectar lona tradicional:", err); });
+        }
+
+
+        // Enlazamos el botón de actualizar de tu monitor directamente a la pasarela reparada
+        function modificarSesionEntrenamientoMySQL() { guardarNuevoEntrenamientoMySQL(); }
+
+        
+
+             // =======================================================================
+        // 🧽 MOTOR PIZARRA PASO 4: CONMUTADOR SANEADO AISLADO PARA EL MONITOREO
+        // =======================================================================
+        function cambiarHerramientaPizarra(tipo) {
+            // Fijamos la variable de dibujo sin tocar nada de window ni hilos cruzados
+            window.herramientaActual = tipo;
+            console.log("🏃 Pizarra -> Selector de accesorios calibrado en: " + tipo);
+
+            // 🎯 EL FILTRO QUIRÚRGICO: Buscamos únicamente los botones que viven DENTRO de la toolbar de la pizarra
+            var contenedorToolbarPizarra = document.getElementById('pizarra-toolbar');
+            if (contenedorToolbarPizarra) {
+                
+                // Apagamos los fondos verdes exclusivamente de los accesorios tácticos
+                var botonesDeLaPizarra = contenedorToolbarPizarra.getElementsByClassName('btn-g');
+                for (var i = 0; i < botonesDeLaPizarra.length; i++) {
+                    botonesDeLaPizarra[i].classList.remove('active');
+                    botonesDeLaPizarra[i].style.background = '#1e293b';
+                }
+
+                // Encendemos milimétricamente el botón de la Goma, Lápiz o Cono que pulsaste
+                var botonPulsadoReal = document.getElementById('tool-' + tipo);
+                if (botonPulsadoReal) {
+                    botonPulsadoReal.classList.add('active');
+                    botonPulsadoReal.style.background = '#00CC66';
+                }
+            }
+        }
+
+
+        // 🎯 SOLDADURA DE SEGURIDAD: Asignamos el alias a window sin invocar segundas funciones
+        window.cambiarHerramientaPizarra = cambiarHerramientaPizarra;
+
+        // =======================================================================
+        // 🛡️ CONTROL GLOBAL: CONMUTADOR DE HERRAMIENTAS TÁCTICAS (ANTI-REFERENCEERROR)
+        // =======================================================================
+        window.cambiarHerramientaPizarra = function(tipo) {
+            window.herramientaActual = tipo;
+            console.log("🛠️ Herramienta táctica de la pizarra conmutada a: " + tipo);
+
+            // Reseteamos el estilo visual de toda la botonera lateral de tu pantalla
+            var botonesToolbar = document.querySelectorAll('#pizarra-toolbar .btn-g');
+            botonesToolbar.forEach(function(b) { 
+                b.classList.remove('active'); 
+                b.style.background = '#1e293b'; 
+            });
+            
+            // Iluminamos el botón físico que acabas de pulsar (Lápiz, Goma, Cono...) en color verde
+            var btnActivo = document.getElementById('tool-' + tipo);
+            if (btnActivo) { 
+                btnActivo.classList.add('active'); 
+                btnActivo.style.background = '#00CC66'; 
+            }
+        };
+
+        // Creamos la declaración tradicional de apoyo por si tu HTML la invoca de forma directa
+        function cambiarHerramientaPizarra(tipo) { window.cambiarHerramientaPizarra(tipo); }
+
+        // =======================================================================
+        // 🛡️ MOTOR PIZARRA TRABAJO: FUNCIÓN NUEVA REBAUTIZADA ANTI-BUCLES
+        // =======================================================================
+        function seleccionarHerramientaDibujoPizarra(tipo) {
+            // Fijamos la variable de dibujo sin tocar nada de window ni hilos cruzados
+            window.herramientaActual = tipo;
+            console.log("🏃 Pizarra -> Selector de accesorios calibrado en: " + tipo);
+
+            // Buscamos únicamente los botones que viven DENTRO de la toolbar de la pizarra
+            var contenedorToolbarPizarra = document.getElementById('pizarra-toolbar');
+            if (contenedorToolbarPizarra) {
+                
+                // Apagamos los fondos verdes exclusivamente de los accesorios tácticos
+                var botonesDeLaPizarra = contenedorToolbarPizarra.getElementsByClassName('btn-g');
+                for (var i = 0; i < botonesDeLaPizarra.length; i++) {
+                    botonesDeLaPizarra[i].classList.remove('active');
+                    botonesDeLaPizarra[i].style.background = '#1e293b';
+                }
+
+                // Encendemos milimétricamente el botón de la Goma, Lápiz o Cono que pulsaste
+                var botonPulsadoReal = document.getElementById('tool-' + tipo);
+                if (botonPulsadoReal) {
+                    botonPulsadoReal.classList.add('active');
+                    botonPulsadoReal.style.background = '#00CC66';
+                }
+            }
+        }
+
+        // Bloqueo total de la función vieja duplicada por si es invocada en otro tramo
+        function cambiarHerramientaPizarra(tipo) { seleccionarHerramientaDibujoPizarra(tipo); }
+
+        // =======================================================================
+        // ⭐ MOTOR PIZARRA TRABAJO: ESTAMPADO REPARADO DE ICONOS Y EVENTOS CLIC
+        // =======================================================================
+        function estamparAccesorioEnCanvas(ctx, x, y, tipo) {
+            console.log("🔶 Estampando en los píxeles del lienzo el accesorio: " + tipo);
+            
+            // Calibramos la tiza y el tamaño del texto para los emojis en tu monitor
+            ctx.save();
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.font = "24px Arial"; 
+            ctx.textAlign = "center"; 
+            ctx.textBaseline = "middle";
+
+            // Evaluamos de forma estricta qué botón tienes iluminado a la izquierda
+            if (tipo === "cono") ctx.fillText("🔶", x, y);
+            if (tipo === "pica") ctx.fillText("📍", x, y);
+            if (tipo === "balon") ctx.fillText("⚽", x, y);
+            if (tipo === "porteria") ctx.fillText("🥅", x, y);
+            
+            // Si son los petos de los futbolistas, dibujamos un círculo de color con su letra de equipo
+            if (tipo === "peto-azul") { 
+                ctx.fillStyle = "#38bdf8"; ctx.beginPath(); ctx.arc(x, y, 11, 0, 2 * Math.PI); ctx.fill(); 
+                ctx.fillStyle = "#ffffff"; ctx.font = "bold 10px Arial"; ctx.fillText("A", x, y); 
+            }
+            if (tipo === "peto-rojo") { 
+                ctx.fillStyle = "#ef4444"; ctx.beginPath(); ctx.arc(x, y, 11, 0, 2 * Math.PI); ctx.fill(); 
+                ctx.fillStyle = "#ffffff"; ctx.font = "bold 10px Arial"; ctx.fillText("R", x, y); 
+            }
+            ctx.restore();
+
+            // Sincronizamos de inmediato el dibujo en la matriz de tu sesión/ejercicio activo
+            if (window.ejercicioActivoId !== null && window.ejercicioActivoId !== undefined) {
+                var canvasReal = document.getElementById('pizarra-futbol-canvas-real');
+                if (canvasReal) {
+                    if (!window.pizarrasPorEjercicio) window.pizarrasPorEjercicio = {};
+                    window.pizarrasPorEjercicio[window.ejercicioActivoId] = canvasReal.toDataURL();
+                }
+            }
+        }
+
+        // REPARACIÓN DEL RECEPTOR DE CLICS: Captura tu mano sobre el lienzo verde
+        function inicializarYDibujarCampoPizarraFutbol() {
+            var canvas = document.getElementById('pizarra-futbol-canvas-real');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+
+            // 1. Dibujamos el césped y las líneas reglamentarias del estadio
+            ctx.fillStyle = '#1b4d22'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)'; ctx.lineWidth = 2;
+            ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+            ctx.beginPath(); ctx.moveTo(canvas.width / 2, 10); ctx.lineTo(canvas.width / 2, canvas.height - 10); ctx.stroke();
+            ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height / 2, 45, 0, 2 * Math.PI); ctx.stroke();
+            ctx.strokeRect(10, canvas.height / 2 - 70, 70, 140); ctx.strokeRect(10, canvas.height / 2 - 30, 25, 60);
+            ctx.strokeRect(canvas.width - 80, canvas.height / 2 - 70, 70, 140); ctx.strokeRect(canvas.width - 35, canvas.height / 2 - 30, 25, 60);
+
+            var fX = 0, fY = 0, pintando = false;
+            
+            // 🎯 CAPTURADOR DE CLIC MAESTRO: Estampa conos y balones en la lona al tocar con el ratón
+            canvas.onmousedown = function(e) {
+                var contorno = canvas.getBoundingClientRect();
+                fX = (e.clientX - contorno.left) * (canvas.width / contorno.width);
+                fY = (e.clientY - contorno.top) * (canvas.height / contorno.height);
+                pintando = true;
+
+                // Si la herramienta elegida NO es el lápiz ni la goma, estampamos el accesorio en ese microsegundo
+                if (window.herramientaActual !== "trazo" && window.herramientaActual !== "goma" && !window.herramientaActual.startsWith("flecha")) {
+                    estamparAccesorioEnCanvas(ctx, fX, fY, window.herramientaActual);
+                    pintando = false; // Bloqueamos el arrastre para que no emborrone
+                }
+            };
+
+            canvas.onmouseup = function(e) {
+                if (!pintando) return; pintando = false;
+                var contorno = canvas.getBoundingClientRect();
+                var finX = (e.clientX - contorno.left) * (canvas.width / contorno.width);
+                var finY = (e.clientY - contorno.top) * (canvas.height / contorno.height);
+                
+                // Si tienes puestas las flechas de pase o carrera, dibuja el vector elástico
+                if (window.herramientaActual.startsWith("flecha")) {
+                    if (typeof dibujarVectorFlechaTactica === "function") {
+                        dibujarVectorFlechaTactica(ctx, fX, fY, finX, finY, window.herramientaActual);
+                    }
+                }
+                ctx.beginPath();
+            };
+
+            canvas.onmousemove = function(e) {
+                if (!pintando) return;
+                var contorno = canvas.getBoundingClientRect();
+                var x = (e.clientX - contorno.left) * (canvas.width / contorno.width);
+                var y = (e.clientY - contorno.top) * (canvas.height / contorno.height);
+                
+                // Si es el lápiz o la goma, ejecuta el trazo continuo en movimiento
+                if (typeof moverAccionLogicaReal === "function") {
+                    moverAccionLogicaReal(ctx, canvas, x, y);
+                }
+            };
+        }
+        // =======================================================================
+        // ⭐ MOTOR HISTORIAL: DESCOMPRESOR INTEGRAL PREMIUM CON MONITOREO DE TEXTOS
+        // =======================================================================
+        function procesarYMostrarSesionesHistorialMonitor(sesiones, idClub) {
+            var listaBox = document.getElementById('ent-lista-sesiones-real');
+            if (!listaBox) return;
+
+            listaBox.innerHTML = ""; // Purgamos residuos visuales anteriores del menú
+
+            sesiones.forEach(function(s) {
+                var divS = document.createElement('div');
+                divS.style.background = 'rgba(255,255,255,0.03)'; divS.style.border = '1px solid #333'; divS.style.borderRadius = '5px';
+                divS.style.padding = '8px 12px'; divS.style.display = 'flex'; divS.style.justifyContent = 'space-between'; divS.style.alignItems = 'center'; divS.style.cursor = 'pointer'; divS.style.marginBottom = '4px';
+
+                divS.onclick = function() {
+                    console.log("📥 Historial -> Desempaquetando de forma limpia con triturador activo...");
+                    
+                    // 🎯 ESCUDO DE ENTRADA: Inicializamos y vaciamos las memorias de tu interfaz
+                    if (!window.pizarrasPorEjercicio) window.pizarrasPorEjercicio = {};
+                    if (!window.textosPorEjercicio) window.textosPorEjercicio = {};
+                    if (!window.descripcionesPorEjercicio) window.descripcionesPorEjercicio = {};
+                    if (!window.observacionesPorEjercicio) window.observacionesPorEjercicio = {};
+
+                    window.pizarrasPorEjercicio = {};
+                    window.textosPorEjercicio = {};
+                    window.descripcionesPorEjercicio = {};
+                    window.observacionesPorEjercicio = {};
+                    window.ejercicioActivoId = null;
+                    window.contadorEjerciciosSesion = 0;
+
+                    // Volcamos los inputs de texto principales del bloque general
+                    document.getElementById('ent-form-id-sesion-activa').value = s.id_entrenamiento;
+                    document.getElementById('ent-form-nombre').value = s.nombre || "";
+                    document.getElementById('ent-form-lugar').value = s.lugar_entrenamiento || "";
+                    document.getElementById('ent-form-tipo').value = s.tipo_entrenamiento || "Calentamiento";
+                    
+                    if (s.fecha) document.getElementById('ent-form-fecha').value = new Date(s.fecha).toISOString().split('T');
+                    
+                    document.getElementById('ent-form-inicio').value = s.hora_inicio ? s.hora_inicio.slice(0,5) : "10:00";
+                    document.getElementById('ent-form-fin').value = s.hora_fin ? s.hora_fin.slice(0,5) : "11:30";
+
+                    var contenedorListado = document.getElementById('ent-contenedor-filas-ejercicios');
+                    if (contenedorListado) contenedorListado.innerHTML = "";
+
+                    var stringDatosCrudos = s.secciones_bloques || "";
+
+                    // RECONSTRUCCIÓN MOLECULAR: Evaluamos el contenido de tu celda de Workbench
+                    try {
+                        var estructuraJSON = JSON.parse(stringDatosCrudos);
+                        if (Array.isArray(estructuraJSON) && estructuraJSON.length > 0) {
+                            estructuraJSON.forEach(function(ejer, idx) {
+                                var numEstacion = idx + 1;
+                                var nombreLimpio = ejer.nombre_ejercicio || "";
+                                
+                                // Filtro higienizador antibasura por si la celda contenía restos corruptos antiguos
+                                if (nombreLimpio.startsWith("data:image") || nombreLimpio.length > 40 || nombreLimpio.includes("iVBORw0")) { 
+                                    nombreLimpio = "Sesión " + numEstacion; 
+                                }
+                                
+                                // 🌟 LA LLAVE DEL TRIUNFO: Sincronizamos las descripciones y observaciones de cada sesión 
+                                // recuperadas de MySQL DIRECTAMENTE en los almacenes globales de las pestañas
+                                window.pizarrasPorEjercicio[numEstacion] = ejer.pizarra_base64 || "";
+                                window.textosPorEjercicio[numEstacion] = nombreLimpio;
+                                window.descripcionesPorEjercicio[numEstacion] = ejer.descripcion_sesion || "";
+                                window.observacionesPorEjercicio[numEstacion] = ejer.observaciones_sesion || "";
+
+                                if (typeof agregarNuevaSesionFilaIndividualTabla === "function") {
+                                    agregarNuevaSesionFilaIndividualTabla(nombreLimpio, ejer.pizarra_base64);
+                                }
+                            });
+                        } else {
+                            if (typeof agregarNuevaSesionFilaIndividualTabla === "function") agregarNuevaSesionFilaIndividualTabla("", "");
+                        }
+                    } catch(e) {
+                        // Soporte elástico de emergencia para registros antiguos de comas planas
+                        var antiguasComas = stringDatosCrudos.split(",");
+                        antiguasComas.forEach(function(t, idx) {
+                            var tLimpio = t.trim();
+                            var numEstacionVieja = idx + 1;
+                            if (tLimpio.startsWith("data:image") || tLimpio.length > 40 || tLimpio.includes("iVBORw0")) {
+                                tLimpio = "Sesión " + numEstacionVieja;
+                            }
+                            window.textosPorEjercicio[numEstacionVieja] = tLimpio;
+                            window.pizarrasPorEjercicio[numEstacionVieja] = "";
+                            window.descripcionesPorEjercicio[numEstacionVieja] = "";
+                            window.observacionesPorEjercicio[numEstacionVieja] = "";
+                            
+                            if (typeof agregarNuevaSesionFilaIndividualTabla === "function") {
+                                agregarNuevaSesionFilaIndividualTabla(tLimpio, "");
+                            }
+                        });
+                    }
+
+                    // 🎯 GESTIÓN DE RENDERIZADO INICIAL: Forzamos la carga visual de la primera sesión 
+                    // leyendo ya de forma síncrona los diccionarios recién repoblados de MySQL
+                    if (window.contadorEjerciciosSesion > 0) {
+                        window.ejercicioActivoId = null; // Rompemos el bloqueo de arrastre previo
+                        if (typeof visualizarPizarraDeSesionEspecifica === "function") {
+                            visualizarPizarraDeSesionEspecifica(1);
+                        }
+                    }
+
+                    // Activamos la botonera inferior en Modo Modificación
+                    if (document.getElementById('ent-titulo-accion-crud')) document.getElementById('ent-titulo-accion-crud').innerText = "✏️ Editar / Modificar Sesión Seleccionada";
+                    if (document.getElementById('btn-ent-guardar')) document.getElementById('btn-ent-guardar').style.display = 'none';
+                    if (document.getElementById('btn-ent-editar')) document.getElementById('btn-ent-editar').style.display = 'inline-block';
+                    if (document.getElementById('btn-ent-eliminar')) document.getElementById('btn-ent-eliminar').style.display = 'inline-block';
+                    if (document.getElementById('btn-ent-cancelar')) document.getElementById('btn-ent-cancelar').style.display = 'inline-block';
+
+                    if (typeof cargarActaAsistenciaJugadoresReal === 'function') {
+                        cargarActaAsistenciaJugadoresReal(s.id_entrenamiento, parseInt(s.id_equipo));
+                    }
+                };
+
+                var fechaFmt = new Date(s.fecha).toLocaleDateString('es-ES');
+                divS.innerHTML = `
+                    <div>
+                        <strong style="color:#38bdf8; font-size:12px;">${s.nombre.toUpperCase()}</strong>
+                        <div style="color:#aaa; font-size:10px; margin-top:2px;">📅 ${fechaFmt} | 📍 ${s.lugar_entrenamiento}</div>
+                    </div>
+                    <span style="background:rgba(0,204,102,0.15); color:#00CC66; font-size:9px; padding:2px 6px; font-weight:bold; border-radius:10px;">${s.tipo_entrenamiento}</span>
+                `;
+                listaBox.appendChild(divS);
+            });
         }
 
 

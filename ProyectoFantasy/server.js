@@ -11,6 +11,14 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // INDICA A NODE QUE EXPONGA TU CARPETA DE FOTOS DE FORMA SEGURA EN INTERNET
 const path = require('path'); // Pon esta línea arriba del todo si no la tienes
 
+// Le decimos a Express que sirva todos los archivos estáticos de tu carpeta actual
+app.use(express.static(__dirname));
+
+// Cuando el navegador pida la raíz '/', le mandamos tu archivo index.html de forma estricta
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // CORRECCIÓN DEFINITIVA: Fuerza a Node a buscar la carpeta fotos en su misma raíz exacta
 app.use('/fotos', express.static(path.join(__dirname, 'fotos')));
 // INDICA A NODE QUE SIVRA TU CARPETA DE VÍDEOS DE FORMA SEGURA EN EL PUERTO 3000
@@ -1260,6 +1268,185 @@ app.get('/api/clasificacion-completa', (req, res) => {
         });
     });
 });
+
+// =======================================================================
+// 🏃 MÓDULO EXCLUSIVO: CONTROL DE ENTRENAMIENTOS DE ALTO RENDIMIENTO
+// =======================================================================
+
+
+// =======================================================================
+// 🏃 MOTOR RELACIONAL DE ENTRENAMIENTOS CALIBRADO 100% A TU WORKBENCH
+// =======================================================================
+
+// 1. ENDPOINT: LISTAR SESIONES FILTRANDO POR ID_EQUIPO ESTRICTO
+app.get('/api/entrenamientos/equipo/:id_equipo', (req, res) => {
+    const idEquipo = parseInt(req.params.id_equipo);
+    console.log(`⚓ MySQL -> Consultando entrenamientos para el Club ID: ${idEquipo}`);
+    
+    // Forzamos a que apunte a tu esquema fantasy_liga de forma rígida
+    const sql = `SELECT * FROM fantasy_liga.entrenamientos WHERE id_equipo = ? ORDER BY fecha DESC`;
+    
+    db.query(sql, [idEquipo], (err, results) => {
+        if (err) {
+            console.error("🔴 Error en SELECT entrenamientos:", err.message);
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(results || []);
+    });
+});
+
+// =======================================================================
+// 🏃 SERVIDOR: ENDPOINT UNIFICADO CON PARSEO BLINDADO PARA MYSQL LONGTEXT
+// =======================================================================
+app.post('/api/entrenamientos/guardar', (req, res) => {
+    const { 
+        id_entrenamiento, id_equipo, nombre, lugar_entrenamiento, fecha, 
+        hora_inicio, hora_fin, tipo_entrenamiento, secciones_bloques, 
+        multimedia_ruta, pizarra_datos, audio_nota 
+    } = req.body;
+
+    // 🎯 REPARACIÓN DE TEXTOS EXTRACTOS GENERALES: Capturamos descripción y observaciones de req.body
+    const descripcion = req.body.descripcion || "";
+    const observaciones = req.body.observaciones || "";
+
+    console.log(`✈️ Pasarela MySQL -> Procesando Bloque Relacional. ID: ${id_entrenamiento || "Alta"}`);
+
+    let fechaLimpia = fecha;
+    if (fecha && fecha.includes('T')) {
+        fechaLimpia = fecha.split('T')[0];
+    }
+
+    // Escudo absoluto de escape de datos para MySQL
+    const datosSesionesFinal = typeof secciones_bloques === 'object' ? JSON.stringify(secciones_bloques) : secciones_bloques;
+
+    if (id_entrenamiento && id_entrenamiento !== null && id_entrenamiento !== "") {
+        console.log(`✏️ Ejecutando UPDATE en LONGTEXT para la sesión ID: [${id_entrenamiento}]...`);
+        
+        const sqlUpdate = `
+            UPDATE fantasy_liga.entrenamientos 
+            SET id_equipo = ?, nombre = ?, descripcion = ?, lugar_entrenamiento = ?, fecha = ?, 
+                hora_inicio = ?, hora_fin = ?, tipo_entrenamiento = ?, secciones_bloques = ?, 
+                observaciones = ?, multimedia_ruta = ?, pizarra_datos = ?, audio_nota = ?
+            WHERE id_entrenamiento = ?`;
+
+        db.query(sqlUpdate, [
+            parseInt(id_equipo), nombre || "", descripcion, lugar_entrenamiento || "", fechaLimpia, 
+            hora_inicio || "10:00", hora_fin || "11:30", tipo_entrenamiento || "Calentamiento", 
+            datosSesionesFinal, observaciones, multimedia_ruta || "", pizarra_datos || "MODO_SEPARADO_REAL", audio_nota || "",
+            parseInt(id_entrenamiento)
+        ], (err, result) => {
+            if (err) {
+                console.error("🔴 Error crítico en UPDATE de MySQL Workbench:", err.message);
+                return res.status(500).json({ error: err.message });
+            }
+            console.log("✅ Datos y pizarras consolidadas con éxito en MySQL.");
+            return res.json({ success: true, message: "Modificado correctamente." });
+        });
+
+    } else {
+        console.log("💾 Insertando nueva fila con soporte LONGTEXT en la tabla...");
+        const sqlInsert = `
+            INSERT INTO fantasy_liga.entrenamientos 
+                (id_equipo, nombre, descripcion, lugar_entrenamiento, fecha, hora_inicio, hora_fin, tipo_entrenamiento, secciones_bloques, observaciones, multimedia_ruta, pizarra_datos, audio_nota)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+        db.query(sqlInsert, [
+            parseInt(id_equipo), nombre || "", descripcion, lugar_entrenamiento || "", fechaLimpia, 
+            hora_inicio || "10:00", hora_fin || "11:30", tipo_entrenamiento || "Calentamiento", 
+            datosSesionesFinal, observaciones, multimedia_ruta || "", pizarra_datos || "MODO_SEPARADO_REAL", audio_nota || ""
+        ], (err, result) => {
+            if (err) {
+                console.error("🔴 Error crítico en INSERT de MySQL:", err.message);
+                return res.status(500).json({ error: err.message });
+            }
+            return res.json({ success: true, id_entrenamiento: result.insertId, message: "Guardado correctamente." });
+        });
+    }
+});
+
+
+
+
+
+// 3. ENDPOINT: BORRADO FÍSICO DE REGISTROS DE ENTRENAMIENTOS
+app.delete('/api/entrenamientos/eliminar/:id', (req, res) => {
+    const idEnt = parseInt(req.params.id);
+    console.log(`🗑️ Eliminando sesión de entrenamiento ID: ${idEnt}`);
+    const sql = `DELETE FROM fantasy_liga.entrenamientos WHERE id_entrenamiento = ?`;
+    db.query(sql, [idEnt], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ success: true, message: "Registro borrado de MySQL Workbench" });
+    });
+});
+
+// 4. ENDPOINT: DESCARGAR ACTA DE RENDIMIENTO ASOCIADA A UNA SESIÓN ESPECÍFICA
+app.get('/api/entrenamientos/asistencia/:id_entrenamiento', (req, res) => {
+    const idEnt = parseInt(req.params.id_entrenamiento);
+    console.log(`📊 Extrayendo notas de asistencia de la sesión: ${idEnt}`);
+    
+    const sql = `SELECT * FROM fantasy_liga.asistencia_entrenamiento WHERE id_entrenamiento = ?`;
+    db.query(sql, [idEnt], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results || []);
+    });
+});
+
+// =======================================================================
+// 🏃 SERVIDOR: PASARELA QUIRÚRGICA CON MAPEO DOBLE ANTI-NULLS DE COINCIDENCIA
+// =======================================================================
+app.post('/api/entrenamientos/asistencia/guardar', (req, res) => {
+    // Captura manual elástica para curarnos en salud con los tipos de datos de Node.js
+    const id_entrenamiento = parseInt(req.body.id_entrenamiento);
+    const id_jugador = parseInt(req.body.id_jugador);
+    const asistio = req.body.asistio ? req.body.asistio.toString() : "SI";
+    const puntos_entrenamiento = parseFloat(req.body.puntos_entrenamiento) || 0.00;
+    const evolucion_comentario = req.body.evolucion_comentario ? req.body.evolucion_comentario.toString() : "";
+
+    console.log(`✈️ Pasarela MySQL -> Procesando entrada: Sesión[${id_entrenamiento}] | Jugador[${id_jugador}] | Puntos[${puntos_entrenamiento}]`);
+
+    if (isNaN(id_entrenamiento) || isNaN(id_jugador)) {
+        console.error("🔴 Error Crítico: Las llaves primarias de la sesión o el jugador vienen vacías o corruptas.");
+        return res.status(400).json({ error: "IDs relacionales inválidos" });
+    }
+
+    // Usamos las columnas físicas exactas que tu monitor muestra en el árbol de esquemas izquierdo
+    const sqlInmune = `
+        INSERT INTO fantasy_liga.asistencia_entrenamiento 
+            (id_entrenamiento, id_jugador, asistio, puntos_entrenamiento, evolucion_comentario)
+        VALUES (?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE 
+            asistio = VALUES(asistio), 
+            puntos_entrenamiento = VALUES(puntos_entrenamiento), 
+            evolucion_comentario = VALUES(evolucion_comentario)`;
+        
+    db.query(sqlInmune, [id_entrenamiento, id_jugador, asistio, puntos_entrenamiento, evolucion_comentario], (err, result) => {
+        if (err) {
+            console.error("🔴 MySQL Workbench rechazó la consulta relacional:", err.message);
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ success: true, message: "Datos consolidados e insertados con éxito en Workbench" });
+    });
+});
+
+
+
+// 6. ENDPOINT: HISTORIAL COMPLETO DE ENTRENAMIENTOS DE UN JUGADOR INDIVIDUAL (PARA SU FICHA)
+app.get('/api/jugadores/historial-entrenamientos/:id_jugador', (req, res) => {
+    const idJugador = parseInt(req.params.id_jugador);
+    const sql = `
+        SELECT ae.*, e.nombre AS entrenamiento_nombre, e.fecha, e.tipo_entrenamiento
+        FROM fantasy_liga.asistencia_entrenamiento ae
+        INNER JOIN fantasy_liga.entrenamientos e ON ae.id_entrenamiento = e.id_entrenamiento
+        WHERE ae.id_jugador = ?
+        ORDER BY e.fecha DESC`;
+    db.query(sql, [idJugador], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results || []);
+    });
+});
+
+
+
 
 app.listen(3000, () => {
     console.log('Servidor corriendo en http://localhost:3000');
