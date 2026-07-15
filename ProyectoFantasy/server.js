@@ -1445,6 +1445,71 @@ app.get('/api/jugadores/historial-entrenamientos/:id_jugador', (req, res) => {
     });
 });
 
+// =======================================================================
+// 📊 SERVIDOR: ENDPOINT ANALÍTICO COMPATIBLE CON ONLY_FULL_GROUP_BY
+// =======================================================================
+app.get('/api/analiticas/resumen/:id_equipo', (req, res) => {
+    const idEquipo = parseInt(req.params.id_equipo);
+    console.log(`📊 Servidor -> Ejecutando balance analítico puro para el Club ID: ${idEquipo}`);
+
+    // Consulta A: Contamos los futbolistas asignados al equipo
+    const sqlJugadores = `SELECT COUNT(*) AS total FROM fantasy_liga.jugadores WHERE id_equipo = ?`;
+    
+    // 🎯 REPARACIÓN MAESTRA DE LA QUERY: Traemos las filas limpias sin GROUP BY invasivos 
+    // para evitar que el modo estricto de MySQL aborte la petición en Node.js
+    const sqlEntrenos = `SELECT secciones_bloques FROM fantasy_liga.entrenamientos WHERE id_equipo = ?`;
+
+    db.query(sqlJugadores, [idEquipo], (errJug, resJug) => {
+        if (errJug) {
+            console.error("🔴 Error en MySQL Workbench (Jugadores):", errJug.message);
+            return res.status(500).json({ error: errJug.message });
+        }
+
+        // Extraemos el conteo de la primera celda del Result Grid
+        const totalJugadores = (resJug && resJug[0]) ? resJug[0].total : 0;
+
+        db.query(sqlEntrenos, [idEquipo], (errEnt, resEnt) => {
+            if (errEnt) {
+                console.error("🔴 Error crítico en MySQL Workbench (Entrenamientos):", errEnt.message);
+                return res.status(500).json({ error: errEnt.message });
+            }
+
+            // Al no agrupar, la longitud del array devuelto es el TOTAL real de entrenamientos guardados
+            const totalEntrenamientos = Array.isArray(resEnt) ? resEnt.length : 0;
+            let totalEjerciciosDiseñados = 0;
+
+            // Recorremos las celdas directamente para contabilizar las estaciones de trabajo
+            if (totalEntrenamientos > 0) {
+                resEnt.forEach(row => {
+                    var bloqueTexto = row.secciones_bloques || "";
+                    if (bloqueTexto.trim() !== "") {
+                        try {
+                            var estructura = JSON.parse(bloqueTexto);
+                            if (Array.isArray(estructura)) {
+                                totalEjerciciosDiseñados += estructura.length;
+                            } else {
+                                totalEjerciciosDiseñados += bloqueTexto.split(",").length;
+                            }
+                        } catch (e) {
+                            totalEjerciciosDiseñados += bloqueTexto.split(",").length;
+                        }
+                    }
+                });
+            }
+
+            // Despachamos el payload limpio hacia tu monitor de gala
+            return res.json({
+                success: true,
+                jugadores: totalJugadores,
+                entrenamientos: totalEntrenamientos,
+                ejercicios: totalEjerciciosDiseñados || totalEntrenamientos
+            });
+        });
+    });
+});
+
+
+
 
 
 
