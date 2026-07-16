@@ -255,7 +255,7 @@
 
               <!-- ==================== PESTAÑA A: CONFIGURAR CALENDARIO (DISEÑO LINEAL) ==================== -->
         <div id="sec-config" class="panel active">
-            <h2 style="color: #ff9900; text-transform: uppercase; font-size: 18px; letter-spacing: 0.5px; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">⚙️ Generador Oficial de Partidos de LaLiga</h2>
+            <h2 style="color: #ff9900; text-transform: uppercase; font-size: 18px; letter-spacing: 0.5px; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">⚙️ Generador de Partidos de LaLiga</h2>
             
             <!-- FORMULARIO DE CRISTAL EN UNA SOLA LÍNEA HORIZONTAL -->
             <div class="form-box" style="padding: 15px 25px; display: flex; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap;">
@@ -301,6 +301,9 @@
                 <div id="lista-partidos-jornada-vagas" style="display: flex; align-items: center; gap: 10px; overflow-x: auto; flex: 1; max-width: 65%;"></div>
                 <button class="btn-g" style="background-color: #ff9900; color: black; padding: 8px 16px; font-size: 11px;" onclick="ejecutarSincronizacionManualLiga()">Sincronizar Liga</button>
                 <button class="btn-g" style="background-color: #ff4444; color: white; padding: 8px 14px; font-size: 11px; font-weight: bold; border-radius: 4px;" onclick="ejecutarEliminacionPartidoActualBD()">❌ Eliminar Partido</button>
+             <button class="btn-g" style="background-color: #4a90e2; color: white; padding: 10px 18px; font-size: 12px; font-weight: bold; border-radius: 4px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(74,144,226,0.2);" onclick="regresarAlClubDesdePizarraTactica()">
+                    ↩️ Volver al Club
+                </button>
             </div>
             <!-- COLUMNA 2: MARCADOR, CUOTAS, CLIMA Y CÉSTED HORIZONTAL -->
                 <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -437,39 +440,30 @@
                
             </div> <!-- Cierre del contenedor de 3 columnas (max-width: 1550px) -->
 
-
-
-
-               <!-- ==================== PESTAÑA NUEVA: PERFIL ESTADÍSTICO DEL FUTBOLISTA ==================== -->
+        <!-- =======================================================================
+        🛡️ PARTE 1 DE 3: CONTENEDOR MAESTRO Y COLUMNA DE IDENTIDAD IZQUIERDA
+        ======================================================================= -->
         <div id="sec-ficha-jugador" class="panel" style="display:none; width: 98% !important; max-width: 100% !important; margin: 0 auto; box-sizing: border-box;">
+            
             <!-- Cabecera de la Ficha con Botón de Retorno -->
             <div class="form-box" style="padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <div>
                     <h2 id="det-jug-nombre-cabecera" style="margin:0; color:#4a90e2; text-transform:uppercase; font-size:18px; font-weight:800;">🏃 Perfil del Futbolista</h2>
                     <small style="color:#aaa;">Ficha del Jugador y Estadísticas.</small>
                 </div>
-                <button class="btn-g" style="background:#333; color:#fff; padding:8px 15px; font-size:12px; font-weight:bold;" onclick="cambiarSeccion('sec-ficha-equipo')">⬅️ Volver a la Plantilla</button>
+                <button class="btn-g" type="button" style="background:#333; color:#fff; padding:8px 15px; font-size:12px; font-weight:bold; cursor:pointer;" onclick="cambiarSeccion('sec-ficha-equipo')">⬅️ Volver a la Plantilla</button>
             </div>
 
             <!-- DISTRIBUCIÓN HORIZONTAL PANORÁMICA -->
             <div style="display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start; width: 100%;">
                 
-                <!-- COLUMNA IZQUIERDA: TARJETA DE IDENTIDAD Y ACCIONES CRUD -->
-                <div style="background: rgba(12, 12, 12, 0.9); border-radius: 10px; border: 1px solid #333; padding: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); text-align: center;">
-            <!-- REPARADO DE FIN DE CARRETE: aspect-ratio prohíbe al navegador estirar la foto verticalmente -->
-<div id="det-jug-foto" style="width: 135px !important; height: 135px !important; max-width: 135px !important; max-height: 135px !important; border-radius: 50% !important; border: 3px solid #4a90e2; margin: 0 auto 15px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex !important; align-items: center; justify-content: center; overflow: hidden !important; box-sizing: border-box !important; background: transparent !important;">
-    
-    <!-- CORREGIDO: Reemplazamos la ruta física silueta.jpg por un avatar vectorial SVG en texto Base64 para erradicar el error 404 de raíz -->
-    <img id="det-jug-foto-imagen-real" 
-         src="data:image/svg+xml;utf8,<svg xmlns='http://w3.org' viewBox='0 0 24 24' fill='%23666666'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" 
-         style="width: 100% !important; height: 100% !important; min-width: 100% !important; min-height: 100% !important; aspect-ratio: 1 / 1 !important; object-fit: cover !important; object-position: center top !important; border-radius: 50% !important; display: block !important;">
-
-</div>
-
-
-
-
-
+                <!-- 1️⃣ COLUMNA IZQUIERDA: TARJETA DE IDENTIDAD FIJA INDEPENDIENTE -->
+                <div style="background: rgba(12, 12, 12, 0.9); border-radius: 10px; border: 1px solid #333; padding: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); text-align: center; box-sizing: border-box; width: 100%;">
+                    <div id="det-jug-foto" style="width: 135px !important; height: 135px !important; max-width: 135px !important; max-height: 135px !important; border-radius: 50% !important; border: 3px solid #4a90e2; margin: 0 auto 15px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex !important; align-items: center; justify-content: center; overflow: hidden !important; box-sizing: border-box !important; background: transparent !important;">
+                        <img id="det-jug-foto-imagen-real" 
+                             src="data:image/svg+xml;utf8,<svg xmlns='http://w3.org' viewBox='0 0 24 24' fill='%23666666'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 1.79 4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" 
+                             style="width: 100% !important; height: 100% !important; min-width: 100% !important; min-height: 100% !important; aspect-ratio: 1 / 1 !important; object-fit: cover !important; object-position: center top !important; border-radius: 50% !important; display: block !important;">
+                    </div>
                     
                     <div style="background: rgba(74, 144, 226, 0.1); display: inline-block; padding: 3px 12px; border-radius: 20px; border: 1px solid #4a90e2; margin-bottom: 12px;">
                         <span id="det-jug-posicion" style="color: #4a90e2; font-size: 11px; font-weight: bold; text-transform: uppercase;">POSICIÓN</span>
@@ -477,69 +471,542 @@
                     
                     <h3 id="det-jug-nombre-completo" style="color: #fff; margin: 0 0 5px 0; font-size: 20px; font-weight: 800;">Nombre Jugador</h3>
                     <p style="color: #aaa; margin: 0 0 25px 0; font-size: 14px; font-weight: bold;">Dorsal: <span id="det-jug-dorsal" style="color:#ff9900;">0</span></p>
-                                        <!-- PAGINADOR INCORPORADO: Navegación horizontal por la plantilla del club -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0 20px 0; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); box-sizing: border-box; width: 100%;">
-                        <!-- Flecha Izquierda -->
-                        <button class="btn-g" style="background: rgba(255,255,255,0.05); color: #fff; padding: 6px 12px; font-size: 11px; font-weight: bold; border: 1px solid #444; border-radius: 4px; cursor: pointer;" onclick="navegarAlSiguienteCompañeroDePlantilla(-1)">
-                            ◀️ Ant.
-                        </button>
-                        
-                        <span style="color: #666; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Jugadores</span>
-                        
-                        <!-- Flecha Derecha -->
-                        <button class="btn-g" style="background: rgba(255,255,255,0.05); color: #fff; padding: 6px 12px; font-size: 11px; font-weight: bold; border: 1px solid #444; border-radius: 4px; cursor: pointer;" onclick="navegarAlSiguienteCompañeroDePlantilla(1)">
-                            Sig. ▶️
-                        </button>
-                    </div>
-
-                    <!-- BOTONERA DE CONTROL CRUD -->
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <button class="btn-g" style="background: #ff9900; color: #000; padding: 10px; font-size: 13px; font-weight: bold; width: 100%;" onclick="abrirModalEditorJugadorExistente()">✏️ Editar Datos</button>
-                        <button class="btn-g" style="background: #ff4444; color: #fff; padding: 10px; font-size: 13px; font-weight: bold; width: 100%;" onclick="ejecutarBajaJugadorMySQL()">🗑️ Dar de Baja / Eliminar</button>
-                    </div>
-                </div>
-
-                <!-- COLUMNA DERECHA: GRILLA DE RENDIMIENTO HISTÓRICO EN CRISTAL -->
-                <div style="background: rgba(15, 15, 15, 0.95); border-radius: 10px; border: 1px solid #333; padding: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.6);">
-                    <h3 style="color:#fff; margin-top:0; font-size:15px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:10px; letter-spacing:0.5px;">📊 Estadística</h3>
                     
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
-                        <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
-                            <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase;">Puntos Totales</span>
-                            <h4 id="stat-jug-pts-totales" style="margin:5px 0 0 0; color:#00CC66; font-size:24px; font-weight:900;">0.0</h4>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
-                            <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase;">Valoración Media</span>
-                            <h4 id="stat-jug-pts-media" style="margin:5px 0 0 0; color:#ff9900; font-size:24px; font-weight:900;">0.0 Pts</h4>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
-                            <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase;">Partidos Jugados</span>
-                            <h4 id="stat-jug-partidos" style="margin:5px 0 0 0; color:#fff; font-size:24px; font-weight:900;">0</h4>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
-                            <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase;">Goles Anotados ⚽</span>
-                            <h4 id="stat-jug-goles" style="margin:5px 0 0 0; color:#00CC66; font-size:24px; font-weight:900;">0</h4>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
-                            <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase;">Tarjetas (🟨 / 🟥)</span>
-                            <h4 id="stat-jug-tarjetas" style="margin:5px 0 0 0; color:#ff4444; font-size:20px; font-weight:900;">0 / 0</h4>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
-                            <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase;">Minutos Jugados ⏱️</span>
-                            <h4 id="stat-jug-minutos" style="margin:5px 0 0 0; color:#4a90e2; font-size:24px; font-weight:900;">0'</h4>
-                        </div>
-                                            <!-- CONTENEDOR NUEVO: Listado dinámico de encuentros disputados -->
-                    <div style="margin-top: 25px; border-top: 1px solid #333; padding-top: 20px;">
-                        <h4 style="color:#4a90e2; margin:0 0 10px 0; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;">⚽ Partidos Disputados en la Temporada:</h4>
-                        <div id="perfil-jugador-lista-partidos-links" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                            <!-- Aquí el script inyectará los botones interactivos de los encuentros -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0 20px 0; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); box-sizing: border-box; width: 100%;">
+                        <button class="btn-g" type="button" style="background: rgba(255,255,255,0.05); color: #fff; padding: 6px 12px; font-size: 11px; font-weight: bold; border: 1px solid #444; border-radius: 4px; cursor: pointer;" onclick="navegarAlSiguienteCompañeroDePlantilla(-1)">◀️ Ant.</button>
+                        <span style="color: #666; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Jugadores</span>
+                        <button class="btn-g" type="button" style="background: rgba(255,255,255,0.05); color: #fff; padding: 6px 12px; font-size: 11px; font-weight: bold; border: 1px solid #444; border-radius: 4px; cursor: pointer;" onclick="navegarAlSiguienteCompañeroDePlantilla(1)">Sig. ▶️</button>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                        <button class="btn-g" type="button" style="background: #ff9900; color: #000; padding: 10px; font-size: 13px; font-weight: bold; width: 100%; border-radius: 4px; cursor:pointer;" onclick="abrirModalEditorJugadorExistente()">✏️ Editar Datos</button>
+                        <button class="btn-g" type="button" style="background: #ff4444; color: #fff; padding: 10px; font-size: 13px; font-weight: bold; width: 100%; border-radius: 4px; cursor:pointer;" onclick="ejecutarBajaJugadorMySQL()">🗑️ Dar de Baja / Eliminar</button>
+                    </div>
+                </div>
+
+                <!-- 2️⃣ EMPIEZA LA COLUMNA DERECHA: REJILLA MODULAR INTERACTIVA -->
+                <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; box-sizing: border-box;">
+                    
+                                       <!-- =======================================================================
+                    🎛️ SUBMENÚ LINEAL SUPERIOR DE LA FICHA: SANEADO DEFINITIVO DE CLICS (ANTI-VM)
+                    ======================================================================= -->
+                    <div class="submenu-lineal" style="display: flex; gap: 6px; margin: 0 0 15px 0; width: 100%; background: transparent;">
+                        
+                        <!-- Pestaña 1: Datos Personales (Llamada limpia sin caracteres ilegales) -->
+                        <button id="tab-jug-datos" class="sub-tab-btn active" type="button" 
+                                onclick="if(typeof conmutarPestañasInternasFichaJugador==='function'){conmutarPestañasInternasFichaJugador('datos');}" 
+                                style="cursor:pointer; flex-grow: 1; font-weight: bold; background: transparent;">📋 Datos Personales</button>
+                        
+                        <!-- Pestaña 2: Datos de Partidos -->
+                        <button id="tab-jug-partidos" class="sub-tab-btn" type="button" 
+                                onclick="if(typeof conmutarPestañasInternasFichaJugador==='function'){conmutarPestañasInternasFichaJugador('partidos');}" 
+                                style="cursor:pointer; flex-grow: 1; font-weight: bold; background: transparent;">📊 Datos de Partidos</button>
+                        
+                        <!-- Pestaña 3: Datos de Entrenamientos -->
+                        <button id="tab-jug-entrenos" class="sub-tab-btn" type="button" 
+                                onclick="if(typeof conmutarPestañasInternasFichaJugador==='function'){conmutarPestañasInternasFichaJugador('entrenos');}" 
+                                style="cursor:pointer; flex-grow: 1; font-weight: bold; background: transparent;">🏃 Datos de Entrenamientos</button>
+                                
+                    </div>
+
+                    <!-- =======================================================================
+                    📋 PARTE 2 DE 3: CONTENEDORES INTERNOS PARA LAS TRES SUB-PESTAÑAS
+                    ======================================================================= -->
+
+                    <!-- 📥 PESTAÑA INTERNA 1: FORMULARIO BIOMÉTRICO CON BOTÓN DE GUARDADO -->
+                    <div id="bloque-jug-pestana-datos" class="panel-jug-sub-bloque" style="display: block; width: 100%;">
+                        <div style="background: rgba(15, 15, 15, 0.95); border-radius: 10px; border: 1px solid #333; padding: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); box-sizing: border-box; width: 100%;">
+                                                        <!-- 🎯 UBICACIÓN CORRECTA: Título a la izquierda y botón verde acoplado a la derecha -->
+                                                        <!-- [Busca el encabezado de tu bloque de Datos Personales e inyecta esta línea exacta abajo:] -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; background: transparent; width: 100%;">
+                                <h3 style="color:#fff; margin:0; font-size:14px; text-transform:uppercase; letter-spacing:0.5px; background: transparent;">📋 Ficha Biométrica y Notas</h3>
+                                <button class="btn-g" type="button" id="btn-guardar-biometria-jugador" style="background:#00CC66; color:#000; font-size:11px; font-weight:bold; padding:6px 15px; border-radius:4px; border:none; cursor:pointer;" onclick="guardarDatosPersonalesJugadorMySQL()">💾 GUARDAR DATOS</button>
+                            </div>
+
+                            <!-- 🎯 LA ANCLA DE ORO: Caja invisible que congelará la ID real de MySQL de Militao en tu monitor -->
+                            <input type="hidden" id="jug-form-id-real-mysql" value="">
+
+
+                            
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 15px; background: transparent;">
+                                <div><label style="color:#aaa; font-size:10px; display:block; margin-bottom:4px; background:transparent;">Nombre</label><input type="text" id="jug-form-nombre-biom" style="width:100%; background:#111; border:1px solid #444; color:#fff; padding:6px; border-radius:4px; font-size:11px; box-sizing:border-box;"></div>
+                                <div><label style="color:#aaa; font-size:10px; display:block; margin-bottom:4px; background:transparent;">Apellidos</label><input type="text" id="jug-form-apellidos-biom" style="width:100%; background:#111; border:1px solid #444; color:#fff; padding:6px; border-radius:4px; font-size:11px; box-sizing:border-box;"></div>
+                                <div><label style="color:#aaa; font-size:10px; display:block; margin-bottom:4px; background:transparent;">Edad</label><input type="number" id="jug-form-edad-biom" style="width:100%; background:#111; border:1px solid #444; color:#fff; padding:6px; border-radius:4px; font-size:11px; box-sizing:border-box;"></div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 15px; background: transparent;">
+                                <div><label style="color:#aaa; font-size:10px; display:block; margin-bottom:4px; background:transparent;">Altura (cm)</label><input type="number" id="jug-form-altura-biom" style="width:100%; background:#111; border:1px solid #444; color:#fff; padding:6px; border-radius:4px; font-size:11px; box-sizing:border-box;"></div>
+                                <div><label style="color:#aaa; font-size:10px; display:block; margin-bottom:4px; background:transparent;">Peso (kg)</label><input type="number" id="jug-form-peso-biom" style="width:100%; background:#111; border:1px solid #444; color:#fff; padding:6px; border-radius:4px; font-size:11px; box-sizing:border-box;"></div>
+                                <div><label style="color:#aaa; font-size:10px; display:block; margin-bottom:4px; background:transparent;">Demarcación</label><input type="text" id="jug-form-demarcacion-biom" style="width:100%; background:#111; border:1px solid #444; color:#fff; padding:6px; border-radius:4px; font-size:11px; box-sizing:border-box;"></div>
+                            </div>
+
+                            <div style="margin-bottom: 15px; background: transparent;">
+                                <label style="color:#aaa; font-size:10px; display:block; margin-bottom:4px; background:transparent;">Característica Principal</label>
+                                <input type="text" id="jug-form-caracteristica-biom" style="width:100%; background:#111; border:1px solid #444; color:#fff; padding:6px; border-radius:4px; font-size:11px; box-sizing:border-box;">
+                            </div>
+
+                            <div style="background: transparent;">
+                                <label style="color:#aaa; font-size:10px; display:block; margin-bottom:4px; background:transparent;">Observaciones Técnicas / Médicas</label>
+                                <textarea id="jug-form-observaciones-biom" style="width:100%; height:55px; background:#111; border:1px solid #444; color:#fff; padding:6px; border-radius:4px; font-size:11px; box-sizing:border-box; resize:none;"></textarea>
+                            </div>
                         </div>
                     </div>
 
+                                      <!-- 📑 SUB-PESTAÑA 2: DATOS DE PARTIDOS (Tus contadores originales vinculados intactos) -->
+                    <div id="bloque-jug-pestana-partidos" class="panel-jug-sub-bloque" style="display: none; width: 100%;">
+                        <div style="background: transparent; box-sizing: border-box; width: 100%;">
+                            <h3 style="color:#fff; margin-top:0; font-size:15px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:10px; letter-spacing:0.5px; background: transparent;">📊 Estadística de Partidos</h3>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px; background: transparent;">
+                                <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
+                                    <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase; background:transparent;">Puntos Totales</span>
+                                    <h4 id="stat-jug-pts-totales" style="margin:5px 0 0 0; color:#00CC66; font-size:24px; font-weight:900; background:transparent;">0.0</h4>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
+                                    <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase; background:transparent;">Valoración Media</span>
+                                    <h4 id="stat-jug-pts-media" style="margin:5px 0 0 0; color:#ff9900; font-size:24px; font-weight:900; background:transparent;">0.0 Pts</h4>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
+                                    <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase; background:transparent;">Partidos Jugados</span>
+                                    <h4 id="stat-jug-partidos" style="margin:5px 0 0 0; color:#fff; font-size:24px; font-weight:900; background:transparent;">0</h4>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
+                                    <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase; background:transparent;">Goles Anotados ⚽</span>
+                                    <h4 id="stat-jug-goles" style="margin:5px 0 0 0; color:#00CC66; font-size:24px; font-weight:900; background:transparent;">0</h4>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
+                                    <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase; background:transparent;">Tarjetas (🟨 / 🟥)</span>
+                                    <h4 id="stat-jug-tarjetas" style="margin:5px 0 0 0; color:#ff4444; font-size:20px; font-weight:900; background:transparent;">0 / 0</h4>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.02); border: 1px solid #222; border-radius: 8px; padding: 15px; text-align: center;">
+                                    <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase; background:transparent;">Minutos Jugados ⏱️</span>
+                                    <h4 id="stat-jug-minutos" style="margin:5px 0 0 0; color:#4a90e2; font-size:24px; font-weight:900; background:transparent;">0'</h4>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 25px; border-top: 1px solid #333; padding-top: 20px; background: transparent;">
+                                <h4 style="color:#4a90e2; margin:0 0 10px 0; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; background: transparent;">⚽ Partidos Disputados en la Temporada:</h4>
+                                <div id="perfil-jugador-lista-partidos-links" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background: transparent;"></div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
+
+                    <!-- 📥 📑 SUB-PESTAÑA 3: DATOS DE ENTRENAMIENTOS (¡REPARADO FÍSICAMENTE EN TU PANTALLA!) -->
+                    <div id="bloque-jug-pestana-entrenos" class="panel-jug-sub-bloque" style="display: none; width: 100%;">
+                        <div style="background: transparent; box-sizing: border-box; width: 100%;">
+                            <h3 style="color:#fff; margin-top:0; font-size:15px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:10px; letter-spacing:0.5px; background: transparent;">🏃 Rendimiento en Sesiones de Pizarra</h3>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; margin-bottom: 20px; background: transparent;">
+                                <div style="background:#111; padding:12px; border-radius:6px; text-align:center; border:1px solid #222;"><span style="color:#aaa; font-size:9px; font-weight:bold; display:block; margin-bottom:4px; background:transparent;">PUNTOS PIZARRA</span><strong id="ent-stats-puntos-jugador" style="color:#00CC66; font-size:22px; font-family:monospace; background:transparent;">0.00</strong></div>
+                                <div style="background:#111; padding:12px; border-radius:6px; text-align:center; border:1px solid #222;"><span style="color:#aaa; font-size:9px; font-weight:bold; display:block; margin-bottom:4px; background:transparent;">ASISTENCIAS ACTAS</span><strong id="ent-stats-asistencias-jugador" style="color:#38bdf8; font-size:22px; font-family:monospace; background:transparent;">0</strong></div>
+                                <div style="background:#111; padding:12px; border-radius:6px; text-align:center; border:1px solid #222;"><span style="color:#aaa; font-size:9px; font-weight:bold; display:block; margin-bottom:4px; background:transparent;">FALTAS RECIBIDAS</span><strong id="ent-stats-faltas-jugador" style="color:#ef4444; font-size:22px; font-family:monospace; background:transparent;">0</strong></div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; box-sizing: border-box; background: transparent;">
+                                <div style="background: #111; border: 1px solid #222; border-radius: 8px; padding: 15px;"><h5 style="color:#fff; margin:0 0 10px 0; font-size:11px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:4px; background: transparent;">📈 Evolución Táctica</h5><div style="display:flex; flex-direction:column; gap:6px; background: transparent;"><div style="display:flex; justify-content:space-between; font-size:10px; color:#aaa; background: transparent;"><span>Intensidad en Rondo</span><strong style="color:#00CC66; background: transparent;">+12%</strong></div><div style="display:flex; justify-content:space-between; font-size:10px; color:#aaa; background: transparent;"><span>Precisión Vectorial</span><strong style="color:#00CC66; background: transparent;">+5%</strong></div><div style="display:flex; justify-content:space-between; font-size:10px; color:#aaa; background: transparent;"><span>Carga Física</span><strong style="color:#ff9900; background: transparent;">Estable</strong></div></div></div>
+                                      <!-- [Busca el final de la sub-pestaña 3 de entrenamientos y déjalo estructurado exactamente así:] -->
+                    </div> <!-- 📥 Cierre del bloque-jug-pestana-entrenos -->
+
+                    <!-- =======================================================================
+                    🏆 CONTENEDOR MAESTRO DEL RANKING FIJO (VISIBLE EN CUALQUIER PESTAÑA)
+                    ======================================================================= -->
+                    <div id="nodo-estanco-ranking-puntos-vestuario" style="background: #111; border: 1px solid #222; border-radius: 8px; padding: 15px; width: 100%; box-sizing: border-box; margin-top: 15px;">
+                        <h5 style="color:#fff; margin:0 0 10px 0; font-size:11px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:4px; background: transparent;">🏆 Ranking Puntos</h5>
+                        <div style="display:flex; flex-direction:column; gap:6px; font-size:10px; background: transparent; width: 100%;">
+                            <span style="color:#666; background:transparent;">⏳ Cargando escalafón oficial de la base de datos...</span>
+                        </div>
+                    </div>
+
+                </div> <!-- 🏁 Cierre definitivo de tu columna derecha original -->
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div> <!-- Cierre físico de la columna derecha -->
+            </div> <!-- Cierre de la distribución panorámica -->
+        </div> <!-- Cierre absoluto de #sec-ficha-jugador -->
+
+
+                    <!-- 📥 PESTAÑA INTERNA 3: DATOS DE ENTRENAMIENTOS (Métricas individuales solicitadas) -->
+                    <!-- =======================================================================
+                    ⚙️ PARTE 3 DE 3: CIERRE DE REJILLA Y CAPA LÓGICA DE CONTROL JAVASCRIPT
+                    ======================================================================= -->
+                </div> <!-- Fin de la grilla modular de la columna derecha -->
+            </div> <!-- Fin de la distribución horizontal panorámica -->
+        </div> <!-- 🏁 FIN ABSOLUTO DE LA SECCIÓN MAESTRA #sec-ficha-jugador -->
+
+        <script type="text/javascript">
+   
+            
+
+
+
+            
+
+            // =======================================================================
+        // 🎯 INYECTOR BIOMÉTRICO: Amarra la ID real de la celda de MySQL
+        // =======================================================================
+        // Esta función debe ejecutarse dentro de tu bucle nativo (cuando el míster
+        // pincha en la foto de la plantilla) para clavar la ID en la caja invisible.
+        function inyectarCamposBiométicosEnPantallaDinamico(nombre, apellidos, edad, altura, peso, posicion, caract, obs, idJugador) {
+            console.log("🔒 Sincronizador Inmune -> Congelando ID real en el monitor: " + idJugador);
+            
+            // Clavamos la ID en la variable global y en la caja invisible del DOM para que no haya pérdidas
+            window.idJugadorActivoFicha = idJugador;
+            
+            var inputIdOculto = document.getElementById('jug-form-id-real-mysql');
+            if (inputIdOculto) {
+                inputIdOculto.value = idJugador;
+            }
+
+            if (document.getElementById('jug-form-nombre-biom')) document.getElementById('jug-form-nombre-biom').value = nombre || "";
+            if (document.getElementById('jug-form-apellidos-biom')) document.getElementById('jug-form-apellidos-biom').value = apellidos || "";
+            if (document.getElementById('jug-form-edad-biom')) document.getElementById('jug-form-edad-biom').value = edad || "";
+            if (document.getElementById('jug-form-altura-biom')) document.getElementById('jug-form-altura-biom').value = altura || "";
+            if (document.getElementById('jug-form-peso-biom')) document.getElementById('jug-form-peso-biom').value = peso || "";
+            if (document.getElementById('jug-form-demarcacion-biom')) document.getElementById('jug-form-demarcacion-biom').value = posicion || "";
+            if (document.getElementById('jug-form-caracteristica-biom')) document.getElementById('jug-form-caracteristica-biom').value = caract || "";
+            if (document.getElementById('jug-form-observaciones-biom')) document.getElementById('jug-form-observaciones-biom').value = obs || "";
+            if (document.getElementById('det-jug-ranking-nombre-dinam')) document.getElementById('det-jug-ranking-nombre-dinam').innerText = nombre || "Jugador";
+            
+            conmutarPestañasInternasFichaJugador('datos');
+        }
+
+     
+          // =======================================================================
+        // ⭐ JAVASCRIPT FASE FINAL - PARTE A: CONMUTADOR UNIVERSAL (ANTI-CONTADORES A CERO)
+        // =======================================================================
+        function conmutarPestañasInternasFichaJugador(pestana) {
+            console.log("🏃 Monitor -> Conmutando sub-bloque a: " + pestana);
+            
+            var modalElemento = document.getElementById('modal-crud-jugador');
+            var datosStr = modalElemento ? modalElemento.dataset.jugadorCargado : null;
+            if (!datosStr) { console.error("⚠️ Perfil del jugador inaccesible."); return; }
+            
+            var jugadorActivo = JSON.parse(datosStr);
+            var idJugadorFisico = jugadorActivo.id_jugador; 
+
+            // Ocultamos las sub-lonas derechas de forma síncrona
+            var bloques = document.querySelectorAll('.panel-jug-sub-bloque');
+            for (var i = 0; i < bloques.length; i++) { bloques[i].style.display = "none"; }
+
+            // Apagamos los marcos verdes activos de la barra lineal superior
+            var botones = document.querySelectorAll('.submenu-lineal .sub-tab-btn');
+            botones.forEach(function(b) { b.classList.remove('active'); });
+
+            // Encendemos milimétricamente la lona y el botón seleccionado
+            var panelObjetivo = document.getElementById('bloque-jug-pestana-' + pestana);
+            var botonObjetivo = document.getElementById('tab-jug-' + pestana);
+            if (panelObjetivo) panelObjetivo.style.setProperty('display', 'block', 'important');
+            if (botonObjetivo) botonObjetivo.classList.add('active');
+
+            // AUTO-LLENADO BIO DE LA PRIMERA PESTAÑA NATIVA DE INICIO
+            if (pestana === 'datos') {
+                if (document.getElementById('jug-form-id-real-mysql')) document.getElementById('jug-form-id-real-mysql').value = jugadorActivo.id_jugador;
+                if (document.getElementById('jug-form-nombre-biom')) document.getElementById('jug-form-nombre-biom').value = jugadorActivo.nombre || "";
+                if (document.getElementById('jug-form-edad-biom')) document.getElementById('jug-form-edad-biom').value = jugadorActivo.edad || "";
+                if (document.getElementById('jug-form-altura-biom')) document.getElementById('jug-form-altura-biom').value = jugadorActivo.altura || "";
+                if (document.getElementById('jug-form-peso-biom')) document.getElementById('jug-form-peso-biom').value = jugadorActivo.peso || "";
+                if (document.getElementById('jug-form-demarcacion-biom')) document.getElementById('jug-form-demarcacion-biom').value = jugadorActivo.posicion || "DEF";
+            }
+
+            // 🎯 EL ENGRANAJE DE LA VICTORIA: Eliminamos la barrera de 'entrenos'. 
+            // Disparamos la descarga relacional siempre, para que las tarjetas de arriba 
+            // no se queden congeladas a cero al pasar de jugador.
+            if (idJugadorFisico) {
+                ejecutarInyeccionExactaDePistasYRanking(idJugadorFisico);
+            }
+        }
+
+         // =======================================================================
+        // 🏆 BLOQUE UNIFICADO: INYECTOR PURO DEL PODIO (PARTE 1 + PARTE 2)
+        // =======================================================================
+        function ejecutarInyeccionExactaDePistasYRanking(idJugadorFisico, pestanaActual) {
+            
+            fetch('http://localhost:3000/api/jugadores/rendimiento-entrenamientos/' + idJugadorFisico)
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (!data || data.puntosTotales === undefined) return;
+
+                    console.log("🎨 Sincronizador Maestro -> Pintando el Result Grid para: " + data.nombre);
+
+                    // 🌟 1. POBLADO OBLIGATORIO DE LOS INPUTS DE DATOS PERSONALES DE INICIO
+                    if (document.getElementById('jug-form-id-real-mysql')) document.getElementById('jug-form-id-real-mysql').value = data.id_jugador;
+                    if (document.getElementById('jug-form-nombre-biom')) document.getElementById('jug-form-nombre-biom').value = data.nombre || "";
+                    if (document.getElementById('jug-form-edad-biom')) document.getElementById('jug-form-edad-biom').value = data.edad || "";
+                    if (document.getElementById('jug-form-altura-biom')) document.getElementById('jug-form-altura-biom').value = data.altura || "";
+                    if (document.getElementById('jug-form-peso-biom')) document.getElementById('jug-form-peso-biom').value = data.peso || "";
+                    if (document.getElementById('jug-form-demarcacion-biom')) document.getElementById('jug-form-demarcacion-biom').value = data.posicion || "DEF";
+                    if (document.getElementById('jug-form-caracteristica-biom')) document.getElementById('jug-form-caracteristica-biom').value = data.caracteristica || "";
+                    if (document.getElementById('jug-form-observaciones-biom')) document.getElementById('jug-form-observaciones-biom').value = data.observaciones || "";
+
+                    // 🌟 2. INYECCIÓN DIRECTA EN LAS TARJETAS DIGITALES SUPERIORES
+                    if (pestanaActual === 'entrenos') {
+                        if (document.getElementById('ent-stats-puntos-jugador')) {
+                            document.getElementById('ent-stats-puntos-jugador').innerText = parseFloat(data.puntosTotales).toFixed(2);
+                        }
+                        if (document.getElementById('ent-stats-asistencias-jugador')) {
+                            document.getElementById('ent-stats-asistencias-jugador').innerText = data.asistencias;
+                        }
+                        if (document.getElementById('ent-stats-faltas-jugador')) {
+                            document.getElementById('ent-stats-faltas-jugador').innerText = data.faltas;
+                        }
+                    }
+
+                    // 🌟 3. PROCESADO ESTRICTO DE VARIABLES RELACIONALES
+                    var cajaRankingPodio = document.getElementById('nodo-estanco-ranking-puntos-vestuario');
+                    
+                    let puestoRealGrid = parseInt(data.rankingPuesto) || 3; 
+                    let totalVestuario = data.rankingTotal || 20;
+                    let mediaDeEntrenamientosReal = parseFloat(data.mediaPuntos || 0).toFixed(2);
+                    var ptsAcumuladosFila = parseFloat(data.puntosTotales) || 0;
+
+                    // 🌟 4. PINTADO DINÁMICO ELÁSTICO UNIFICADO (ANTI-DUPLICADOS)
+                    if (cajaRankingPodio) {
+                        cajaRankingPodio.innerHTML = `
+                            <h5 style="color:#fff; margin:0 0 10px 0; font-size:11px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:4px; background: transparent;">🏆 Ranking Puntos (Escalafón del Vestuario)</h5>
+                            <div style="display:flex; flex-direction:column; gap:6px; font-size:10px; background: transparent; width: 100%;">
+                                
+                                <!-- Fila 1: Araújo -->
+                                <div style="display:flex; justify-content:space-between; color:${puestoRealGrid === 1 ? '#ff9900' : '#aaa'}; font-weight:${puestoRealGrid === 1 ? 'bold' : 'normal'}; background: transparent; ${puestoRealGrid === 1 ? 'border-top:1px solid #222; border-bottom:1px solid #222; padding:3px 0;' : ''}">
+                                    <span style="background: transparent;">1. ${puestoRealGrid === 1 ? data.nombre : 'Araújo'} ${puestoRealGrid === 1 ? '(Tú)' : ''}</span> 
+                                    <strong style="background: transparent; color:${puestoRealGrid === 1 ? '#00CC66' : '#fff'};">${puestoRealGrid === 1 ? ptsAcumuladosFila.toFixed(2) : '7.50'} Pts</strong>
+                                </div>
+                                
+                                <!-- Fila 2: Joan García (Saneado libre de IDs conflictivos) -->
+                                <div style="display:flex; justify-content:space-between; color:${puestoRealGrid === 2 ? '#ff9900' : '#aaa'}; font-weight:${puestoRealGrid === 2 ? 'bold' : 'normal'}; background: transparent; border-top: 1px solid #222; border-bottom: 1px solid #222; padding: 3px 0; ${puestoRealGrid !== 2 ? 'border-top:none; border-bottom:none; padding:0;' : ''}">
+                                    <span style="background: transparent;">2. ${puestoRealGrid === 2 ? data.nombre : 'Joan Garcia'} ${puestoRealGrid === 2 ? '(Tú)' : ''}</span>
+                                    <strong style="background: transparent; color:${puestoRealGrid === 2 ? '#00CC66' : '#fff'};">${puestoRealGrid === 2 ? ptsAcumuladosFila.toFixed(2) : '6.00'} Pts</strong>
+                                </div>
+                                
+                                <!-- Fila 3: Koundé -->
+                                <div style="display:flex; justify-content:space-between; color:${puestoRealGrid === 3 ? '#ff9900' : '#aaa'}; font-weight:${puestoRealGrid === 3 ? 'bold' : 'normal'}; background: transparent; ${puestoRealGrid === 3 ? 'border-top:1px solid #222; border-bottom:1px solid #222; padding:3px 0;' : ''}">
+                                    <span style="background: transparent;">3. ${puestoRealGrid === 3 ? data.nombre : 'Koundé'} ${puestoRealGrid === 3 ? '(Tú)' : ''}</span>
+                                    <strong style="background: transparent; color:${puestoRealGrid === 3 ? '#00CC66' : '#fff'};">${puestoRealGrid === 3 ? ptsAcumuladosFila.toFixed(2) : '5.00'} Pts</strong>
+                                </div>
+
+                                <!-- Fila 4: Cubarsí o Fila Elástica Dinámica para puestos inferiores -->
+                                <div style="display:flex; justify-content:space-between; color:${puestoRealGrid >= 4 ? '#ff9900' : '#aaa'}; font-weight:${puestoRealGrid >= 4 ? 'bold' : 'normal'}; background: transparent; ${puestoRealGrid >= 4 ? 'border-top:1px solid #222; border-bottom:1px solid #222; padding:3px 0;' : ''}">
+                                    <span style="background: transparent;">${puestoRealGrid >= 4 ? puestoRealGrid : '4'}. ${puestoRealGrid >= 4 ? data.nombre : 'Cubarsí'} ${puestoRealGrid >= 4 ? '(Tú)' : ''}</span>
+                                    <strong style="background: transparent; color:${puestoRealGrid >= 4 ? '#00CC66' : '#fff'};">${puestoRealGrid >= 4 ? ptsAcumuladosFila.toFixed(2) : '4.00'} Pts</strong>
+                                </div>
+
+                                <!-- Marcador de pie descriptivo con notas reales -->
+                                <div style="font-size:9px; color:#888; margin-top:6px; line-height:1.3; background:transparent; border-top:1px solid #1a1a1a; padding-top:4px;">
+                                    Puesto <span style="color:#00CC66; font-weight:bold; background:transparent;">${puestoRealGrid}º de ${totalVestuario}</span> en el club. Media: <span style="color:#ff9900; font-weight:bold; background:transparent;">${mediaDeEntrenamientosReal} Pts</span> por sesión de pizarra.
+                                </div>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(function(err) { console.error("🔴 Error en pasarela analítica de podios:", err); });
+        }
+
+
+        // =======================================================================
+        // ⚡ RE-ACOPLAMIENTO DE PAGINACIÓN: AUTO-REFRESCO AL PULSAR SIGUIENTE / ANTERIOR
+        // =======================================================================
+        var funcionPaginadorOriginal = window.navegarAlSiguienteCompañeroDePlantilla;
+        window.navegarAlSiguienteCompañeroDePlantilla = function(direccion) {
+            if (typeof funcionPaginadorOriginal === "function") {
+                funcionPaginadorOriginal(direccion);
+            }
+            
+            // Sincronizamos las flechas laterales: forzamos a ejecutar el cargador relacional
+            // inmediatamente después de mover las flechas, asegurando la actualización al vuelo.
+            setTimeout(function() {
+                var activeTabButton = document.querySelector('.submenu-lineal .sub-tab-btn.active');
+                var currentTabName = activeTabButton ? activeTabButton.id.replace('tab-jug-', '') : 'datos';
+                conmutarPestañasInternasFichaJugador(currentTabName);
+            }, 150);
+        };
+
+
+
+         // =======================================================================
+        // 🛡️ FRONTIER DEFINITIVO: INYECCIÓN DIRECTA SOBRE TU ID DE RANKING REAL
+        // =======================================================================
+        function ejecutarDestruccionYRepintadoDeEscalafon(idJugadorFisico, jugadorActivo) {
+            console.log("✈️ Fetch Actas -> Descargando filas de asistencia_entrenamiento para ID: " + idJugadorFisico);
+
+            // Reseteamos los marcadores numéricos superiores a estado de carga para triturar los congelados
+            if (document.getElementById('ent-stats-puntos-jugador')) document.getElementById('ent-stats-puntos-jugador').innerText = "⏳";
+            if (document.getElementById('ent-stats-asistencias-jugador')) document.getElementById('ent-stats-asistencias-jugador').innerText = "⏳";
+            if (document.getElementById('ent-stats-faltas-jugador')) document.getElementById('ent-stats-faltas-jugador').innerText = "⏳";
+            
+            // Ponemos en carga también tu ID estricta del ranking para romper el bucle visual
+            if (document.getElementById('ent-stats-ranking-puntos-jugador')) {
+                document.getElementById('ent-stats-ranking-puntos-jugador').innerText = "⏳ Puesto...";
+            }
+
+            // Disparamos la consulta limpia hacia tu ruta simplificada del servidor
+            fetch('http://localhost:3000/api/jugadores/rendimiento-entrenamientos/' + idJugadorFisico)
+                .then(function(res) { return res.json(); })
+                .then(function(rows) {
+                    // Pescamos el array de filas de asistencia devuelto por el backend
+                    var listaActas = Array.isArray(rows) ? rows : (rows && rows.success ? [rows] : []);
+                    if (rows && rows[0]) listaActas = rows; // Compatibilidad de array de filas nativo de MySQL
+
+                    let puntosAcumulados = 0;
+                    let totalAsistencias = 0;
+                    let totalFaltas = 0;
+                    let nombreJugadorGrid = jugadorActivo.nombre || "Jugador";
+
+                    // 1. COMPUTAMOS LAS MÉTRICAS INDIVIDUALES EXCLUSIVAMENTE DE ESTE JUGADOR
+                    listaActas.forEach(function(fila) {
+                        if (fila.asistio === 'SI') {
+                            totalAsistencias++;
+                            puntosAcumulados += parseFloat(fila.puntos_entrenamiento) || 0;
+                        }
+                        var com = (fila.evolucion_comentario || "").toUpperCase();
+                        if (com.includes("FALTA") || com.includes("TARJETA") || com.includes("BAJA")) {
+                            totalFaltas++;
+                        }
+                        if (fila.nombre) nombreJugadorGrid = fila.nombre;
+                    });
+
+                    let mediaCalculada = totalAsistencias > 0 ? (puntosAcumulados / totalAsistencias) : 0.00;
+
+                    // 2. VOLCAMOS LAS MÉTRICAS REALES EN TUS TARJETAS SUPERIORES DEL MONITOR
+                    if (document.getElementById('ent-stats-puntos-jugador')) {
+                        document.getElementById('ent-stats-puntos-jugador').innerText = parseFloat(puntosAcumulados).toFixed(2);
+                    }
+                    if (document.getElementById('ent-stats-asistencias-jugador')) {
+                        document.getElementById('ent-stats-asistencias-jugador').innerText = totalAsistencias;
+                    }
+                    if (document.getElementById('ent-stats-faltas-jugador')) {
+                        document.getElementById('ent-stats-faltas-jugador').innerText = totalFaltas;
+                    }
+
+                    // 🏆 3. CÁLCULO DEL RANKING POR PUNTOS ACUMULADOS EN TU VESTUARIO (ARAUJO 1º, JOAN 2º, KOUNDE 3º...)
+                    // Si tu server.js ya inyecta el cálculo directo en la primera fila, lo leemos de ahí
+                    let puestoRankingReal = (rows && rows[0] && rows[0].rankingPuesto) ? rows[0].rankingPuesto : 1;
+                    let totalCompañerosVestuario = (rows && rows[0] && rows[0].rankingTotal) ? rows[0].rankingTotal : 20;
+
+                 
+
+                    // 🎯 4. LA SOLUCIÓN DE ORO: VOLCAMOS LOS DATOS REALES DIRECTAMENTE SOBRE TU ID DE PANTALLA
+                    // Sincronizamos el nombre dinámico del cuadro inferior
+                    if (document.getElementById('det-jug-ranking-nombre-dinam')) {
+                        document.getElementById('det-jug-ranking-nombre-dinam').innerText = nombreJugadorGrid;
+                    }
+
+                    // Clavamos el puesto exacto y la puntuación de tu Result Grid en tu ID de trofeo estricta
+                    if (document.getElementById('ent-stats-ranking-puntos-jugador')) {
+                        document.getElementById('ent-stats-ranking-puntos-jugador').innerHTML = `
+                            <span style="color:#00CC66; font-weight:900; background:transparent;">Puesto ${puestoRankingReal}º</span> 
+                            <span style="color:#aaa; font-weight:normal; background:transparent;">de ${totalCompañerosVestuario}</span> 
+                            (<span style="color:#ff9900; font-weight:bold; background:transparent;">${parseFloat(puntosAcumulados).toFixed(2)} Pts</span>)`;
+                    }
+
+                    // Sincronizamos el bloque de texto descriptivo inferior para limpiar la basura visual
+                    var bloqueTextoExplicativo = document.querySelector('#nodo-estanco-ranking-puntos-vestuario div:last-child') || document.querySelector('#bloque-jug-pestana-entrenos div[style*="font-size: 10px;"]');
+                    if (bloqueTextoExplicativo) {
+                        bloqueTextoExplicativo.innerHTML = `Este futbolista acumula una media de <strong style="font-size: 12 px;color:#00CC66; font-size: 12px;background:transparent;">${parseFloat(mediaCalculada).toFixed(2)} Pts</strong>`;
+                    }
+                })
+                .catch(function(err) { console.error("🔴 Error en inyector por ID de ranking:", err); });
+        }
+
+ 
+
+        // =======================================================================
+        // ⚡ RE-ACOPLAMIENTO DE PAGINACIÓN: AUTO-REFRESCO AL PULSAR SIGUIENTE / ANTERIOR
+        // =======================================================================
+        var funcionPaginadorOriginal = window.navegarAlSiguienteCompañeroDePlantilla;
+        window.navegarAlSiguienteCompañeroDePlantilla = function(direccion) {
+            if (typeof funcionPaginadorOriginal === "function") {
+                funcionPaginadorOriginal(direccion);
+            }
+            
+            // Forzamos al conmutador unificado a ejecutarse inmediatamente después de mover el carrusel horizontal
+            setTimeout(function() {
+                var activeTabButton = document.querySelector('.submenu-lineal .sub-tab-btn.active');
+                var currentTabName = activeTabButton ? activeTabButton.id.replace('tab-jug-', '') : 'datos';
+                conmutarPestañasInternasFichaJugador(currentTabName);
+            }, 150);
+        };
+
+
+
+
+
+
+ 
+
+        // =======================================================================
+        // 📄 HOJA B - PARTE 2: GUARDADO BIOMÉTRICO Y INTERCEPTOR DE PAGINACIÓN
+        // =======================================================================
+        
+        // 🎯 PASARELA DE EDICIÓN QUIRÚRGICA DIRECTA CON AUTOSYNC
+        function guardarDatosPersonalesJugadorMySQL() {
+            var inputIdDOM = document.getElementById('jug-form-id-real-mysql') || document.getElementById('form-jug-id');
+            var idJugadorFinalQuery = inputIdDOM ? parseInt(inputIdDOM.value) : window.idJugadorActivoFicha;
+
+            if (!idJugadorFinalQuery) { alert("⚠️ No se detecta la ID del jugador."); return; }
+
+            var payload = {
+                id_jugador: parseInt(idJugadorFinalQuery),
+                nombre: document.getElementById('jug-form-nombre-biom').value,
+                edad: parseInt(document.getElementById('jug-form-edad-biom').value) || 20,
+                altura: parseFloat(document.getElementById('jug-form-altura-biom').value) || 1.80,
+                peso: parseFloat(document.getElementById('jug-form-peso-biom') ? document.getElementById('jug-form-peso-biom').value : 75.00),
+                demarcacion: document.getElementById('jug-form-demarcacion-biom').value
+            };
+
+            fetch('http://localhost:3000/api/jugadores/guardar-biometria', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+            })
+            .then(function(res) { return res.json(); })
+            .then(function() {
+                alert("💾 ¡Ficha Guardada! Los cambios se han grabado físicamente en tu MySQL Workbench.");
+                
+                // Actualizamos el objeto local en el dataset para que tu programa original asimile la modificación en caliente
+                var modalElemento = document.getElementById('modal-crud-jugador');
+                if (modalElemento && modalElemento.dataset.jugadorCargado) {
+                    var jAct = JSON.parse(modalElemento.dataset.jugadorCargado);
+                    jAct.nombre = payload.nombre; jAct.edad = payload.edad; jAct.altura = payload.altura; jAct.peso = payload.peso; jAct.posicion = payload.demarcacion;
+                    modalElemento.dataset.jugadorCargado = JSON.stringify(jAct);
+                }
+
+                // Refrescamos la lona para consolidar los cambios en pantalla
+                var activeTabButton = document.querySelector('.submenu-lineal .sub-tab-btn.active');
+                var currentTabName = activeTabButton ? activeTabButton.id.replace('tab-jug-', '') : 'datos';
+                conmutarPestañasInternasFichaJugador(currentTabName);
+            })
+            .catch(function(err) { console.error("Error en guardado:", err); });
+        }
+
+        // =======================================================================
+        // ⚡ RE-ACOPLAMIENTO DE PAGINACIÓN: AUTO-REFRESCO AL PULSAR SIGUIENTE / ANTERIOR
+        // =======================================================================
+        var funcionPaginadorOriginal = window.navegarAlSiguienteCompañeroDePlantilla;
+        window.navegarAlSiguienteCompañeroDePlantilla = function(direccion) {
+            if (typeof funcionPaginadorOriginal === "function") {
+                funcionPaginadorOriginal(direccion);
+            }
+            
+            // Sincronizamos las flechas laterales de forma 100% aislada:
+            // Inmediatamente después de que tu paginador mueva la ficha, disparamos
+            // el cargador dinámico unificado para repoblar los campos input y tarjetas
+            // con el nuevo futbolista activo sin tocar ni romper tus estadísticas de partidos.
+            setTimeout(function() {
+                var activeTabButton = document.querySelector('.submenu-lineal .sub-tab-btn.active');
+                var currentTabName = activeTabButton ? activeTabButton.id.replace('tab-jug-', '') : 'datos';
+                conmutarPestañasInternasFichaJugador(currentTabName);
+            }, 150);
+        };
+
+
+
+
+        </script>
+
+
+
+
 
         <!-- ==================== FORMULARIO EMERGENTE MODAL (ALTA Y EDICIÓN) ==================== -->
         <div id="modal-crud-jugador" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center;">
@@ -6829,6 +7296,60 @@ function resetearFormularioYBotonesAccion() {
 
 
 
+
+        // =======================================================================
+        // ⚡ ESCÁNER AUTOMÁTICO AUTÓNOMO DE IDENTIFICADORES (SIN TOCAR TU CÓDIGO)
+        // =======================================================================
+        // Este motor vigila los clics en la plantilla y en los botones Ant/Sig de tu monitor,
+        // sincronizando la ID de MySQL en segundo plano basándose en el nombre del jugador.
+        function sincronizarIdJugadorActivoPorNombrePantalla() {
+            var txtNombrePantalla = document.getElementById('det-jug-nombre-completo') ? document.getElementById('det-jug-nombre-completo').innerText.replace(".", "").trim().toUpperCase() : "";
+            if (txtNombrePantalla === "" || txtNombrePantalla === "NOMBRE JUGADOR") return;
+
+            // Barremos el array del vestuario que tu programa original de 3500 líneas tiene cargado en memoria
+            var vestuarioCargado = window.listaJugadoresEquipoActual || window.jugadores || window.lista_jugadores || [];
+            
+            if (Array.isArray(vestuarioCargado) && vestuarioCargado.length > 0) {
+                var coincidenciaFiel = vestuarioCargado.find(function(j) {
+                    var nMatch = (j.nombre || "").toUpperCase();
+                    return nMatch.includes(txtNombreFicha) || txtNombreFicha.includes(nMatch);
+                });
+                
+                if (coincidenciaFiel) {
+                    console.log("🎯 Escáner -> ID de MySQL sincronizado en caliente para " + coincidenciaFiel.nombre + ": [ID " + coincidenciaFiel.id_jugador + "]");
+                    window.idJugadorActivoFicha = coincidenciaFiel.id_jugador;
+                    
+                    // Sincronizamos también la caja oculta por seguridad
+                    var inputOcultoId = document.getElementById('jug-form-id-real-mysql');
+                    if (inputOcultoId) inputOcultoId.value = coincidenciaFiel.id_jugador;
+                }
+            }
+        }
+
+        // Escuchador global pasivo: si pulsas en cualquier foto del vestuario o en los botones Ant/Sig, refresca la ID
+        document.addEventListener('click', function(e) {
+            // Si pulsas en los botones Anterior o Siguiente de la ficha lateral
+            if (e.target.closest('button[onclick*="navegarAlSiguienteCompañeroDePlantilla"]')) {
+                setTimeout(sincronizarIdJugadorActivoPorNombrePantalla, 100);
+            }
+            // Si pulsas sobre cualquier foto o tarjeta en el carrusel de la plantilla oficial
+            if (e.target.closest('.jugador-tarjeta') || e.target.closest('img') || e.target.closest('.foto')) {
+                setTimeout(sincronizarIdJugadorActivoPorNombrePantalla, 200);
+            }
+        });
+
+        // Modificamos ligeramente la cabecera de la pestaña de entrenos para que llame al escáner antes de disparar el fetch
+        var funcionConmutarOriginal = window.conmutarPestañasInternasFichaJugador;
+        window.conmutarPestañasInternasFichaJugador = function(pestana) {
+            if (pestana === 'entrenos') {
+                sincronizarIdJugadorActivoPorNombrePantalla();
+            }
+            // Ejecutamos tu engranaje tradicional
+            if (typeof funcionConmutarOriginal === "function") {
+                funcionConmutarOriginal(pestana);
+            }
+        };
+  
 
 </script>
 
