@@ -3,6 +3,9 @@ const mysql = require('mysql2');
 const cors = require('cors');
 
 const app = express();
+// Servimos de forma estática la carpeta donde tienes guardado tu index.html
+app.use(express.static(__dirname));
+
 app.use(cors());
 // CORRECCIÓN RADICAL: Eleva el límite de carga a 50MB para soportar películas de fotogramas continuos gigantes
 app.use(express.json({ limit: '50mb' }));
@@ -367,7 +370,7 @@ app.get('/api/valor-equipo/:id_partido', (req, res) => {
 // =======================================================================
 // OBTENER DETALLE DEL JUGADOR + HISTORIAL DE ENCUENTROS REPARADO (CERO FALLOS 500)
 // =======================================================================
-app.get('/api/jugadores/detalle/:id', (req, res) => {
+ app.get('/api/jugadores/detalle/:id', (req, res) => {
     const id_j = req.params.id;
     console.log(`📥 Consultando de forma segura en MySQL el perfil del jugador ID: ${id_j}`);
     
@@ -908,7 +911,7 @@ app.delete('/api/jugadas/:id', (req, res) => {
 // =======================================================================
 // OBTENER DETALLE DEL JUGADOR + HISTORIAL DE ENCUENTROS RELACIONADOS (MYSQL)
 // =======================================================================
-app.get('/api/jugadores/detalle/:id', (req, res) => {
+/*app.get('/api/jugadores/detalle/:id', (req, res) => {
     const id_j = req.params.id;
     console.log(`📥 Consultando perfil e historial de partidos para el jugador ID: ${id_j}`);
     
@@ -960,7 +963,7 @@ app.get('/api/jugadores/detalle/:id', (req, res) => {
     });
 });
 
-
+*/
 
 // 2. CREAR NUEVO JUGADOR EN LA BASE DE DATOS
 app.post('/api/jugadores', (req, res) => {
@@ -1419,102 +1422,86 @@ app.post('/api/jugadores/guardar-biometria', (req, res) => {
 });
 
 // =======================================================================
-// 🏆 BACKEND REAL DEFINITIVO: ALINEADO MILIMÉTRICAMENTE CON TUS DOS TABLAS
+// 🏆 SERVER REPARADO: ENVÍA EXPEDIENTE Y ARRAY DE VESTUARIO REAL DE MYSQL
 // =======================================================================
 app.get('/api/jugadores/rendimiento-entrenamientos/:id_jugador', (req, res) => {
     const idJugadorFiltro = parseInt(req.params.id_jugador);
-    console.log(`📊 Servidor MySQL -> Despachando balance para el Jugador ID: [${idJugadorFiltro}]`);
+    console.log(`📊 Servidor MySQL -> Extrayendo escalafón multiequipo para ID: [${idJugadorFiltro}]`);
 
     if (isNaN(idJugadorFiltro)) {
         return res.status(400).json({ error: "Identificador de jugador inválido." });
     }
 
-    // 🎯 1. LEEMOS DIRECTAMENTE LA FICHA DEL JUGADOR EN TU TABLA MAESTRA
-    // Extraemos su nombre, equipo y tu columna real de Workbench: 'puntos_entrenamiento_acumulados'
-    const sqlFichaMaestra = `
-        SELECT id_jugador, nombre, id_equipo, puntos_entrenamiento_acumulados 
-        FROM fantasy_liga.jugadores 
-        WHERE id_jugador = ?`;
-
-    db.query(sqlFichaMaestra, [idJugadorFiltro], (errJ, resJ) => {
-        if (errJ || !resJ || resJ.length === 0) {
-            console.error("🔴 Error al localizar al jugador en tu base de datos:", errJ ? errJ.message : "Fila vacía");
-            return res.status(400).json({ error: "No se localiza el perfil del jugador." });
+    // 1. Buscamos primero el equipo (id_equipo) del jugador solicitado de forma dinámica
+    const sqlBuscarEquipo = `SELECT id_equipo FROM fantasy_liga.jugadores WHERE id_jugador = ?`;
+    
+    db.query(sqlBuscarEquipo, [idJugadorFiltro], (errEq, resEq) => {
+        if (errEq || !resEq || resEq.length === 0) {
+            return res.status(400).json({ error: "No se localiza el equipo del jugador." });
         }
+        
+        const idEquipoActivo = resEq[0].id_equipo;
 
-        const jugadorDatos = resJ[0];
-        const idEquipoActivo = jugadorDatos.id_equipo;
-        // Pescamos tus puntos acumulados de Workbench (Ej: Araújo tiene 7.50 en tu tabla de jugadores)
-        const puntosAcumuladosWorkbench = parseFloat(jugadorDatos.puntos_entrenamiento_acumulados) || 0.00;
+        // 2. 🎯 TU QUERY DE ÉXITO DE WORKBENCH MODIFICADA CON EL COMODÍN '?':
+        // Traemos de golpe a toda la plantilla de SU EQUIPO ordenada de mayor a menor por puntos
+        const sqlTuGridValidadoMultiequipo = `
+            SELECT 
+                j.id_jugador,
+                j.nombre,
+                COUNT(CASE WHEN ae.asistio = 'SI' THEN 1 END) AS total_asistencias,
+                IFNULL(SUM(ae.puntos_entrenamiento), 0) AS puntos_entrenamiento_totales,
+                ROUND(
+                    IFNULL(SUM(ae.puntos_entrenamiento), 0) / 
+                    CASE WHEN COUNT(CASE WHEN ae.asistio = 'SI' THEN 1 END) = 0 THEN 1 
+                         ELSE COUNT(CASE WHEN ae.asistio = 'SI' THEN 1 END) 
+                    END, 2
+                ) AS media_puntos_entrenamiento
+            FROM fantasy_liga.jugadores j
+            LEFT JOIN fantasy_liga.asistencia_entrenamiento ae ON j.id_jugador = ae.id_jugador
+            WHERE j.id_equipo = ?
+            GROUP BY j.id_jugador, j.nombre
+            ORDER BY puntos_entrenamiento_totales DESC`;
 
-        // 🎯 2. CONSULTA DEL ESCALAFÓN DEL VESTUARIO (ARAUJO 1º, JOAN 2º, KOUNDE 3º...)
-        // Ordenamos a todos los compañeros de SU EQUIPO de mayor a menor según sus puntos reales
-        const sqlCalculoEscalafonMister = `
-            SELECT id_jugador, puntos_entrenamiento_acumulados 
-            FROM fantasy_liga.jugadores 
-            WHERE id_equipo = ? 
-            ORDER BY puntos_entrenamiento_acumulados DESC`;
-
-        db.query(sqlCalculoEscalafonMister, [idEquipoActivo], (errRank, rowsEquipo) => {
-            if (errRank) {
-                console.error("🔴 Error en el ranking de MySQL Workbench:", errRank.message);
-                return res.status(500).json({ error: errRank.message });
+        db.query(sqlTuGridValidadoMultiequipo, [idEquipoActivo], (err, rows) => {
+            if (err) {
+                console.error("🔴 Error crítico en tu MySQL Workbench:", err.message);
+                return res.status(500).json({ error: err.message });
             }
 
-            // Calculamos qué puesto real ocupa en la rejilla ordenada de su club
+            const vestuarioCompleto = rows || [];
             let puestoRankingReal = 1;
-            for (let i = 0; i < rowsEquipo.length; i++) {
-                if (rowsEquipo[i].id_jugador === idJugadorFiltro) {
-                    puestoRankingReal = i + 1; // Araújo dará 1º, Joan 2º, Koundé 3º, Cubarsí 4º clavados
+            let coincidenciaFila = null;
+
+            // 3. DETECTAMOS QUÉ PUESTO OCUPA EN LA MATRIZ ORDENADA DE SU CLUB
+            for (let i = 0; i < vestuarioCompleto.length; i++) {
+                if (vestuarioCompleto[i].id_jugador === idJugadorFiltro) {
+                    puestoRankingReal = i + 1; // Posición exacta en su vestuario
+                    coincidenciaFila = vestuarioCompleto[i];
                     break;
                 }
             }
 
-            // 🎯 3. EXTRAEMOS LAS SESIONES DE ASISTENCIA PARA SACAR LA NOTA MEDIA REAL
-            const sqlActasDeAsistencia = `
-                SELECT asistio, puntos_entrenamiento 
-                FROM fantasy_liga.asistencia_entrenamiento 
-                WHERE id_jugador = ?`;
+            // Si el jugador no registra actas, fabricamos un registro base seguro
+            if (!coincidenciaFila) {
+                coincidenciaFila = { id_jugador: idJugadorFiltro, nombre: "Jugador", total_asistencias: 0, puntos_entrenamiento_totales: 0, media_puntos_entrenamiento: 0 };
+            }
 
-            db.query(sqlActasDeAsistencia, [idJugadorFiltro], (errActa, rowsActas) => {
-                var listaActas = rowsActas || [];
-                let totalAsistencias = 0;
-                let sumatorioPuntosAsistencia = 0;
-
-                listaActas.forEach(fila => {
-                    if (fila.asistio === 'SI') {
-                        totalAsistencias++;
-                        sumatorioPuntosAsistencia += parseFloat(fila.puntos_entrenamiento) || 0;
-                    }
-                });
-
-                // Calculamos la media real en base a los entrenos que de verdad ha hecho
-                let mediaCalculada = totalAsistencias > 0 ? (sumatorioPuntosAsistencia / totalAsistencias) : 0.00;
-
-                console.log(`🚀 [Pasarela Soldada] -> ${jugadorDatos.nombre} | Puntos: ${puntosAcumuladosWorkbench} | Puesto: ${puestoRankingReal}º de ${rowsEquipo.length}`);
-
-                // Despachamos las claves unificadas milimétricamente con tu index.html
-                return res.json({
-                    success: true,
-                    id_jugador: jugadorDatos.id_jugador,
-                    nombre: jugadorDatos.nombre,
-                    asistencias: totalAsistencias,
-                    puntosTotales: puntosAcumuladosWorkbench, // Manda el 7.50 limpio de Araújo hacia la web
-                    mediaPuntos: mediaCalculada, // Manda su media real de sesiones
-                    faltas: 0,
-                    rankingPuesto: puestoRankingReal, // Posición real dictada por MySQL Workbench
-                    rankingTotal: rowsEquipo.length
-                });
+            // 4. DESPACHAMOS EL PACK CON LA FICHA Y EL ARRAY COMPLETO DEL VESTUARIO ORDENADO
+            return res.json({
+                success: true,
+                id_jugador: coincidenciaFila.id_jugador,
+                nombre: coincidenciaFila.nombre,
+                asistencias: coincidenciaFila.total_asistencias,
+                puntosTotales: parseFloat(coincidenciaFila.puntos_entrenamiento_totales) || 0.00,
+                mediaPuntos: parseFloat(coincidenciaFila.media_puntos_entrenamiento) || 0.00,
+                faltas: 0,
+                rankingPuesto: puestoRankingReal,
+                rankingTotal: vestuarioCompleto.length,
+                rowsVestuario: vestuarioCompleto // 🌟 EL ARMA SECRETA: Enviamos la lista real ordenada para el bucle
             });
         });
     });
 });
-
-
-
-
-
-
 
 
 

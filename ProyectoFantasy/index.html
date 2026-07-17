@@ -495,17 +495,17 @@
                         <!-- Pestaña 1: Datos Personales (Llamada limpia sin caracteres ilegales) -->
                         <button id="tab-jug-datos" class="sub-tab-btn active" type="button" 
                                 onclick="if(typeof conmutarPestañasInternasFichaJugador==='function'){conmutarPestañasInternasFichaJugador('datos');}" 
-                                style="cursor:pointer; flex-grow: 1; font-weight: bold; background: transparent;">📋 Datos Personales</button>
+                                style="cursor:pointer; flex-grow: 1; font-weight: bold; background: #00CC66">📋 Datos Personales</button>
                         
                         <!-- Pestaña 2: Datos de Partidos -->
                         <button id="tab-jug-partidos" class="sub-tab-btn" type="button" 
                                 onclick="if(typeof conmutarPestañasInternasFichaJugador==='function'){conmutarPestañasInternasFichaJugador('partidos');}" 
-                                style="cursor:pointer; flex-grow: 1; font-weight: bold; background: transparent;">📊 Datos de Partidos</button>
+                                style="cursor:pointer; flex-grow: 1; font-weight: bold; background: #00CC66">📊 Datos de Partidos</button>
                         
                         <!-- Pestaña 3: Datos de Entrenamientos -->
                         <button id="tab-jug-entrenos" class="sub-tab-btn" type="button" 
                                 onclick="if(typeof conmutarPestañasInternasFichaJugador==='function'){conmutarPestañasInternasFichaJugador('entrenos');}" 
-                                style="cursor:pointer; flex-grow: 1; font-weight: bold; background: transparent;">🏃 Datos de Entrenamientos</button>
+                                style="cursor:pointer; flex-grow: 1; font-weight: bold; background: #00CC66">🏃 Datos de Entrenamientos</button>
                                 
                     </div>
 
@@ -674,35 +674,34 @@
             conmutarPestañasInternasFichaJugador('datos');
         }
 
-     
-          // =======================================================================
-        // ⭐ JAVASCRIPT FASE FINAL - PARTE A: CONMUTADOR UNIVERSAL (ANTI-CONTADORES A CERO)
+         // =======================================================================
+        // 📄 HOJA A: CONMUTADOR DE PESTAÑAS MULTIEQUIPO (CON ACCESO COMPATIBLE)
         // =======================================================================
         function conmutarPestañasInternasFichaJugador(pestana) {
             console.log("🏃 Monitor -> Conmutando sub-bloque a: " + pestana);
             
             var modalElemento = document.getElementById('modal-crud-jugador');
             var datosStr = modalElemento ? modalElemento.dataset.jugadorCargado : null;
-            if (!datosStr) { console.error("⚠️ Perfil del jugador inaccesible."); return; }
+            if (!datosStr) { console.error("⚠️ Dataset de jugador inaccesible."); return; }
             
             var jugadorActivo = JSON.parse(datosStr);
-            var idJugadorFisico = jugadorActivo.id_jugador; 
+            var idJugadorFisico = parseInt(jugadorActivo.id_jugador); 
 
-            // Ocultamos las sub-lonas derechas de forma síncrona
+            // Ocultamos las tres sub-lonas modulares de la derecha
             var bloques = document.querySelectorAll('.panel-jug-sub-bloque');
             for (var i = 0; i < bloques.length; i++) { bloques[i].style.display = "none"; }
 
-            // Apagamos los marcos verdes activos de la barra lineal superior
+            // Apagamos el resaltado verde de la barra lineal superior
             var botones = document.querySelectorAll('.submenu-lineal .sub-tab-btn');
             botones.forEach(function(b) { b.classList.remove('active'); });
 
-            // Encendemos milimétricamente la lona y el botón seleccionado
+            // Encendemos la lona y el botón seleccionado
             var panelObjetivo = document.getElementById('bloque-jug-pestana-' + pestana);
             var botonObjetivo = document.getElementById('tab-jug-' + pestana);
             if (panelObjetivo) panelObjetivo.style.setProperty('display', 'block', 'important');
             if (botonObjetivo) botonObjetivo.classList.add('active');
 
-            // AUTO-LLENADO BIO DE LA PRIMERA PESTAÑA NATIVA DE INICIO
+            // AUTO-LLENADO BIO EN DATOS PERSONALES PARA EVITAR INPUTS EN BLANCO
             if (pestana === 'datos') {
                 if (document.getElementById('jug-form-id-real-mysql')) document.getElementById('jug-form-id-real-mysql').value = jugadorActivo.id_jugador;
                 if (document.getElementById('jug-form-nombre-biom')) document.getElementById('jug-form-nombre-biom').value = jugadorActivo.nombre || "";
@@ -712,116 +711,47 @@
                 if (document.getElementById('jug-form-demarcacion-biom')) document.getElementById('jug-form-demarcacion-biom').value = jugadorActivo.posicion || "DEF";
             }
 
-            // 🎯 EL ENGRANAJE DE LA VICTORIA: Eliminamos la barrera de 'entrenos'. 
-            // Disparamos la descarga relacional siempre, para que las tarjetas de arriba 
-            // no se queden congeladas a cero al pasar de jugador.
+            // Disparamos la recarga analítica del vestuario enviándole el testigo a la Hoja B
             if (idJugadorFisico) {
-                ejecutarInyeccionExactaDePistasYRanking(idJugadorFisico);
+                ejecutarInyeccionExactaDePistasYRanking(idJugadorFisico, pestana);
             }
         }
 
-         // =======================================================================
-        // 🏆 BLOQUE UNIFICADO: INYECTOR PURO DEL PODIO (PARTE 1 + PARTE 2)
+
+
         // =======================================================================
-        function ejecutarInyeccionExactaDePistasYRanking(idJugadorFisico, pestanaActual) {
+        // 📄 HOJA A: CONMUTADOR VISUAL PURO (ELIMINA DISPAROS ANTICIPADOS)
+        // =======================================================================
+        function conmutarPestañasInternasFichaJugador(pestana) {
+            console.log("🏃 Monitor -> Cambiando sub-bloque de pantalla a: " + pestana);
             
-            fetch('http://localhost:3000/api/jugadores/rendimiento-entrenamientos/' + idJugadorFisico)
-                .then(function(res) { return res.json(); })
-                .then(function(data) {
-                    if (!data || data.puntosTotales === undefined) return;
+            // Ocultamos de forma síncrona las tres sub-lonas modulares de la derecha
+            var bloques = document.querySelectorAll('.panel-jug-sub-bloque');
+            for (var i = 0; i < bloques.length; i++) { bloques[i].style.display = "none"; }
 
-                    console.log("🎨 Sincronizador Maestro -> Pintando el Result Grid para: " + data.nombre);
+            // Apagamos los marcos verdes activos de la barra lineal superior
+            var botones = document.querySelectorAll('.submenu-lineal .sub-tab-btn');
+            botones.forEach(function(b) { b.classList.remove('active'); });
 
-                    // 🌟 1. POBLADO OBLIGATORIO DE LOS INPUTS DE DATOS PERSONALES DE INICIO
-                    if (document.getElementById('jug-form-id-real-mysql')) document.getElementById('jug-form-id-real-mysql').value = data.id_jugador;
-                    if (document.getElementById('jug-form-nombre-biom')) document.getElementById('jug-form-nombre-biom').value = data.nombre || "";
-                    if (document.getElementById('jug-form-edad-biom')) document.getElementById('jug-form-edad-biom').value = data.edad || "";
-                    if (document.getElementById('jug-form-altura-biom')) document.getElementById('jug-form-altura-biom').value = data.altura || "";
-                    if (document.getElementById('jug-form-peso-biom')) document.getElementById('jug-form-peso-biom').value = data.peso || "";
-                    if (document.getElementById('jug-form-demarcacion-biom')) document.getElementById('jug-form-demarcacion-biom').value = data.posicion || "DEF";
-                    if (document.getElementById('jug-form-caracteristica-biom')) document.getElementById('jug-form-caracteristica-biom').value = data.caracteristica || "";
-                    if (document.getElementById('jug-form-observaciones-biom')) document.getElementById('jug-form-observaciones-biom').value = data.observaciones || "";
+            // Encendemos milimétricamente la lona y el botón seleccionado por tu ratón
+            var panelObjetivo = document.getElementById('bloque-jug-pestana-' + pestana);
+            var botonObjetivo = document.getElementById('tab-jug-' + pestana);
+            if (panelObjetivo) panelObjetivo.style.setProperty('display', 'block', 'important');
+            if (botonObjetivo) botonObjetivo.classList.add('active');
 
-                    // 🌟 2. INYECCIÓN DIRECTA EN LAS TARJETAS DIGITALES SUPERIORES
-                    if (pestanaActual === 'entrenos') {
-                        if (document.getElementById('ent-stats-puntos-jugador')) {
-                            document.getElementById('ent-stats-puntos-jugador').innerText = parseFloat(data.puntosTotales).toFixed(2);
-                        }
-                        if (document.getElementById('ent-stats-asistencias-jugador')) {
-                            document.getElementById('ent-stats-asistencias-jugador').innerText = data.asistencias;
-                        }
-                        if (document.getElementById('ent-stats-faltas-jugador')) {
-                            document.getElementById('ent-stats-faltas-jugador').innerText = data.faltas;
-                        }
-                    }
+            // Pescamos la ID inyectada en el modal físico para forzar el refresco de las tarjetas
+            var modalElemento = document.getElementById('modal-crud-jugador');
+            var datosStr = modalElemento ? modalElemento.dataset.jugadorCargado : null;
+            if (!datosStr) return;
+            
+            var jugadorActivo = JSON.parse(datosStr);
+            var idJugadorFisico = parseInt(jugadorActivo.id_jugador);
 
-                    // 🌟 3. PROCESADO ESTRICTO DE VARIABLES RELACIONALES
-                    var cajaRankingPodio = document.getElementById('nodo-estanco-ranking-puntos-vestuario');
-                    
-                    let puestoRealGrid = parseInt(data.rankingPuesto) || 3; 
-                    let totalVestuario = data.rankingTotal || 20;
-                    let mediaDeEntrenamientosReal = parseFloat(data.mediaPuntos || 0).toFixed(2);
-                    var ptsAcumuladosFila = parseFloat(data.puntosTotales) || 0;
-
-                    // 🌟 4. PINTADO DINÁMICO ELÁSTICO UNIFICADO (ANTI-DUPLICADOS)
-                    if (cajaRankingPodio) {
-                        cajaRankingPodio.innerHTML = `
-                            <h5 style="color:#fff; margin:0 0 10px 0; font-size:11px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:4px; background: transparent;">🏆 Ranking Puntos (Escalafón del Vestuario)</h5>
-                            <div style="display:flex; flex-direction:column; gap:6px; font-size:10px; background: transparent; width: 100%;">
-                                
-                                <!-- Fila 1: Araújo -->
-                                <div style="display:flex; justify-content:space-between; color:${puestoRealGrid === 1 ? '#ff9900' : '#aaa'}; font-weight:${puestoRealGrid === 1 ? 'bold' : 'normal'}; background: transparent; ${puestoRealGrid === 1 ? 'border-top:1px solid #222; border-bottom:1px solid #222; padding:3px 0;' : ''}">
-                                    <span style="background: transparent;">1. ${puestoRealGrid === 1 ? data.nombre : 'Araújo'} ${puestoRealGrid === 1 ? '(Tú)' : ''}</span> 
-                                    <strong style="background: transparent; color:${puestoRealGrid === 1 ? '#00CC66' : '#fff'};">${puestoRealGrid === 1 ? ptsAcumuladosFila.toFixed(2) : '7.50'} Pts</strong>
-                                </div>
-                                
-                                <!-- Fila 2: Joan García (Saneado libre de IDs conflictivos) -->
-                                <div style="display:flex; justify-content:space-between; color:${puestoRealGrid === 2 ? '#ff9900' : '#aaa'}; font-weight:${puestoRealGrid === 2 ? 'bold' : 'normal'}; background: transparent; border-top: 1px solid #222; border-bottom: 1px solid #222; padding: 3px 0; ${puestoRealGrid !== 2 ? 'border-top:none; border-bottom:none; padding:0;' : ''}">
-                                    <span style="background: transparent;">2. ${puestoRealGrid === 2 ? data.nombre : 'Joan Garcia'} ${puestoRealGrid === 2 ? '(Tú)' : ''}</span>
-                                    <strong style="background: transparent; color:${puestoRealGrid === 2 ? '#00CC66' : '#fff'};">${puestoRealGrid === 2 ? ptsAcumuladosFila.toFixed(2) : '6.00'} Pts</strong>
-                                </div>
-                                
-                                <!-- Fila 3: Koundé -->
-                                <div style="display:flex; justify-content:space-between; color:${puestoRealGrid === 3 ? '#ff9900' : '#aaa'}; font-weight:${puestoRealGrid === 3 ? 'bold' : 'normal'}; background: transparent; ${puestoRealGrid === 3 ? 'border-top:1px solid #222; border-bottom:1px solid #222; padding:3px 0;' : ''}">
-                                    <span style="background: transparent;">3. ${puestoRealGrid === 3 ? data.nombre : 'Koundé'} ${puestoRealGrid === 3 ? '(Tú)' : ''}</span>
-                                    <strong style="background: transparent; color:${puestoRealGrid === 3 ? '#00CC66' : '#fff'};">${puestoRealGrid === 3 ? ptsAcumuladosFila.toFixed(2) : '5.00'} Pts</strong>
-                                </div>
-
-                                <!-- Fila 4: Cubarsí o Fila Elástica Dinámica para puestos inferiores -->
-                                <div style="display:flex; justify-content:space-between; color:${puestoRealGrid >= 4 ? '#ff9900' : '#aaa'}; font-weight:${puestoRealGrid >= 4 ? 'bold' : 'normal'}; background: transparent; ${puestoRealGrid >= 4 ? 'border-top:1px solid #222; border-bottom:1px solid #222; padding:3px 0;' : ''}">
-                                    <span style="background: transparent;">${puestoRealGrid >= 4 ? puestoRealGrid : '4'}. ${puestoRealGrid >= 4 ? data.nombre : 'Cubarsí'} ${puestoRealGrid >= 4 ? '(Tú)' : ''}</span>
-                                    <strong style="background: transparent; color:${puestoRealGrid >= 4 ? '#00CC66' : '#fff'};">${puestoRealGrid >= 4 ? ptsAcumuladosFila.toFixed(2) : '4.00'} Pts</strong>
-                                </div>
-
-                                <!-- Marcador de pie descriptivo con notas reales -->
-                                <div style="font-size:9px; color:#888; margin-top:6px; line-height:1.3; background:transparent; border-top:1px solid #1a1a1a; padding-top:4px;">
-                                    Puesto <span style="color:#00CC66; font-weight:bold; background:transparent;">${puestoRealGrid}º de ${totalVestuario}</span> en el club. Media: <span style="color:#ff9900; font-weight:bold; background:transparent;">${mediaDeEntrenamientosReal} Pts</span> por sesión de pizarra.
-                                </div>
-                            </div>
-                        `;
-                    }
-                })
-                .catch(function(err) { console.error("🔴 Error en pasarela analítica de podios:", err); });
-        }
-
-
-        // =======================================================================
-        // ⚡ RE-ACOPLAMIENTO DE PAGINACIÓN: AUTO-REFRESCO AL PULSAR SIGUIENTE / ANTERIOR
-        // =======================================================================
-        var funcionPaginadorOriginal = window.navegarAlSiguienteCompañeroDePlantilla;
-        window.navegarAlSiguienteCompañeroDePlantilla = function(direccion) {
-            if (typeof funcionPaginadorOriginal === "function") {
-                funcionPaginadorOriginal(direccion);
+            // Disparamos la actualización analítica con la ID que esté activa en ese instante
+            if (idJugadorFisico) {
+                ejecutarInyeccionExactaDePistasYRanking(idJugadorFisico, pestana);
             }
-            
-            // Sincronizamos las flechas laterales: forzamos a ejecutar el cargador relacional
-            // inmediatamente después de mover las flechas, asegurando la actualización al vuelo.
-            setTimeout(function() {
-                var activeTabButton = document.querySelector('.submenu-lineal .sub-tab-btn.active');
-                var currentTabName = activeTabButton ? activeTabButton.id.replace('tab-jug-', '') : 'datos';
-                conmutarPestañasInternasFichaJugador(currentTabName);
-            }, 150);
-        };
+        }
 
 
 
@@ -931,74 +861,212 @@
 
 
 
-
-
-
- 
-
+         // =======================================================================
+        // 💾 FASE 2: GRABADOR BIOMÉTRICO CON AUTOSYNC INMEDIATO (ANTI-CAMPOS VACÍOS)
         // =======================================================================
-        // 📄 HOJA B - PARTE 2: GUARDADO BIOMÉTRICO Y INTERCEPTOR DE PAGINACIÓN
-        // =======================================================================
-        
-        // 🎯 PASARELA DE EDICIÓN QUIRÚRGICA DIRECTA CON AUTOSYNC
         function guardarDatosPersonalesJugadorMySQL() {
+            // Localizamos la ID física real del futbolista cargado en tu lona
             var inputIdDOM = document.getElementById('jug-form-id-real-mysql') || document.getElementById('form-jug-id');
-            var idJugadorFinalQuery = inputIdDOM ? parseInt(inputIdDOM.value) : window.idJugadorActivoFicha;
+            var modalMaestro = document.getElementById('modal-crud-jugador');
+            
+            let idJugadorFinalQuery = inputIdDOM ? parseInt(inputIdDOM.value) : null;
+            
+            // Si el input no registra valor aún, lo pescamos de forma segura del dataset nativo de la imagen
+            if (!idJugadorFinalQuery && modalMaestro && modalMaestro.dataset.jugadorCargado) {
+                var jLocal = JSON.parse(modalMaestro.dataset.jugadorCargado);
+                idJugadorFinalQuery = parseInt(jLocal.id_jugador);
+            }
 
-            if (!idJugadorFinalQuery) { alert("⚠️ No se detecta la ID del jugador."); return; }
+            if (!idJugadorFinalQuery) { 
+                alert("⚠️ Error de pasarela: No se detecta la ID física del jugador activo."); 
+                return; 
+            }
 
+            // Capturamos con total precisión los inputs de texto de tu Ficha Biométrica
             var payload = {
-                id_jugador: parseInt(idJugadorFinalQuery),
-                nombre: document.getElementById('jug-form-nombre-biom').value,
-                edad: parseInt(document.getElementById('jug-form-edad-biom').value) || 20,
-                altura: parseFloat(document.getElementById('jug-form-altura-biom').value) || 1.80,
-                peso: parseFloat(document.getElementById('jug-form-peso-biom') ? document.getElementById('jug-form-peso-biom').value : 75.00),
-                demarcacion: document.getElementById('jug-form-demarcacion-biom').value
+                id_jugador: idJugadorFinalQuery,
+                nombre: document.getElementById('jug-form-nombre-biom') ? document.getElementById('jug-form-nombre-biom').value : "",
+                apellidos: document.getElementById('jug-form-apellidos-biom') ? document.getElementById('jug-form-apellidos-biom').value : "",
+                edad: document.getElementById('jug-form-edad-biom') ? parseInt(document.getElementById('jug-form-edad-biom').value) || 20 : 20,
+                altura: document.getElementById('jug-form-altura-biom') ? parseFloat(document.getElementById('jug-form-altura-biom').value) || 1.80 : 1.80,
+                peso: document.getElementById('jug-form-peso-biom') ? parseFloat(document.getElementById('jug-form-peso-biom').value) || 75.00 : 75.00,
+                demarcacion: document.getElementById('jug-form-demarcacion-biom') ? document.getElementById('jug-form-demarcacion-biom').value : "DEF",
+                caracteristica: document.getElementById('jug-form-caracteristica-biom') ? document.getElementById('jug-form-caracteristica-biom').value : "",
+                observaciones: document.getElementById('jug-form-observaciones-biom') ? document.getElementById('jug-form-observaciones-biom').value : ""
             };
 
+            console.log("💾 Grabando cambios biométricos en MySQL Workbench para ID: " + idJugadorFinalQuery);
+
             fetch('http://localhost:3000/api/jugadores/guardar-biometria', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             })
             .then(function(res) { return res.json(); })
-            .then(function() {
-                alert("💾 ¡Ficha Guardada! Los cambios se han grabado físicamente en tu MySQL Workbench.");
+            .then(function(data) {
+                alert(`💾 ¡Ficha de ${payload.nombre} Guardada Exitosamente!\nLos cambios se han grabado físicamente en tu base de datos.`);
                 
-                // Actualizamos el objeto local en el dataset para que tu programa original asimile la modificación en caliente
-                var modalElemento = document.getElementById('modal-crud-jugador');
-                if (modalElemento && modalElemento.dataset.jugadorCargado) {
-                    var jAct = JSON.parse(modalElemento.dataset.jugadorCargado);
-                    jAct.nombre = payload.nombre; jAct.edad = payload.edad; jAct.altura = payload.altura; jAct.peso = payload.peso; jAct.posicion = payload.demarcacion;
-                    modalElemento.dataset.jugadorCargado = JSON.stringify(jAct);
+                // 🎯 EL TRUCO DEL REFRESCO EN CALIENTE:
+                // Actualizamos el dataset local en caliente para que tu paginador horizontal 
+                // asimile las modificaciones al instante y no ande arrastrando nulos antiguos
+                if (modalMaestro && modalMaestro.dataset.jugadorCargado) {
+                    var jAct = JSON.parse(modalMaestro.dataset.jugadorCargado);
+                    jAct.nombre = payload.nombre;
+                    jAct.apellidos = payload.apellidos;
+                    jAct.edad = payload.edad;
+                    jAct.altura = payload.altura;
+                    jAct.peso = payload.peso;
+                    jAct.posicion = payload.demarcacion;
+                    jAct.caracteristica = payload.caracteristica;
+                    jAct.observaciones = payload.observaciones;
+                    modalMaestro.dataset.jugadorCargado = JSON.stringify(jAct);
                 }
 
-                // Refrescamos la lona para consolidar los cambios en pantalla
+                // Forzamos al conmutador unificado a refrescar la pestaña actual para consolidar textos
                 var activeTabButton = document.querySelector('.submenu-lineal .sub-tab-btn.active');
                 var currentTabName = activeTabButton ? activeTabButton.id.replace('tab-jug-', '') : 'datos';
-                conmutarPestañasInternasFichaJugador(currentTabName);
+                
+                if (typeof conmutarPestañasInternasFichaJugador === "function") {
+                    conmutarPestañasInternasFichaJugador(currentTabName);
+                }
             })
-            .catch(function(err) { console.error("Error en guardado:", err); });
+            .catch(function(err) { 
+                console.error("🔴 Error crítico en la pasarela de guardado POST:", err); 
+                alert("⚠️ Error al grabar los datos en el servidor.");
+            });
         }
 
+
+           // =======================================================================
+        // ⚡ RE-ACOPLAMIENTO DE PAGINACIÓN: AUTO-REFRESCO FIEL CON COMPATIBILIDAD NATIVA
         // =======================================================================
-        // ⚡ RE-ACOPLAMIENTO DE PAGINACIÓN: AUTO-REFRESCO AL PULSAR SIGUIENTE / ANTERIOR
-        // =======================================================================
+        // Guardamos de forma segura la función paginadora original de tu carrusel
         var funcionPaginadorOriginal = window.navegarAlSiguienteCompañeroDePlantilla;
+        
         window.navegarAlSiguienteCompañeroDePlantilla = function(direccion) {
+            console.log("🔄 Flecha Horizontal Pulsada -> Moviendo carrusel hacia dirección: " + direccion);
+            
+            // 1. Ejecutamos tu paginación nativa intacta. Esto hará que tu programa original
+            // llame a 'viajarAlPerfilDetalladoDelJugador', haga el fetch de partidos y cambie la foto.
             if (typeof funcionPaginadorOriginal === "function") {
                 funcionPaginadorOriginal(direccion);
             }
             
-            // Sincronizamos las flechas laterales de forma 100% aislada:
-            // Inmediatamente después de que tu paginador mueva la ficha, disparamos
-            // el cargador dinámico unificado para repoblar los campos input y tarjetas
-            // con el nuevo futbolista activo sin tocar ni romper tus estadísticas de partidos.
-            setTimeout(function() {
+            // 2. 🛡️ SEGURO DE RECARGA DIRECTA: Para garantizar el refresco instantáneo al pasar,
+            // interceptamos la ID que tu paginador acaba de inyectar en la variable global del perfil
+            // y obligamos a las sub-pestañas a limpiarse y actualizarse al unísono.
+            var idJugadorNuevoEnCarrusel = window.idJugadorSeleccionadoPerfil || window.id_jugador;
+            
+            if (idJugadorNuevoEnCarrusel) {
+                // Buscamos cuál es la pestaña que el míster tiene activa en este instante en la pantalla
                 var activeTabButton = document.querySelector('.submenu-lineal .sub-tab-btn.active');
                 var currentTabName = activeTabButton ? activeTabButton.id.replace('tab-jug-', '') : 'datos';
-                conmutarPestañasInternasFichaJugador(currentTabName);
-            }, 150);
+                
+                console.log("✈️ Pasarela Paginador -> Forzando recarga síncrona para la ID: " + idJugadorNuevoEnCarrusel);
+                
+                // Disparamos la inyección exacta erradicando por completo el congelamiento del futbolista anterior
+                if (typeof ejecutarInyeccionExactaDePistasYRanking === "function") {
+                    ejecutarInyeccionExactaDePistasYRanking(idJugadorNuevoEnCarrusel, currentTabName);
+                }
+            }
         };
 
+        // =======================================================================
+        // 📄 PARTE 1: RE-INYECTOR UNIFICADO DE ACTAS Y REPOBLADOR BIOMÉTRICO
+        // =======================================================================
+        function ejecutarInyeccionExactaDePistasYRanking(idJugadorFisico, pestanaActual) {
+            console.log("✈️ Fetch Actas -> Descargando rendimiento real para ID: " + idJugadorFisico);
+            
+            // Reseteamos marcadores superiores a estado de carga para no arrastrar congelados
+            if (document.getElementById('ent-stats-puntos-jugador')) document.getElementById('ent-stats-puntos-jugador').innerText = "⏳";
+            if (document.getElementById('ent-stats-asistencias-jugador')) document.getElementById('ent-stats-asistencias-jugador').innerText = "⏳";
+            if (document.getElementById('ent-stats-faltas-jugador')) document.getElementById('ent-stats-faltas-jugador').innerText = "⏳";
+
+            fetch('http://localhost:3000/api/jugadores/rendimiento-entrenamientos/' + idJugadorFisico)
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (!data || data.puntosTotales === undefined) return;
+
+                    // 🌟 A. REPOBLADO AUTOMÁTICO DE LOS INPUTS PERSONALES AL PINCHAR LA IMAGEN (EVITA HOJAS EN BLANCO)
+                    if (document.getElementById('jug-form-id-real-mysql')) document.getElementById('jug-form-id-real-mysql').value = data.id_jugador;
+                    if (document.getElementById('jug-form-nombre-biom')) document.getElementById('jug-form-nombre-biom').value = data.nombre || "";
+                    if (document.getElementById('jug-form-edad-biom')) document.getElementById('jug-form-edad-biom').value = data.edad || "";
+                    if (document.getElementById('jug-form-altura-biom')) document.getElementById('jug-form-altura-biom').value = data.altura || "";
+                    if (document.getElementById('jug-form-peso-biom')) document.getElementById('jug-form-peso-biom').value = data.peso || "";
+                    if (document.getElementById('jug-form-demarcacion-biom')) document.getElementById('jug-form-demarcacion-biom').value = data.posicion || "DEF";
+                    if (document.getElementById('jug-form-caracteristica-biom')) document.getElementById('jug-form-caracteristica-biom').value = data.caracteristica || "";
+                    if (document.getElementById('jug-form-observaciones-biom')) document.getElementById('jug-form-observaciones-biom').value = data.observaciones || "";
+
+                    // 🌟 B. LLENADO REAL DE LAS TRES TARJETAS DIGITALES SUPERIORES EN LA PESTAÑA ENTRENOS
+                    if (pestanaActual === 'entrenos') {
+                        if (document.getElementById('ent-stats-puntos-jugador')) {
+                            document.getElementById('ent-stats-puntos-jugador').innerText = parseFloat(data.puntosTotales).toFixed(2);
+                        }
+                        if (document.getElementById('ent-stats-asistencias-jugador')) {
+                            document.getElementById('ent-stats-asistencias-jugador').innerText = data.asistencias;
+                        }
+                        if (document.getElementById('ent-stats-faltas-jugador')) {
+                            document.getElementById('ent-stats-faltas-jugador').innerText = data.faltas;
+                        }
+                    }
+
+                    // Pasamos el flujo al pintor dinámico del podio de la Parte 2
+                    ejecutarDibujadoDePodioDinamicoSinClones(data, idJugadorFisico);
+                })
+                .catch(function(err) { console.error("🔴 Error en pasarela analítica relacional:", err); });
+        }
+
+        // =======================================================================
+        // 📄 PARTE 2: PINTOR DINÁMICO ELÁSTICO DEL PODIO SIN COMPONENTES FIJOS
+        // =======================================================================
+        function ejecutarDibujadoDePodioDinamicoSinClones(data, idJugadorFisico) {
+            var cajaRankingPodio = document.getElementById('nodo-estanco-ranking-puntos-vestuario');
+            if (!cajaRankingPodio) return;
+
+            let puestoRealGrid = parseInt(data.rankingPuesto) || 1; 
+            let totalVestuario = data.rankingTotal || 20;
+            let mediaDeEntrenamientosReal = parseFloat(data.mediaPuntos || 0).toFixed(2);
+            var ptsAcumuladosFila = parseFloat(data.puntosTotales) || 0;
+
+            // Pescamos las filas de asistencia ordenadas que inyecta tu ruta de server.js
+            var listaFilasServidor = Array.isArray(data.rowsVestuario) ? data.rowsVestuario : [];
+            let htmlFilasDinamicas = "";
+
+            listaFilasServidor.forEach(function(fila, index) {
+                let puestoLoop = index + 1;
+                let esElActivo = (fila.id_jugador === idJugadorFisico);
+                
+                let colorTexto = esElActivo ? "#ff9900" : "#aaa";
+                let grosor = esElActivo ? "bold" : "normal";
+                let colorPts = esElActivo ? "#00CC66" : "#fff";
+                let borde = esElActivo ? "border-top:1px solid #222; border-bottom:1px solid #222; padding:3px 0;" : "";
+
+                // Mostramos los 3 primeros puestos del podio del club actual y forzamos a mostrar
+                // al jugador seleccionado en su posición exacta si quedó más abajo en la tabla
+                if (puestoLoop <= 3 || esElActivo) {
+                    htmlFilasDinamicas += `
+                        <div style="display:flex; justify-content:space-between; color:${colorTexto}; font-weight:${grosor}; background: transparent; ${borde}">
+                            <span style="background: transparent;">${puestoLoop}. ${fila.nombre} ${esElActivo ? '(Tú)' : ''}</span> 
+                            <strong style="background: transparent; color:${colorPts};">${parseFloat(fila.puntos_entrenamiento_totales || 0).toFixed(2)} Pts</strong>
+                        </div>`;
+                }
+            });
+
+            // Re-pintamos de golpe la lona del escalafón de tu monitor
+            cajaRankingPodio.innerHTML = `
+                <h5 style="color:#fff; margin:0 0 10px 0; font-size:11px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:4px; background: transparent;">🏆 Ranking Puntos (Escalafón del Vestuario)</h5>
+                <div style="display:flex; flex-direction:column; gap:6px; font-size:10px; background: transparent; width: 100%;">
+                    
+                    <!-- Aquí se inyectan las filas ordenadas de tu base de datos de MySQL -->
+                    ${htmlFilasDinamicas}
+
+                    <!-- El marcador de pie dinámico con tus medias reales calculadas por tu Query -->
+                    <div style="font-size:9px; color:#888; margin-top:6px; line-height:1.3; background:transparent; border-top:1px solid #1a1a1a; padding-top:4px;">
+                        Puesto <span style="color:#00CC66; font-weight:bold; background:transparent;">${puestoRealGrid}º de ${totalVestuario}</span> en el club. Media: <span style="color:#ff9900; font-weight:bold; background:transparent;">${mediaDeEntrenamientosReal} Pts</span> por sesión de pizarra.
+                    </div>
+                </div>
+            `;
+        }
 
 
 
@@ -3965,11 +4033,8 @@ if (subSeccion !== 'entrenamientos') {
         // =======================================================================
         let idJugadorSeleccionadoPerfil = null;
 
-               // =======================================================================
-        // FUNCIÓN PERFIL CORREGIDA: INMUNE A REFERENCEERROR Y CON RUTA DE FOTO REAL
-        // =======================================================================
-               // =======================================================================
-        // FUNCIÓN PERFIL DEFINITIVA: INMUNE A ERRORES Y CON IMAGEN BLINDADA FIJA
+             // =======================================================================
+        // 📸 FUNCIÓN NATIVA REPARADA CON DISPARADOR AUTOMÁTICO DE EXPEDIENTES
         // =======================================================================
         function viajarAlPerfilDetalladoDelJugador(id_jugador) {
             idJugadorSeleccionadoPerfil = id_jugador;
@@ -3988,35 +4053,43 @@ if (subSeccion !== 'entrenamientos') {
             fetch('http://localhost:3000/api/jugadores/detalle/' + id_jugador)
                 .then(res => res.json())
                 .then(data => {
-                    let j = Array.isArray(data) ? data : data;
+                    let j = Array.isArray(data) ? data[0] : data; // Forzamos desempaquetado si MySQL Workbench devuelve matriz
                     if (!j) return;
 
                     // 1. Rellenamos la tarjeta de identidad izquierda
-                    document.getElementById('det-jug-nombre-cabecera').innerText = `🏃 Perfil: ${j.nombre}`;
-                    document.getElementById('det-jug-nombre-completo').innerText = j.nombre;
-                    document.getElementById('det-jug-posicion').innerText = j.posicion;
-                    document.getElementById('det-jug-dorsal').innerText = j.dorsal || "0";
+                    if(document.getElementById('det-jug-nombre-cabecera')) document.getElementById('det-jug-nombre-cabecera').innerText = ` Perfil: ${j.nombre}`;
+                    if(document.getElementById('det-jug-nombre-completo')) document.getElementById('det-jug-nombre-completo').innerText = j.nombre;
+                    if(document.getElementById('det-jug-posicion')) document.getElementById('det-jug-posicion').innerText = j.posicion;
+                    if(document.getElementById('det-jug-dorsal')) document.getElementById('det-jug-dorsal').innerText = j.dorsal || "0";
                     
                     // PASARELA DIRECTA MULTIMEDIA: Limpia comillas e inyecta en la etiqueta <img> blindada
                     let imgReal = document.getElementById('det-jug-foto-imagen-real');
                     if (imgReal) {
                         let nombreArchivoImagen = j.foto_ruta || j.foto || "silueta.jpg";
                         nombreArchivoImagen = nombreArchivoImagen.replace(/['"]+/g, ''); // Limpia las comillas residuales &quot;
-                        
                         console.log("🎯 Cargando imagen : " + nombreArchivoImagen);
                         imgReal.src = `http://localhost:3000/fotos/${nombreArchivoImagen}`;
                     }
 
                     // 2. Inyectamos las estadísticas acumuladas reales de tu MySQL Workbench
-                    document.getElementById('stat-jug-pts-totales').innerText = parseFloat(j.puntos_totales || 0).toFixed(1);
-                    document.getElementById('stat-jug-pts-media').innerText = parseFloat(j.puntos_media || 0).toFixed(1) + " Pts";
-                    document.getElementById('stat-jug-partidos').innerText = j.partidos_jugados || 0;
-                    document.getElementById('stat-jug-goles').innerText = j.goles_totales || 0;
-                    document.getElementById('stat-jug-tarjetas').innerText = `${j.amarillas_totales || 0} 🟨 / ${j.rojas_totales || 0} 🟥`;
-                    document.getElementById('stat-jug-minutos').innerText = (j.minutos_totales || 0) + "'";
+                    if(document.getElementById('stat-jug-pts-totales')) document.getElementById('stat-jug-pts-totales').innerText = parseFloat(j.puntos_totales || 0).toFixed(1);
+                    if(document.getElementById('stat-jug-pts-media')) document.getElementById('stat-jug-pts-media').innerText = parseFloat(j.puntos_media || 0).toFixed(1) + " Pts";
+                    if(document.getElementById('stat-jug-partidos')) document.getElementById('stat-jug-partidos').innerText = j.partidos_jugagedos || j.partidos_jugados || 0;
+                    if(document.getElementById('stat-jug-goles')) document.getElementById('stat-jug-goles').innerText = j.goles_totales || 0;
+                    if(document.getElementById('stat-jug-tarjetas')) document.getElementById('stat-jug-tarjetas').innerText = `${j.amarillas_totales || 0} 🟨 / ${j.rojas_totales || 0} 🟥`;
+                    if(document.getElementById('stat-jug-minutos')) document.getElementById('stat-jug-minutos').innerText = (j.minutos_totales || 0) + "'";
 
                     // Almacenamos el objeto completo para que el formulario de edición pueda precargar los inputs
-                    document.getElementById('modal-crud-jugador').dataset.jugadorCargado = JSON.stringify(j);
+                    var elModalMaestro = document.getElementById('modal-crud-jugador');
+                    if (elModalMaestro) {
+                        elModalMaestro.dataset.jugadorCargado = JSON.stringify(j);
+                    }
+
+                    // 🎯 EL DISPARADOR DE ORO: Obligamos a los casilleros de Datos Personales y al Ranking 
+                    // a auto-cargarse al vuelo en este mismo microsegundo con los datos de Trent recién bajados
+                    if (typeof conmutarPestañasInternasFichaJugador === "function") {
+                        conmutarPestañasInternasFichaJugador('datos'); 
+                    }
 
                     // 3. Renderizador de accesos directos a partidos disputados
                     let boxLinksPartidos = document.getElementById('perfil-jugador-lista-partidos-links');
@@ -4026,9 +4099,7 @@ if (subSeccion !== 'entrenamientos') {
                             j.historial_partidos.forEach(function(partido) {
                                 let btnPartido = document.createElement('button');
                                 btnPartido.className = 'btn-g';
-                                btnPartido.style.background = 'rgba(255,255,255,0.03)'; btnPartido.style.border = '1px solid #333';
-                                btnPartido.style.color = '#fff'; btnPartido.style.padding = '10px'; btnPartido.style.borderRadius = '6px';
-                                btnPartido.style.fontSize = '12px'; btnPartido.style.fontWeight = 'bold'; btnPartido.style.cursor = 'pointer';
+                                btnPartido.style.cssText = "background:rgba(255,255,255,0.03); border:1px solid #333; color:#fff; padding:10px; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer;";
                                 btnPartido.innerText = `${partido.equipo_local} ${partido.goles_local} - ${partido.goles_visitante} ${partido.equipo_visitante}`;
 
                                 btnPartido.onclick = function() {
@@ -4044,6 +4115,7 @@ if (subSeccion !== 'entrenamientos') {
                 })
                 .catch(err => console.error("Error al compilar el historial del futbolista:", err));
         }
+
 
 
 
@@ -7349,7 +7421,44 @@ function resetearFormularioYBotonesAccion() {
                 funcionConmutarOriginal(pestana);
             }
         };
-  
+          // =======================================================================
+        // 📄 HOJA A: FORMATEADOR Y REPOBLADOR BIOMÉTRICO (ANTI-CAMPOS VACÍOS)
+        // =======================================================================
+        function repoblarCamposFormularioFichaNativa(jugadorActivo) {
+            if (!jugadorActivo) { console.error("⚠️ No hay datos del jugador para repoblar."); return; }
+            console.log("🎨 Repoblando ficha de inicio para: " + jugadorActivo.nombre);
+
+            // Mapeamos milimétricamente cada celda de tu base de datos con los inputs de tu pantalla
+            if (document.getElementById('jug-form-id-real-mysql')) {
+                document.getElementById('jug-form-id-real-mysql').value = jugadorActivo.id_jugador || "";
+            }
+            if (document.getElementById('jug-form-nombre-biom')) {
+                document.getElementById('jug-form-nombre-biom').value = jugadorActivo.nombre || "";
+            }
+            if (document.getElementById('jug-form-apellidos-biom')) {
+                document.getElementById('jug-form-apellidos-biom').value = jugadorActivo.apellidos || "";
+            }
+            if (document.getElementById('jug-form-edad-biom')) {
+                document.getElementById('jug-form-edad-biom').value = jugadorActivo.edad || "";
+            }
+            if (document.getElementById('jug-form-altura-biom')) {
+                document.getElementById('jug-form-altura-biom').value = jugadorActivo.altura || "";
+            }
+            if (document.getElementById('jug-form-peso-biom')) {
+                document.getElementById('jug-form-peso-biom').value = jugadorActivo.peso || "";
+            }
+            if (document.getElementById('jug-form-demarcacion-biom')) {
+                document.getElementById('jug-form-demarcacion-biom').value = jugadorActivo.posicion || "DEF";
+            }
+            if (document.getElementById('jug-form-caracteristica-biom')) {
+                document.getElementById('jug-form-caracteristica-biom').value = jugadorActivo.caracteristica || "";
+            }
+            if (document.getElementById('jug-form-observaciones-biom')) {
+                document.getElementById('jug-form-observaciones-biom').value = jugadorActivo.observaciones || "";
+            }
+        }
+ 
+
 
 </script>
 
