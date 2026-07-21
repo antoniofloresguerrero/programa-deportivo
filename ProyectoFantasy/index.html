@@ -433,6 +433,113 @@
                     </div>
                 </div>
             </div> <!-- Cierre definitivo de la cuadrícula de 2 columnas (460px 1fr) -->
+
+
+
+<!-- Pizarra de Entrenamiento-->
+
+
+<!-- =======================================================================
+     ⚔️ SECCIÓN EXCLUSIVA: PIZARRA TÁCTICA Y PREPARACIÓN DE PARTIDOS V2
+     ======================================================================= -->
+<div id="sub-sec-club-partidos-tactica" style="display: block; width: 100%; box-sizing: border-box; font-family: sans-serif; color: #fff;">
+    <div style="display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; width: 100%;">
+        
+        <!-- COLUMNA IZQUIERDA: MARCADOR INTEGRADO Y CANVAS -->
+        <div style="background: rgba(15, 15, 15, 0.85); border-radius: 10px; border: 1px solid #333; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); box-sizing: border-box;">
+            
+            <h3 style="color:#38bdf8; margin-top:0; font-size:14px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:10px; letter-spacing:0.5px;">
+                ⚔️ Planificación Táctica (Partido ID: <span id="par-txt-id-partido">Nuevo</span>)
+            </h3>
+            
+            <!-- ID oculto del partido para sincronizar los cambios -->
+            <input type="hidden" id="par-form-id-partido" value="">
+
+            <!-- Campos de Configuración del Encuentro (Jornada y Marcador en paralelo) -->
+            <div style="display: grid; grid-template-columns: 140px 1fr; gap: 15px; margin-bottom: 15px; align-items: end;">
+                <div>
+                    <label style="color:#aaa; font-size:10px; font-weight:bold; display:block; margin-bottom:4px;">Jornada:</label>
+                    <input type="number" id="par-form-jornada" value="1" min="1" readonly style="width:100%; background:#222; border:1px solid #444; color:#ff9900; padding:6px; border-radius:4px; box-sizing:border-box; font-weight:bold; text-align:center;">
+                </div>
+                
+                <!-- Bloque de Marcador con Nombres Dinámicos -->
+                <div style="display: flex; align-items: center; justify-content: center; gap: 12px; background: rgba(0,0,0,0.4); padding: 4px 15px; border-radius: 4px; border: 1px solid #222; height: 32px; box-sizing: border-box;">
+                    <!-- Nombre Local -->
+                    <span id="txt-nombre-local" style="font-size: 11px; font-weight: bold; color: #38bdf8; min-width: 100px; text-align: right; text-transform: uppercase; letter-spacing: 0.5px;">LOCAL</span>
+                    
+                    <!-- Input Gol Local -->
+                    <input type="number" id="par-form-goles-local" value="0" min="0" style="width:40px; background:#111; border:1px solid #444; color:#fff; padding:3px; text-align:center; border-radius:4px; font-weight:bold; font-size:12px;">
+                    
+                    <span style="color: #555; font-size: 10px; font-weight: bold;">VS</span>
+                    
+                    <!-- Input Gol Visitante -->
+                    <input type="number" id="par-form-goles-visitante" value="0" min="0" style="width:40px; background:#111; border:1px solid #444; color:#fff; padding:3px; text-align:center; border-radius:4px; font-weight:bold; font-size:12px;">
+                    
+                    <!-- Nombre Visitante -->
+                    <span id="txt-nombre-visitante" style="font-size: 11px; font-weight: bold; color: #dc2626; min-width: 100px; text-align: left; text-transform: uppercase; letter-spacing: 0.5px;">VISITANTE</span>
+                </div>
+            </div>
+
+            <!-- Sistema de Audio integrado -->
+            <div style="display: flex; gap: 8px; align-items: center; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 15px;">
+                <button id="btn-microfono-partido" type="button" style="background:#334155; color:#fff; padding:8px 14px; font-weight:bold; border-radius:4px; font-size:11px; cursor:pointer; border:none;" onclick="conmutarGrabacionAudioPartido()">🎤 Grabar Instrucción de Voz</button>
+                <button id="btn-reproducir-audio-partido" type="button" style="background:#ff9900; color:#000; padding:8px 14px; font-weight:bold; border-radius:4px; font-size:11px; cursor:pointer; border:none; display:none;" onclick="reproducirAudioPartidoEnMemoria()">🔊 Escuchar Dictado</button>
+                <button id="btn-eliminar-audio-partido" type="button" style="background:#ff4444; color:#fff; padding:8px 14px; font-weight:bold; border-radius:4px; font-size:11px; cursor:pointer; border:none; display:none;" onclick="borrarAudioPartidoEnMemoria()">🗑️ Eliminar Voz</button>
+                <span id="txt-estado-audio" style="font-size: 11px; color: #888;">Sin nota de voz asignada</span>
+            </div>
+
+            <!-- Caja contenedora de la Pizarra Táctica -->
+            <div style="margin: 15px 0; background: rgba(20, 25, 35, 0.85); border-radius: 8px; border: 1px solid #38bdf8; padding: 15px; box-sizing: border-box; width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <strong style="color:#38bdf8; font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">📋 Pizarra de Alineación y Movimientos Tácticos</strong>
+                    <button class="btn-g" type="button" style="background:#ff4444; color:#fff; border:none; padding:4px 12px; font-size:10px; font-weight:bold; border-radius:3px; cursor:pointer;" onclick="limpiarPizarraPartidoActivo()">🧹 Borrar Todo</button>
+                </div>
+                <div style="display: flex; gap: 12px; background: #0f172a; padding: 10px; border-radius: 6px; box-sizing: border-box;">
+                    <!-- BARRA DE HERRAMIENTAS LATERAL ESTILO PAINT (Con más separación vertical) -->
+                    <div id="pizarra-partido-toolbar" style="display: flex; flex-direction: column; gap: 10px; background: rgba(30, 41, 59, 0.7); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); min-width: 135px; box-sizing: border-box;">
+                        <span style="color:#aaa; font-size:9px; font-weight:bold; text-transform:uppercase; text-align:center; display:block; border-bottom:1px solid #444; padding-bottom:6px;">Trazados</span>
+                        <button id="par-tool-trazo" class="btn-g active" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:10px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('trazo', this)">✏️ Línea Pase</button>
+                        <button id="par-tool-goma" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:10px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('goma', this)">🧽 Goma</button>
+                        
+                        <span style="color:#aaa; font-size:9px; font-weight:bold; text-transform:uppercase; text-align:center; display:block; border-bottom:1px solid #444; padding:6px 0 4px 0;">Plantilla</span>
+                        <button id="par-tool-local" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:10px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('jugador-local', this)">🔵 Nuestro XI</button>
+                        <button id="par-tool-rival" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:10px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('jugador-visitante', this)">🔴 Rival</button>
+                        <button id="par-tool-balon" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:10px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('balon', this)">⚽ Balón</button>
+                    </div>
+
+                    <!-- EL LIENZO DEL CANVAS -->
+                    <canvas id="pizarra-canvas-partido" width="750" height="460" style="flex-grow:1; border: 1px solid #334155; border-radius: 4px; cursor: crosshair; background: #1e3a1e;"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- COLUMNA DERECHA: REGISTRO Y PREPARACIÓN DE ACCIONES (MYSQL) -->
+        <div style="background: rgba(15, 15, 15, 0.85); border-radius: 10px; border: 1px solid #333; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); box-sizing: border-box; height: 100%;">
+            <strong style="color:#ff9900; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">💾 Control de Guardado</strong>
+            <small style="color:#888; font-size:10px; display:block; margin-bottom:15px;">Guarda la estrategia y el dictado de audio para este partido en la base de datos.</small>
+            
+            <button type="button" style="width:100%; background:#38bdf8; color:#000; font-weight:bold; font-size:12px; padding:10px; border-radius:4px; border:none; cursor:pointer; margin-bottom:10px;" onclick="guardarInformeTacticoPartidoMySQL()">💾 Sincronizar con Base de Datos</button>
+            
+            <div style="border-top: 1px solid #333; padding-top:15px; margin-top:5px;">
+                <span style="color:#aaa; font-size:10px; font-weight:bold; display:block; margin-bottom:4px;">Estatus Relacional:</span>
+                <p style="color:#888; font-size:11px; margin:0; line-height:1.4;">La pizarra se acopla de manera automática al partido que selecciones en tu carrusel superior.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    #pizarra-partido-toolbar .btn-g.active { background: #38bdf8 !important; color: #000 !important; border-color: #38bdf8 !important; font-weight: bold; }
+    .btn-partido-item { transition: all 0.2s ease; }
+    .btn-partido-item:hover { background: #22d3ee !important; color: #000 !important; border-color: #22d3ee !important; }
+</style>
+
+
+
+<!-- Fin Pizarra de Entrenamiento-->
+
+
         </div> <!-- Cierre de la sección sec-partidos -->
 
 
@@ -1247,46 +1354,7 @@
                     <!-- Se rellena dinámicamente con los encuentros del club -->
                 </div>
             </div>
-        
-        <!--
-           
-    <button class="btn-g" style="background:#334155; color:#fff; padding:6px 15px; font-size:11px; font-weight:bold; border-radius:4px; cursor:pointer;" 
-            onclick="
-                let panelEntrenamiento = document.getElementById('sub-sec-club-entrenamientos-nativo');
-                if(panelEntrenamiento) panelEntrenamiento.style.display = 'none';
-                
-                let lonaFichaClub = document.getElementById('sec-ficha-equipo') || document.getElementById('ficha-equipo');
-                if(lonaFichaClub) {
-                    let bloquesHijos = lonaFichaClub.children;
-                    for(let i=0; i < bloquesHijos.length; i++) {
-                        if(bloquesHijos[i].id !== 'sub-sec-club-entrenamientos-nativo' && bloquesHijos[i].tagName !== 'DIV') {
-                            bloquesHijos[i].style.setProperty('display', 'block', 'important');
-                        }
-                    }
-                }
-            ">📋 Datos Generales</button>
-            
-    
-    <button class="btn-g" style="background:#00CC66; color:#000; padding:6px 15px; font-size:11px; font-weight:bold; border-radius:4px; cursor:pointer;" 
-            onclick="
-                let lonaFichaClub2 = document.getElementById('sec-ficha-equipo') || document.getElementById('ficha-equipo');
-                if(lonaFichaClub2) {
-                    let bloquesHijos2 = lonaFichaClub2.children;
-                    for(let i=0; i < bloquesHijos2.length; i++) {
-                        if(bloquesHijos2[i].id !== 'sub-sec-club-entrenamientos-nativo' && bloquesHijos2[i].tagName !== 'DIV') {
-                            bloquesHijos2[i].style.setProperty('display', 'none', 'important');
-                        }
-                    }
-                }
-                
-                let panelEntrenamiento2 = document.getElementById('sub-sec-club-entrenamientos-nativo');
-                if(panelEntrenamiento2) panelEntrenamiento2.style.setProperty('display', 'block', 'important');
-                
-                // Pasarela elástica: Disparamos la carga limpia de la pizarra y la plantilla relacional
-                if(typeof inicializarMóduloEntrenamientos === 'function') inicializarMóduloEntrenamientos();
-            ">🏃 Plan de Entrenamiento</button>
-</div>
--->
+              
 
 
 <!-- =======================================================================
@@ -1482,6 +1550,7 @@
 
 </div>
 
+</div>
 
 
      
@@ -1895,7 +1964,13 @@
                     contenedor.appendChild(btn);
                 });
             }).catch(err => console.error("Error al listar pastillas de partidos:", err));
-    }
+    
+  
+
+        }
+
+
+
  function abrirPartidoEspecificoDesdeBD(p) {
         if (!p) return;
         partidoSeleccionadoActual = p;
@@ -1937,6 +2012,21 @@
         });
         
         cargarDetalleActaYListas(p.id_partido);
+     
+            // 🎯 ENGANCHE PERFECTO CORREGIDO: Extrae el ID numérico limpio del objeto nativo 'p'
+    if (typeof buscarYCargarPartidoEspecifico === "function" && p) {
+        // Buscamos todas las variantes posibles donde tu objeto pueda guardar el número de ID
+        const idLimpioYReal = p.id_partido || p.id || (typeof p === 'number' ? p : null);
+        
+        if (idLimpioYReal) {
+            buscarYCargarPartidoEspecifico(idLimpioYReal);
+        } else {
+            console.warn("⚠️ La pizarra no pudo extraer un ID numérico válido del objeto de partido:", p);
+        }
+    }
+
+
+    
     }
 
 
@@ -3628,6 +3718,97 @@ if (subSeccion !== 'entrenamientos') {
 
             campo.appendChild(divJ);
             configurarArrastreBalonPizarra();
+        }
+
+
+
+  
+
+        // Trazador matemático puro: dibuja el estadio directamente en el pixel
+        function redibujarEstadioBaseJavaScript() {
+            if (!ctxReset || !cvReset) return;
+            ctxReset.strokeStyle = "rgba(255, 255, 255, 0.4)";
+            ctxReset.lineWidth = 2;
+            ctxReset.globalCompositeOperation = 'source-over';
+
+            ctxReset.strokeRect(20, 20, cvReset.width - 40, cvReset.height - 40);
+            let medioX = cvReset.width / 2;
+            ctxReset.beginPath(); ctxReset.moveTo(medioX, 20); ctxReset.lineTo(medioX, cvReset.height - 20); ctxReset.stroke();
+            ctxReset.beginPath(); ctxReset.arc(medioX, cvReset.height / 2, 55, 0, 2 * Math.PI); ctxReset.stroke();
+
+            // Áreas Locales (L) y Visitantes (V) cerradas impecables
+            ctxReset.strokeRect(20, cvReset.height / 2 - 90, 75, 180);
+            ctxReset.strokeRect(20, cvReset.height / 2 - 45, 25, 90);
+            ctxReset.strokeRect(cvReset.width - 95, cvReset.height / 2 - 90, 75, 180);
+            ctxReset.strokeRect(cvReset.width - 45, cvReset.height / 2 - 45, 25, 90);
+        }
+
+        function configurarEscuchadoresTrazosReset() {
+            if (!cvReset) return;
+            
+            cvReset.addEventListener('mousedown', function(e) {
+                let r = cvReset.getBoundingClientRect();
+                let x = e.clientX - r.left;
+                let y = e.clientY - r.top;
+
+                if (toolReset === 'lapiz' || toolReset === 'goma') {
+                    drawReset = true;
+                    ctxReset.beginPath(); ctxReset.moveTo(x, y);
+                }
+            });
+
+            cvReset.addEventListener('mousemove', function(e) {
+                if (!drawReset || !ctxReset) return;
+                let r = cvReset.getBoundingClientRect();
+                let x = e.clientX - r.left;
+                let y = e.clientY - r.top;
+
+                if (toolReset === 'lapiz') {
+                    ctxReset.strokeStyle = '#ff9900'; // Tu trazo táctico naranja vistoso
+                    ctxReset.lineWidth = 3;
+                    ctxReset.globalCompositeOperation = 'source-over';
+                    ctxReset.lineTo(x, y); ctxReset.stroke();
+                } else if (toolReset === 'goma') {
+                    // Borrado transparente circular: elimina flechas sin tocar el fondo verde
+                    ctxReset.clearRect(x - 12, y - 12, 24, 24);
+                    redibujarEstadioBaseJavaScript(); // Sella las líneas por si pasas la goma encima
+                }
+            });
+
+            cvReset.addEventListener('mouseup', function() { drawReset = false; });
+            cvReset.addEventListener('mouseleave', function() { drawReset = false; });
+        }
+
+        // 🎯 MOTOR DRAG & DROP HTML5: Mueve tus petos libremente flotando sobre el estadio
+        function configurarArrastreFichasHTML() {
+            var fichas = document.querySelectorAll('.ficha-tactica-drag');
+            var contenedor = document.getElementById('contenedor-estadio-reset-capas');
+            if (!contenedor) return;
+
+            fichas.forEach(function(ficha) {
+                ficha.addEventListener('dragstart', function(e) {
+                    e.dataTransfer.setData('text/plain', ficha.id);
+                    ficha.style.opacity = '0.4';
+                });
+                ficha.addEventListener('dragend', function() { ficha.style.opacity = '1'; });
+            });
+
+            contenedor.addEventListener('dragover', function(e) { e.preventDefault(); });
+            
+            contenedor.addEventListener('drop', function(e) {
+                e.preventDefault();
+                var idFicha = e.dataTransfer.getData('text/plain');
+                var elemento = document.getElementById(idFicha);
+                if (!elemento) return;
+
+                var r = contenedor.getBoundingClientRect();
+                var x = e.clientX - r.left - 13; // Centramos la ficha redonda en el ratón
+                var y = e.clientY - r.top - 13;
+
+                elemento.style.left = x + 'px';
+                elemento.style.top = y + 'px';
+                console.log(`📌 Ficha [${idFicha}] reposicionada en Capa B -> X: ${x} Y: ${y}`);
+            });
         }
 
 
@@ -5370,10 +5551,7 @@ if (subSeccion !== 'entrenamientos') {
 
         
 
-
        
-
-        
         // =======================================================================
         // ⭐ MOTOR PREMIUM PARTE 4: PIZARRA DE OBJETOS VECTORIALES Y BASE DE DATOS
         // =======================================================================
@@ -5452,8 +5630,7 @@ if (subSeccion !== 'entrenamientos') {
 
 
 
-            canvas.onmousedown = arrancarAccion; canvas.onmouseup = terminarAccion; canvas.onmousemove = moverAccion;
-            canvas.ontouchstart = arrancarAccion; canvas.ontouchend = terminarAccion; canvas.ontouchmove = moverAccion;
+          
       
 
            
@@ -6385,12 +6562,6 @@ function resetearFormularioYBotonesAccion() {
      
 
         function modificarSesionEntrenamientoMySQL() { guardarNuevoEntrenamientoMySQL(); }
-
-     
-
-
-
-
 
    
 
@@ -7458,6 +7629,651 @@ function resetearFormularioYBotonesAccion() {
             }
         }
  
+
+//
+        // pizarra de entrenamiento desde aqui
+//
+
+
+// =======================================================================
+// VARIABLES GLOBALES DE AUDIO (MEDIA RECORDER PARA NOTAS VERBALES)
+// =======================================================================
+let grabadorMediosPartido = null;
+let fragmentosAudioPartido = [];
+let cadenaAudioBase64Global = ""; // Guarda el audio final en formato Base64 para MySQL
+
+// =======================================================================
+// MOTOR GRÁFICO DE LA PIZARRA TÁCTICA
+// =======================================================================
+class MotorPizarraPartidos {
+    constructor(canvasId, toolbarId) {
+        this.canvas = document.getElementById(canvasId);
+        if (!this.canvas) return;
+        
+        this.ctx = this.canvas.getContext('2d');
+        this.toolbar = document.getElementById(toolbarId);
+        
+        // Estados lógicos de control
+        this.herramientaActiva = 'trazo'; 
+        this.dibujando = false;
+        this.objetoArrastrandose = null;
+        
+        // Estilos del pincel y goma de borrar trazos
+        this.colorPincel = '#FFFFFF'; 
+        this.grosorPincel = 3;
+        this.grosorGoma = 25;
+
+        // Base de datos volátil en memoria local
+        this.elementosInteractivos = []; // Contiene fichas y balones
+        this.trazosPintura = [];         // Contiene las líneas del lápiz
+
+        this.inicializarEventos();
+        this.redibujarLienzoCompleto();
+    }
+
+    /**
+     * Enlaza los escuchadores para capturar ratón y eventos multitáctiles
+     */
+    inicializarEventos() {
+        // --- EVENTOS CON RATÓN (ORDENADOR) ---
+        this.canvas.addEventListener('mousedown', (e) => this.alIniciarPresion(this.obtenerCoordenadas(e)));
+        this.canvas.addEventListener('mousemove', (e) => this.alMoverPresion(this.obtenerCoordenadas(e)));
+        this.canvas.addEventListener('mouseup', () => this.alFinalizarPresion());
+        this.canvas.addEventListener('mouseleave', () => this.alFinalizarPresion());
+
+        // --- EVENTOS PANTALLAS TÁCTILES (MÓVILES / TABLETS) ---
+        this.canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                e.preventDefault(); 
+                this.alIniciarPresion(this.obtenerCoordenadas(e.touches[0]));
+            }
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1) {
+                e.preventDefault();
+                this.alMoverPresion(this.obtenerCoordenadas(e.touches[0]));
+            }
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchend', () => this.alFinalizarPresion());
+    }
+
+    /**
+     * Mapea la posición exacta X / Y dentro del recuadro del Canvas
+     */
+    obtenerCoordenadas(evento) {
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+            x: evento.clientX - rect.left,
+            y: evento.clientY - rect.top
+        };
+    }
+
+    /**
+     * Alterna la clase active visual en el menú lateral estilo Paint
+     */
+    cambiarHerramienta(nuevaHerramienta, botonPresionado) {
+        this.herramientaActiva = nuevaHerramienta;
+        if (this.toolbar) {
+            const botones = this.toolbar.querySelectorAll('.btn-g');
+            botones.forEach(btn => btn.classList.remove('active'));
+        }
+        if (botonPresionado) {
+            botonPresionado.classList.add('active');
+        }
+    }
+    /**
+     * DIBUJA EL TERRENO DE JUEGO Y REPRODUCE LOS TRAZOS Y OBJETOS GUARDADOS
+     */
+    redibujarLienzoCompleto() {
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+
+        // 1. Capa Base: Césped Verde Oscuro
+        this.ctx.fillStyle = '#1b4332'; 
+        this.ctx.fillRect(0, 0, w, h);
+
+        // 2. Líneas Blancas del Campo (Con un toque de transparencia)
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        this.ctx.lineWidth = 2.5;
+
+        // Línea exterior general
+        this.ctx.strokeRect(25, 25, w - 50, h - 50);
+        
+        // Línea de medio campo
+        this.ctx.beginPath();
+        this.ctx.moveTo(w / 2, 25);
+        this.ctx.lineTo(w / 2, h - 25);
+        this.ctx.stroke();
+        
+        // Círculo central
+        this.ctx.beginPath();
+        this.ctx.arc(w / 2, h / 2, 65, 0, Math.PI * 2);
+        this.ctx.stroke();
+        
+        // Punto central de saque
+        this.ctx.beginPath();
+        this.ctx.arc(w / 2, h / 2, 3, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fill();
+
+        // Áreas de Portería Izquierda (Grande y Chica)
+        this.ctx.strokeRect(25, h / 2 - 110, 95, 220); 
+        this.ctx.strokeRect(25, h / 2 - 45, 35, 90);    
+
+        // Áreas de Portería Derecha (Grande y Chica)
+        this.ctx.strokeRect(w - 120, h / 2 - 110, 95, 220); 
+        this.ctx.strokeRect(w - 60, h / 2 - 45, 35, 90);    
+
+        // 3. Renderizado de Trazos Libres de Pintura (Lápiz y Goma)
+        this.trazosPintura.forEach(trazo => {
+            if (trazo.puntos.length < 2) return;
+            this.ctx.beginPath();
+            this.ctx.moveTo(trazo.puntos[0].x, trazo.puntos[0].y);
+            for (let i = 1; i < trazo.puntos.length; i++) {
+                this.ctx.lineTo(trazo.puntos[i].x, trazo.puntos[i].y);
+            }
+            this.ctx.lineCap = 'round';
+            this.ctx.lineJoin = 'round';
+            this.ctx.lineWidth = trazo.grosor;
+            this.ctx.strokeStyle = trazo.tipo === 'goma' ? '#1b4332' : trazo.color;
+            this.ctx.stroke();
+        });
+
+        // 4. Renderizado de Elementos Móviles (Fichas y Balón)
+        this.elementosInteractivos.forEach(el => {
+            this.ctx.save();
+            this.ctx.beginPath();
+
+            if (el.tipo === 'jugador-local') {
+                this.ctx.arc(el.x, el.y, el.radio, 0, Math.PI * 2);
+                this.ctx.fillStyle = '#0284c7'; // Azul táctico
+                this.ctx.fill();
+                this.ctx.lineWidth = 2;
+                this.ctx.strokeStyle = '#ffffff';
+                this.ctx.stroke();
+            } else if (el.tipo === 'jugador-visitante') {
+                this.ctx.arc(el.x, el.y, el.radio, 0, Math.PI * 2);
+                this.ctx.fillStyle = '#dc2626'; // Rojo rival
+                this.ctx.fill();
+                this.ctx.lineWidth = 2;
+                this.ctx.strokeStyle = '#ffffff';
+                this.ctx.stroke();
+            } else if (el.tipo === 'balon') {
+                this.ctx.arc(el.x, el.y, el.radio, 0, Math.PI * 2);
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.fill();
+                this.ctx.lineWidth = 1.5;
+                this.ctx.strokeStyle = '#000000';
+                this.ctx.stroke();
+                // Dibujo de costuras internas tipo balón
+                this.ctx.moveTo(el.x - 5, el.y); this.ctx.lineTo(el.x + 5, el.y);
+                this.ctx.moveTo(el.x, el.y - 5); this.ctx.lineTo(el.x, el.y + 5);
+                this.ctx.stroke();
+            }
+            this.ctx.restore();
+        });
+    }
+    /**
+     * GESTIÓN DE ACCIONES AL PRESIONAR EL LIENZO
+     */
+    alIniciarPresion(pos) {
+        const elementoDetectado = this.buscarElementoBajoCursor(pos);
+        
+        // 1. Si detecta una ficha y no está la goma activa, se prepara para arrastrarla
+        if (elementoDetectado && this.herramientaActiva !== 'goma') {
+            this.objetoArrastrandose = elementoDetectado;
+            return;
+        }
+
+        // 2. Si está la goma activa y toca una ficha, la elimina de la pizarra
+        if (this.herramientaActiva === 'goma' && elementoDetectado) {
+            this.elementosInteractivos = this.elementosInteractivos.filter(el => el.id !== elementoDetectado.id);
+            this.redibujarLienzoCompleto();
+            return;
+        }
+
+        // 3. Si está el lápiz o la goma libre en el césped, activa el modo dibujo tradicional
+        if (this.herramientaActiva === 'trazo' || this.herramientaActiva === 'goma') {
+            this.dibujando = true;
+            const nuevoTrazo = {
+                tipo: this.herramientaActiva,
+                puntos: [pos],
+                color: this.colorPincel,
+                grosor: this.herramientaActiva === 'goma' ? this.grosorGoma : this.grosorPincel
+            };
+            this.trazosPintura.push(nuevoTrazo);
+            return;
+        }
+
+        // 4. Si es una herramienta de ficha (local, rival, balón), crea un objeto nuevo en esa posición
+        this.crearNuevoObjetoEnLienzo(this.herramientaActiva, pos);
+    }
+
+    /**
+     * GESTIÓN DE MOVIMIENTOS MIENTRAS SE MANTIENE PRESIONADO EL LIENZO
+     */
+    alMoverPresion(pos) {
+        // Caso A: Dibujando trazos libres en el campo
+        if (this.dibujando) {
+            const trazoActual = this.trazosPintura[this.trazosPintura.length - 1];
+            trazoActual.puntos.push(pos);
+            this.redibujarLienzoCompleto();
+            return;
+        }
+
+        // Caso B: Desplazando un jugador o balón seleccionado
+        if (this.objetoArrastrandose) {
+            this.objetoArrastrandose.x = pos.x;
+            this.objetoArrastrandose.y = pos.y;
+            this.redibujarLienzoCompleto();
+        }
+    }
+
+    /**
+     * LIBERA LAS BANDERAS DE ARRASTRE AL SOLTAR EL CURSOR O EL DEDO
+     */
+    alFinalizarPresion() {
+        this.dibujando = false;
+        this.objetoArrastrandose = null;
+    }
+
+    /**
+     * INSERTA UNA NUEVA FICHA EN LA BASE DE DATOS VOLÁTIL DE LA PIZARRA
+     */
+    crearNuevoObjetoEnLienzo(tipo, pos) {
+        if (tipo === 'trazo' || tipo === 'goma') return;
+
+        const nuevoElemento = {
+            id: Date.now() + Math.random(),
+            tipo: tipo,
+            x: pos.x,
+            y: pos.y,
+            radio: tipo === 'balon' ? 10 : 15
+        };
+
+        this.elementosInteractivos.push(nuevoElemento);
+        this.redibujarLienzoCompleto();
+    }
+
+    /**
+     * BUSCA MATEMÁTICAMENTE SI HAY UN JUGADOR O BALÓN BAJO EL CURSOR
+     */
+    buscarElementoBajoCursor(pos) {
+        for (let i = this.elementosInteractivos.length - 1; i >= 0; i--) {
+            const el = this.elementosInteractivos[i];
+            const distance = Math.sqrt((pos.x - el.x) ** 2 + (pos.y - el.y) ** 2);
+            if (distance <= el.radio) return el;
+        }
+        return null;
+    }
+
+    /**
+     * REINICIA POR COMPLETO LOS ELEMENTOS GRÁFICOS Y TRAZOS
+     */
+    borrarTodo() {
+        this.elementosInteractivos = [];
+        this.trazosPintura = [];
+        this.redibujarLienzoCompleto();
+    }
+}
+// =======================================================================
+// MOTOR NATIVO DEL MICRÓFONO (API MEDIARECORDER) PARA NOTAS VERBALES
+// =======================================================================
+
+/**
+ * Activa o detiene la grabación del micrófono de forma consecutiva
+ */
+function conmutarGrabacionAudioPartido() {
+    const btnMicro = document.getElementById('btn-microfono-partido');
+    const txtEstado = document.getElementById('txt-estado-audio');
+
+    // Caso 1: Si no está grabando, solicitamos permisos e iniciamos el micro
+    if (!grabadorMediosPartido || grabadorMediosPartido.state === "inactive") {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                grabadorMediosPartido = new MediaRecorder(stream);
+                fragmentosAudioPartido = [];
+
+                grabadorMediosPartido.ondataavailable = (e) => {
+                    if (e.data.size > 0) fragmentosAudioPartido.push(e.data);
+                };
+
+                // Cuando se detiene, empaquetamos el audio y lo convertimos a Base64
+                grabadorMediosPartido.onstop = () => {
+                    const audioBlob = new Blob(fragmentosAudioPartido, { type: 'audio/wav' });
+                    
+                    // Convertimos el archivo binario a String Base64 para guardarlo en MySQL
+                    const lector = new FileReader();
+                    lector.readAsDataURL(audioBlob);
+                    lector.onloadend = () => {
+                        cadenaAudioBase64Global = lector.result; // Almacena el "data:audio/wav;base64,..."
+                        txtEstado.innerText = "¡Nota de voz procesada y cargada en memoria!";
+                        txtEstado.style.color = "#00CC66";
+                        
+                        // Encendemos los botones de control de audio de la interfaz
+                        document.getElementById('btn-reproducir-audio-partido').style.display = "inline-block";
+                        document.getElementById('btn-eliminar-audio-partido').style.display = "inline-block";
+                    };
+                };
+
+                grabadorMediosPartido.start();
+                btnMicro.innerText = "🛑 Detener Grabación";
+                btnMicro.style.background = "#dc2626";
+                txtEstado.innerText = "🎙️ Escuchando micrófono... habla ahora.";
+                txtEstado.style.color = "#ff9900";
+            })
+            .catch(err => {
+                alert("Error al acceder al micrófono. Asegúrate de otorgar permisos en tu navegador.");
+                console.error("Permiso denegado micro:", err);
+            });
+    } else {
+        // Caso 2: Si ya estaba grabando, detenemos el proceso
+        grabadorMediosPartido.stop();
+        // Apagamos físicamente el hardware del micrófono
+        grabadorMediosPartido.stream.getTracks().forEach(track => track.stop());
+        
+        btnMicro.innerText = "🎤 Grabar Instrucción de Voz";
+        btnMicro.style.background = "#334155";
+    }
+}
+
+/**
+ * Decodifica la variable Base64 de memoria y la reproduce instantáneamente en los altavoces
+ */
+function reproducirAudioPartidoEnMemoria() {
+    if (!cadenaAudioBase64Global) return;
+    const elementoAudio = new Audio(cadenaAudioBase64Global);
+    elementoAudio.play();
+}
+
+/**
+ * Limpia las variables de audio y reajusta los botones visuales
+ */
+function borrarAudioPartidoEnMemoria() {
+    if (confirm("¿Seguro que deseas eliminar la nota verbal de este partido?")) {
+        cadenaAudioBase64Global = "";
+        document.getElementById('btn-reproducir-audio-partido').style.display = "none";
+        document.getElementById('btn-eliminar-audio-partido').style.display = "none";
+        
+        const txtEstado = document.getElementById('txt-estado-audio');
+        txtEstado.innerText = "Sin nota de voz asignada";
+        txtEstado.style.color = "#888";
+    }
+}
+// =======================================================================
+// PASARELA FETCH/AJAX: INTEGRACIÓN Y RECUPERACIÓN CON MYSQL
+// =======================================================================
+
+
+
+
+// =======================================================================
+// PASARELA FETCH/AJAX SINCRO CON TU SERVER EXPRESS (RUTAS /API/)
+// =======================================================================
+
+/**
+ * RECOPILA LA PIZARRA Y LOS GOLES ASOCIÁNDOLOS AL PARTIDO CARGADO EN PANTALLA (ID: 26)
+ */
+function guardarInformeTacticoPartidoMySQL() {
+    // 1. Intentamos leer el ID desde el formulario de la pizarra
+    let idPartidoActual = document.getElementById('par-form-id-partido').value;
+
+    // 🎯 ENLAZADO DIRECTO: Si el input está vacío o dice "Nuevo", le asignamos el ID 26 que está activo arriba
+    if (!idPartidoActual || idPartidoActual === "" || idPartidoActual === "Nuevo") {
+        idPartidoActual = 26; 
+    }
+
+    const jornada = document.getElementById('par-form-jornada').value;
+    const golesLocal = document.getElementById('par-form-goles-local').value;
+    const golesVisitante = document.getElementById('par-form-goles-visitante').value;
+
+    // 2. Convertimos los trazos actuales de tu campo táctico a Base64 PNG
+    const cadenaDibujoBase64 = document.getElementById('pizarra-canvas-partido').toDataURL("image/png");
+
+    // 3. Construimos el Payload limpio para tu server.js
+    const payloadDatos = {
+        id_partido: idPartidoActual,
+        pizarra_dibujo: cadenaDibujoBase64,
+        pizarra_audio: cadenaAudioBase64Global // String Base64 WAV de tu micrófono (si se grabó)
+    };
+
+    console.log(`📡 Sincronizando lona táctica en tu Base de Datos para el ID real: [${idPartidoActual}]`, payloadDatos);
+
+    // Enviamos la petición POST directa a tu app.post de Node.js
+    fetch('http://localhost:3000/api/partidos/guardar-pizarra', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payloadDatos)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Fallo de comunicación con el servidor Node.js");
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert(`✅ ¡Estrategia guardada correctamente para el partido en pantalla! (ID: ${idPartidoActual})`);
+            // Actualizamos la etiqueta de tu título para que deje de decir "Nuevo"
+            document.getElementById('par-txt-id-partido').innerText = idPartidoActual;
+            document.getElementById('par-form-id-partido').value = idPartidoActual;
+        } else {
+            alert("🔴 Error al guardar: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("🔴 Error en la pasarela Fetch:", error);
+        alert("Hubo un error de red. Verifica que tu 'server.js' esté encendido en el puerto 3000.");
+    });
+}
+
+
+/**
+ * RECONSTRUYE LA PIZARRA, LOS GOLES Y LOS NOMBRES BASÁNDOSE EN EL ID SELECCIONADO
+ */
+function buscarYCargarPartidoEspecifico(idALeer) {
+    const tablaEquiposOficial = {
+        1: "realmadrid", 2: "barcelona", 3: "atletico", 4: "deportivocoruna",
+        5: "Athletic Club", 6: "Real Sociedad", 7: "betis", 8: "villarreal",
+        9: "valencia", 10: "alaves", 11: "osasuna", 12: "getafe",
+        13: "celta", 14: "sevilla", 15: "malaga", 16: "elche",
+        17: "rayovallecano", 18: "levante", 19: "espanyol", 20: "racingsantander"
+    };
+
+    console.log(`📥 Solicitando datos en tu servidor Express para el ID de partido: [${idALeer}]`);
+
+    // Seteamos el ID activo en las etiquetas visuales de la cabecera de la lona
+    const inputIdPartido = document.getElementById('par-form-id-partido');
+    const txtIdPartido = document.getElementById('par-txt-id-partido');
+    if (inputIdPartido) inputIdPartido.value = idALeer;
+    if (txtIdPartido) txtIdPartido.innerText = idALeer;
+
+    // Petición GET directa a tu pasarela en server.js
+    fetch(`http://localhost:3000/api/partidos/recuperar-pizarra/${idALeer}`)
+    .then(response => {
+        if (!response.ok) throw new Error("Fallo en la comunicación con Node.js");
+        return response.json();
+    })
+    .then(partido => {
+        if (!partido) return;
+
+        // Rellenamos la jornada y los goles del formulario táctico actual (Marcador 3 vs 1)
+        const inputJornada = document.getElementById('par-form-jornada');
+        const inputGolesLocal = document.getElementById('par-form-goles-local');
+        const inputGolesVisitante = document.getElementById('par-form-goles-visitante');
+
+        if (inputJornada) inputJornada.value = partido.id_jornada || 1;
+        if (inputGolesLocal) inputGolesLocal.value = partido.goles_local !== undefined ? partido.goles_local : 0;
+        if (inputGolesVisitante) inputGolesVisitante.value = partido.goles_visitante !== undefined ? partido.goles_visitante : 0;
+
+        // Mapeo seguro de nombres
+        const nombreLocalFinal = tablaEquiposOficial[partido.id_local] || `Equipo ${partido.id_local}`;
+        const nombreVisitanteFinal = tablaEquiposOficial[partido.id_visitante] || `Equipo ${partido.id_visitante}`;
+
+        // Inyectamos en el minimarcador integrado al lado de los goles
+        const labelPizarraLocal = document.getElementById('txt-nombre-local');
+        const labelPizarraVisitante = document.getElementById('txt-nombre-visitante');
+        if (labelPizarraLocal) labelPizarraLocal.innerText = nombreLocalFinal;
+        if (labelPizarraVisitante) labelPizarraVisitante.innerText = nombreVisitanteFinal;
+
+        // 1. DIBUJAR LOS TRAZOS DE LA PIZARRA EN EL CANVAS
+        if (miPizarraPartidos) {
+            miPizarraPartidos.borrarTodo(); // Reseteamos trazos anteriores
+            
+            if (partido.pizarra_dibujo && partido.pizarra_dibujo !== "NULL" && partido.pizarra_dibujo.trim() !== "") {
+                const imagenFondoPizarra = new Image();
+                imagenFondoPizarra.src = partido.pizarra_dibujo;
+                imagenFondoPizarra.onload = () => {
+                    miPizarraPartidos.ctx.drawImage(imagenFondoPizarra, 0, 0);
+                };
+            }
+        }
+
+        // 2. RECUPERAR EL REPRODUCTOR DE NOTA DE VOZ MICROFÓNICA
+        const txtEstado = document.getElementById('txt-estado-audio');
+        const btnReproducir = document.getElementById('btn-reproducir-audio-partido');
+        const btnEliminar = document.getElementById('btn-eliminar-audio-partido');
+
+        if (partido.pizarra_audio && partido.pizarra_audio !== "NULL" && partido.pizarra_audio.trim() !== "") {
+            cadenaAudioBase64Global = partido.pizarra_audio;
+            if (txtEstado) { txtEstado.innerText = "🔊 ¡Nota de voz recuperada con éxito!"; txtEstado.style.color = "#00CC66"; }
+            if (btnReproducir) btnReproducir.style.display = "inline-block";
+            if (btnEliminar) btnEliminar.style.display = "inline-block";
+        } else {
+            cadenaAudioBase64Global = "";
+            if (txtEstado) { txtEstado.innerText = "Este partido no registra archivos de voz"; txtEstado.style.color = "#888"; }
+            if (btnReproducir) btnReproducir.style.display = "none";
+            if (btnEliminar) btnEliminar.style.display = "none";
+        }
+    })
+    .catch(error => console.error("🔴 Error pasivo en el volcado JSON:", error));
+}
+
+
+/**
+ * REFRESCADOR DINÁMICO: Se ejecuta automáticamente cada vez que cambias de partido arriba.
+ * Limpia la lona y descarga desde MySQL la estrategia del nuevo ID seleccionado.
+ */
+function refrescarPizarraPorCambioDePartidoSuperior(idPartidoSeleccionado) {
+    if (!idPartidoSeleccionado || isNaN(idPartidoSeleccionado)) {
+        console.warn("⚠️ Intento de carga con un ID de partido inválido.");
+        return;
+    }
+
+    console.log(`🔄 Carrusel Superior activó el Partido ID: [${idPartidoSeleccionado}]. Actualizando lona táctica...`);
+
+    // 1. Forzamos a los inputs ocultos a memorizar el nuevo ID del partido para que los "UPDATE" vayan ahí
+    const inputIdPartido = document.getElementById('par-form-id-partido');
+    const txtIdPartido = document.getElementById('par-txt-id-partido');
+    if (inputIdPartido) inputIdPartido.value = idPartidoSeleccionado;
+    if (txtIdPartido) txtIdPartido.innerText = idPartidoSeleccionado;
+
+    // 2. Limpiamos la lona inmediatamente para que no se queden los trazos del partido anterior mientras descarga el nuevo
+    if (miPizarraPartidos) {
+        miPizarraPartidos.borrarTodo();
+    }
+
+    // 3. Invocamos a tu función de carga oficial (la que usa tu diccionario de 20 equipos)
+    if (typeof buscarYCargarPartidoEspecifico === "function") {
+        buscarYCargarPartidoEspecifico(idPartidoSeleccionado);
+    }
+}
+
+
+
+
+
+/**
+ * REINICIA LAS CASILLAS E INFORME DE LA PIZARRA
+ */
+function limpiarFormularioParaNuevoPartido() {
+    document.getElementById('par-form-id-partido').value = "";
+    document.getElementById('par-txt-id-partido').innerText = "Nuevo";
+    document.getElementById('par-form-jornada').value = "1";
+    document.getElementById('par-form-local').value = "1";
+    document.getElementById('par-form-visitante').value = "2";
+    document.getElementById('par-form-goles-local').value = "0";
+    document.getElementById('par-form-goles-visitante').value = "0";
+    
+    miPizarraPartidos.borrarTodo();
+    
+    cadenaAudioBase64Global = "";
+    document.getElementById('btn-reproducir-audio-partido').style.display = "none";
+    document.getElementById('btn-eliminar-audio-partido').style.display = "none";
+    const txtEstado = document.getElementById('txt-estado-audio');
+    txtEstado.innerText = "Sin nota de voz asignada";
+    txtEstado.style.color = "#888";
+}
+
+// =======================================================================
+// INITIALIZACIÓN GLOBAL INTEGRADA (CON CARGA AUTOMÁTICA DEL PARTIDO 26)
+// =======================================================================
+
+let miPizarraPartidos = null;
+
+function inicializarPizarraDePartidos() {
+    if (miPizarraPartidos !== null) return;
+    
+    const canvasElement = document.getElementById('pizarra-canvas-partido');
+    if (canvasElement) {
+        // 1. Instanciamos el motor gráfico
+        miPizarraPartidos = new MotorPizarraPartidos('pizarra-canvas-partido', 'pizarra-partido-toolbar');
+        console.log("⚽ Pizarra táctica inicializada con éxito.");
+
+        // 2. 🚀 CARGA AUTOMÁTICA INMEDIATA: Forzamos a la pizarra a buscar los datos del partido 26 en MySQL
+        if (typeof buscarYCargarPartidoEspecifico === "function") {
+            buscarYCargarPartidoEspecifico(26);
+        }
+    }
+}
+
+// Aseguramos el disparo seguro sin romper tus window.onload nativos
+if (document.readyState === "complete" || document.readyState === "interactive") {
+    inicializarPizarraDePartidos();
+} else {
+    document.addEventListener("DOMContentLoaded", inicializarPizarraDePartidos);
+}
+
+
+
+
+
+// =======================================================================
+// FUNCIONES PUENTE GLOBALES (CONECTAN EL HTML CON EL MOTOR DE LA PIZARRA)
+// =======================================================================
+
+/**
+ * Soluciona el error Uncaught ReferenceError de los botones de herramientas
+ */
+
+function seleccionarHerramientaPartido(herramienta, botonElemento) {
+    if (miPizarraPartidos) {
+        miPizarraPartidos.cambiarHerramienta(herramienta, botonElemento);
+    } else {
+        console.error("El motor de la pizarra no está inicializado todavía.");
+    }
+}
+
+/**
+ * Conecta el botón "Borrar Todo" del HTML
+ */
+function limpiarPizarraPartidoActivo() {
+    if (confirm("¿Limpiar por completo la pizarra táctica del partido?")) {
+        if (miPizarraPartidos) {
+            miPizarraPartidos.borrarTodo();
+        }
+    }
+}
+
+
+
+ 
+// Fin de Pizarra de Entrenamiento
+
+
+
+
+
 
 
 </script>

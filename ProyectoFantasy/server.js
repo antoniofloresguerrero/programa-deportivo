@@ -368,6 +368,29 @@ app.get('/api/valor-equipo/:id_partido', (req, res) => {
 });
 
 // =======================================================================
+// 🏆 FASE 1: CONTROLADORES DE SESIÓN DINÁMICA DE PARTIDOS EN EL SERVIDOR
+// =======================================================================
+// Variable de de de de de memoria viva en el backend. Erradicamos por completo el 24 fijo.
+let idPartidoActivoEnMemoriaServidor = null; 
+
+// 🎯 API A: Sincronizador Automático. Guarda el ID real del partido pinchado
+app.post('/api/partidos/fijar-id-sesion-real', (req, res) => {
+    const { id_partido } = req.body;
+    if (id_partido && !isNaN(parseInt(id_partido))) {
+        idPartidoActivoEnMemoriaServidor = parseInt(id_partido);
+        console.log(`🎯 Servidor MySQL -> Sesión táctica de de partidos bloqueada en ID: [${idPartidoActivoEnMemoriaServidor}]`);
+        return res.json({ success: true, idActiva: idPartidoActivoEnMemoriaServidor });
+    }
+    res.status(400).json({ error: "Identificador de partido inválido o ausente." });
+});
+
+
+
+
+
+
+
+// =======================================================================
 // OBTENER DETALLE DEL JUGADOR + HISTORIAL DE ENCUENTROS REPARADO (CERO FALLOS 500)
 // =======================================================================
  app.get('/api/jugadores/detalle/:id', (req, res) => {
@@ -1624,6 +1647,114 @@ app.get('/api/analiticas/resumen/:id_equipo', (req, res) => {
 });
 
 
+
+// 🎯 2. PASARELA GET REPARADA: Descarga TODAS las columnas del partido en cuestión
+app.get('/api/partidos/recuperar-pizarra/:id_partido', (req, res) => {
+    const idFielPartido = parseInt(req.params.id_partido);
+    console.log(`📥 Servidor MySQL -> Buscando fila completa para el Partido ID: [${idFielPartido}]`);
+
+    if (!idFielPartido || isNaN(idFielPartido)) {
+        return res.status(400).json({ error: "ID de partido inválido." });
+    }
+
+    // CAMBIO CRÍTICO: Cambiamos las columnas por un asterisco (*)
+    const sqlBuscarPizarra = `
+        SELECT * 
+        FROM fantasy_liga.partidos 
+        WHERE id_partido = ?`;
+
+    db.query(sqlBuscarPizarra, [idFielPartido], (err, rows) => {
+        if (err) {
+            console.error("🔴 Error en la consulta SELECT de MySQL:", err.message);
+            return res.status(500).json({ error: err.message });
+        }
+        
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({ error: "Partido no encontrado en el sistema." });
+        }
+        
+        // Enviamos el objeto de la fila directo
+        res.json(rows[0]); 
+    });
+});
+
+
+// server para pizarra de entrenamiento
+
+
+
+
+// =======================================================================
+// 🏆 RESETEADO DE RUTAS EN EL BACKEND: PERSISTENCIA 100% VARIABLE MULTI-ID
+// =======================================================================
+// 🎯 1. PASARELA POST: Recibe el ID explícito del frontend y actualiza tu MySQL Workbench
+app.post('/api/partidos/guardar-pizarra', (req, res) => {
+    // Escaneamos todas las llaves posibles que el cuerpo JSON del frontend pueda inyectar
+    const { id_partido, idPartido, pizarra_dibujo, pizarra_audio } = req.body;
+    
+    // Convertimos la clave en un número entero limpio de MySQL
+    const idFielPartido = parseInt(id_partido || idPartido);
+
+    console.log(`💾 Servidor MySQL -> Ejecutando UPDATE. Fila de destino real: [${idFielPartido}]`);
+
+    if (!idFielPartido || isNaN(idFielPartido)) {
+        return res.status(400).json({ error: "Identificador de partido inválido o ausente en el payload." });
+    }
+
+    const sqlGuardarPizarra = `
+        UPDATE fantasy_liga.partidos 
+        SET pizarra_dibujo = ?, pizarra_audio = ? 
+        WHERE id_partido = ?`;
+
+    db.query(sqlGuardarPizarra, [pizarra_dibujo, pizarra_audio, idFielPartido], (err, result) => {
+        if (err) {
+            console.error("🔴 Error crítico al escribir en la tabla partidos:", err.message);
+            return res.status(500).json({ error: err.message });
+        }
+        console.log(`✨ ¡Éxito relacional! Datos guardados para el Partido ID: ${idFielPartido}`);
+        res.json({ success: true, message: `Pizarra e historial consolidados en el ID ${idFielPartido}.` });
+    });
+});
+
+// 🎯 2. PASARELA GET: Descarga los trazos Base64 correspondientes al partido en cuestión
+app.get('/api/partidos/recuperar-pizarra/:id_partido', (req, res) => {
+    const idFielPartido = parseInt(req.params.id_partido);
+    console.log(`📥 Servidor MySQL -> Buscando celdas LONGTEXT para el Partido ID: [${idFielPartido}]`);
+
+    if (!idFielPartido || isNaN(idFielPartido)) {
+        return res.status(400).json({ error: "ID de partido inválido." });
+    }
+
+    const sqlBuscarPizarra = `
+        SELECT pizarra_dibujo, pizarra_audio 
+        FROM fantasy_liga.partidos 
+        WHERE id_partido = ?`;
+
+    db.query(sqlBuscarPizarra, [idFielPartido], (err, rows) => {
+        if (err) {
+            console.error("🔴 Error en la consulta SELECT de MySQL:", err.message);
+            return res.status(500).json({ error: err.message });
+        }
+        
+        // Si la fila viene vacía, respondemos con nulos limpios de forma pasiva
+        if (!rows || rows.length === 0) {
+            return res.json({ pizarra_dibujo: null, pizarra_audio: null });
+        }
+        
+        // Devolvemos el registro directo relacional al monitor de Chrome
+        res.json(rows[0]); 
+    });
+});
+
+
+
+// Inicio de pizarra de entrenamiento
+
+
+
+
+
+// fin de pizarra partido
 
 
 
