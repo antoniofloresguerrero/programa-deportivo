@@ -71,14 +71,44 @@ app.post('/api/jornadas', (req, res) => {
     });
 });
 
-// 3. OBTENER PARTIDOS DE UNA JORNADA
-app.get('/api/partidos/:id_jornada', (req, res) => {
-    const query = 'SELECT p.*, el.nombre AS local_nombre, ev.nombre AS visitante_nombre FROM partidos p JOIN equipos el ON p.id_local = el.id_equipo JOIN equipos ev ON p.id_visitante = ev.id_equipo WHERE p.id_jornada = ?';
-    db.query(query, [req.params.id_jornada], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(results || []);
+// =======================================================================
+// 🧲 ENDPOINT DEL CARRUSEL SUPERIOR: Filtra la lista de partidos por Club
+// =======================================================================
+// Inyectamos el escudo de verificación para saber quién pide la lista
+app.get('/api/partidos/lista-carrusel', verificarTokenDeSeguridad, (req, res) => {
+    
+    // Extraemos el club y el rol del token desencriptado del usuario
+    const idClubDelUsuario = req.user.id_club_cuenta;
+    const idRolDelUsuario = req.user.id_rol;
+    const categoriaDelUsuario = req.user.categoria;
+
+    let sqlCarrusel = "";
+    let parametros = [];
+
+    // 👑 CASO 1: Si eres tú, el ADMINISTRADOR GLOBAL (Rol 1), el carrusel muestra TODO
+    if (idRolDelUsuario === 1) {
+        sqlCarrusel = `SELECT * FROM fantasy_liga.partidos ORDER BY id_jornada ASC, id_partido DESC`;
+        parametros = [];
+    } 
+    // 📋 CASO 2: Si eres ENTRENADOR (Rol 2) o JUGADOR (Rol 3), filtramos por tu CLUB y CATEGORÍA
+    else {
+        sqlCarrusel = `
+            SELECT * 
+            FROM fantasy_liga.partidos 
+            WHERE id_club_cuenta = ? AND categoria = ?
+            ORDER BY id_jornada ASC, id_partido DESC`;
+        parametros = [idClubDelUsuario, categoriaDelUsuario];
+    }
+
+    db.query(sqlCarrusel, parametros, (err, rows) => {
+        if (err) {
+            console.error("🔴 Error al cargar carrusel filtrado:", err.message);
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        res.json(rows); // Devolvemos solo la lista aislada que le corresponde ver
     });
 });
+
 
 // 4. REGISTRAR PARTIDO EN ACTA CLONANDO PLANTILLAS REALES DE LA BD
 app.post('/api/partidos', (req, res) => {
@@ -1648,35 +1678,73 @@ app.get('/api/analiticas/resumen/:id_equipo', (req, res) => {
 
 
 
-// 🎯 2. PASARELA GET REPARADA: Descarga TODAS las columnas del partido en cuestión
-app.get('/api/partidos/recuperar-pizarra/:id_partido', (req, res) => {
-    const idFielPartido = parseInt(req.params.id_partido);
-    console.log(`📥 Servidor MySQL -> Buscando fila completa para el Partido ID: [${idFielPartido}]`);
-
-    if (!idFielPartido || isNaN(idFielPartido)) {
-        return res.status(400).json({ error: "ID de partido inválido." });
+// =======================================================================
+// 🛡️ MIDDLEWARE: Verifica el "Pasaporte" (JWT Token) enviado por la tablet
+// =======================================================================
+function verificarTokenDeSeguridad(req, res, next) {
+    // La tablet debe enviar el token en la cabecera 'Authorization'
+    const bearerHeader = req.headers['authorization'];
+    
+    if (!bearerHeader) {
+        return res.status(403).json({ success: false, error: "Acceso denegado. Se requiere Token de sesión." });
     }
 
-    // CAMBIO CRÍTICO: Cambiamos las columnas por un asterisco (*)
-    const sqlBuscarPizarra = `
-        SELECT * 
-        FROM fantasy_liga.partidos 
-        WHERE id_partido = ?`;
+    try {
+        const token = bearerHeader.split(' ')[1]; // Extraemos el token limpio
+        // Desencriptamos el token usando tu clave secreta de inicio
+        const datosUsuarioLogueado = jwt.verify(token, JWT_SECRET_KEY);
+        
+        // Inyectamos las credenciales del usuario en la petición (req.user) para usarlas abajo
+        req.user = datosUsuarioLogueado; 
+        next(); // Damos paso al endpoint correspondiente
+    } catch (error) {
+        return res.status(401).json({ success: false, error: "Token vencido o inválido. Inicie sesión de nuevo." });
+    }
+}
 
-    db.query(sqlBuscarPizarra, [idFielPartido], (err, rows) => {
-        if (err) {
-            console.error("🔴 Error en la consulta SELECT de MySQL:", err.message);
-            return res.status(500).json({ error: err.message });
-        }
+// =======================================================================
+// 🎯 PASARELA GET PROTEGIDA: Aísla y carga los partidos por CLUB y ROL
+// =======================================================================
+// Añadimos 'verificarTokenDeSeguridad' como escudo antes de ejecutar la consulta SQL
+app.get('/api/partidos/recuperar-pizarra/:id_partido', verificarTokenDeSeguridad, (req, res) => {
+    const idPartido = parseInt(req.params.id_partido);
+    
+    // 🎯 AQUÍ OCURRE EL AISLAMIENTO:
+    // Recuperamos el Club y el Rol del usuario directamente desde su Token desencriptado
+    const idClubDelUsuario = req.user.id_club_cuenta;
+    const idRolDelUsuario = req.user.id_rol;
+
+    let sqlBuscarPizarra = "";
+    let parametrosConsulta = [];
+
+    // 👑 CASO ADMIN: Si eres tú (Rol 1), puedes ver CUALQUIER partido de CUALQUIER club
+    if (idRolDelUsuario === 1) {
+        sqlBuscarPizarra = `SELECT * FROM fantasy_liga.partidos WHERE id_partido = ?`;
+        parametrosConsulta = [idPartido];
+    } 
+    // 📋/🏃 CASO CLUB: Si eres Entrenador o Jugador, el sistema añade un filtro obligatorio
+    // para que SOLO puedas leer si el partido pertenece a TU id_club_cuenta relacional de MySQL
+    else {
+        sqlBuscarPizarra = `
+            SELECT * 
+            FROM fantasy_liga.partidos 
+            WHERE id_partido = ? AND id_club_cuenta = ?`;
+        parametrosConsulta = [idPartido, idClubDelUsuario];
+    }
+
+    db.query(sqlBuscarPizarra, parametrosConsulta, (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
         
         if (!rows || rows.length === 0) {
-            return res.status(404).json({ error: "Partido no encontrado en el sistema." });
+            // Si un entrenador del Club 2 intenta poner el ID de un partido del Club 1, 
+            // el sistema le dirá que no existe, protegiendo y aislando la información por completo.
+            return res.status(404).json({ error: "Partido no encontrado o no tienes permisos para verlo." });
         }
         
-        // Enviamos el objeto de la fila directo
         res.json(rows[0]); 
     });
 });
+
 
 
 // server para pizarra de entrenamiento
@@ -1685,36 +1753,81 @@ app.get('/api/partidos/recuperar-pizarra/:id_partido', (req, res) => {
 
 
 // =======================================================================
-// 🏆 RESETEADO DE RUTAS EN EL BACKEND: PERSISTENCIA 100% VARIABLE MULTI-ID
+// 🔐 PASARELA POST PROTEGIDA: Guarda la estrategia blindando el Club y el Rol
 // =======================================================================
-// 🎯 1. PASARELA POST: Recibe el ID explícito del frontend y actualiza tu MySQL Workbench
-app.post('/api/partidos/guardar-pizarra', (req, res) => {
-    // Escaneamos todas las llaves posibles que el cuerpo JSON del frontend pueda inyectar
-    const { id_partido, idPartido, pizarra_dibujo, pizarra_audio } = req.body;
+// Inyectamos el middleware 'verificarTokenDeSeguridad' como escudo preventivo
+app.post('/api/partidos/guardar-pizarra', verificarTokenDeSeguridad, (req, res) => {
+    const { id_partido, pizarra_dibujo, pizarra_audio } = req.body;
     
-    // Convertimos la clave en un número entero limpio de MySQL
-    const idFielPartido = parseInt(id_partido || idPartido);
+    // Extraemos las credenciales auténticas inyectadas por el pasaporte JWT
+    const idClubDelUsuario = req.user.id_club_cuenta;
+    const idRolDelUsuario = req.user.id_rol;
 
-    console.log(`💾 Servidor MySQL -> Ejecutando UPDATE. Fila de destino real: [${idFielPartido}]`);
-
-    if (!idFielPartido || isNaN(idFielPartido)) {
-        return res.status(400).json({ error: "Identificador de partido inválido o ausente en el payload." });
+    // 🛑 VALIDACIÓN 1: Bloqueo estricto por Rol. Si es un jugador, rechazamos de inmediato
+    if (idRolDelUsuario === 3) {
+        console.warn(`🚨 ¡Alerta de seguridad! El usuario con Rol Jugador intentó saltarse el frontend para escribir en MySQL.`);
+        return res.status(403).json({ success: false, error: "Acceso denegado. Los jugadores no tienen permisos de escritura." });
     }
 
+    if (!id_partido) {
+        return res.status(400).json({ success: false, error: "Falta el ID del partido obligatorio." });
+    }
+
+    // 👑 REGLA DE EXCEPCIÓN: Si eres el ADMINISTRADOR global (Tú, Rol 1), guardas sin validar el club
+    if (idRolDelUsuario === 1) {
+        ejecutarUpdateDePizarraEnMySQL(id_partido, pizarra_dibujo, pizarra_audio, res);
+    } 
+    // 📋 REGLA MULTI-INQUILINO: Si eres entrenador (Rol 2), MySQL primero verifica si eres dueño de ese partido
+    else {
+        // Hacemos una consulta rápida de control de propiedad para verificar el Club
+        const sqlVerificarPropiedad = `SELECT id_club_cuenta FROM fantasy_liga.partidos WHERE id_partido = ?`;
+        
+        db.query(sqlVerificarPropiedad, [id_partido], (err, rows) => {
+            if (err) {
+                console.error("🔴 Error en control de propiedad de MySQL:", err.message);
+                return res.status(500).json({ success: false, error: err.message });
+            }
+
+            if (!rows || rows.length === 0) {
+                return res.status(404).json({ success: false, error: "El partido especificado no existe." });
+            }
+
+            const idClubDelPartidoEnBD = rows[0].id_club_cuenta;
+
+            // 🛑 COMPROBACIÓN CRUZADA: Si el partido pertenece a otra cuenta de club, bloqueamos el acceso
+            if (idClubDelPartidoEnBD !== idClubDelUsuario) {
+                console.warn(`🚨 Intento de infiltración cruzada detectado. Club ${idClubDelUsuario} intentó modificar partido del Club ${idClubDelPartidoEnBD}`);
+                return res.status(403).json({ success: false, error: "Acceso denegado. No tienes permisos para modificar datos de otro club." });
+            }
+
+            // Si pasa los dos filtros con éxito, damos luz verde al guardado relacional
+            ejecutarUpdateDePizarraEnMySQL(id_partido, pizarra_dibujo, pizarra_audio, res);
+        });
+    }
+});
+
+/**
+ * FUNCIÓN AUXILIAR COHERENTE: Ejecuta el comando UPDATE consolidado en tu base de datos
+ */
+function ejecutarUpdateDePizarraEnMySQL(idPartido, dibujo, audio, res) {
     const sqlGuardarPizarra = `
         UPDATE fantasy_liga.partidos 
         SET pizarra_dibujo = ?, pizarra_audio = ? 
         WHERE id_partido = ?`;
 
-    db.query(sqlGuardarPizarra, [pizarra_dibujo, pizarra_audio, idFielPartido], (err, result) => {
+    db.query(sqlGuardarPizarra, [dibujo, audio, idPartido], (err, result) => {
         if (err) {
-            console.error("🔴 Error crítico al escribir en la tabla partidos:", err.message);
-            return res.status(500).json({ error: err.message });
+            console.error("🔴 Error al ejecutar UPDATE de pizarra en MySQL:", err.message);
+            return res.status(500).json({ success: false, error: err.message });
         }
-        console.log(`✨ ¡Éxito relacional! Datos guardados para el Partido ID: ${idFielPartido}`);
-        res.json({ success: true, message: `Pizarra e historial consolidados en el ID ${idFielPartido}.` });
+        
+        console.log(`💾 ¡Estrategia multi-lona blindada con éxito! Registro consolidado para el Partido ID: [${idPartido}]`);
+        return res.json({ success: true, message: "Pizarra unificada y notas de voz guardadas con éxito en MySQL." });
     });
-});
+}
+
+
+
 
 // 🎯 2. PASARELA GET: Descarga los trazos Base64 correspondientes al partido en cuestión
 app.get('/api/partidos/recuperar-pizarra/:id_partido', (req, res) => {
@@ -1755,6 +1868,123 @@ app.get('/api/partidos/recuperar-pizarra/:id_partido', (req, res) => {
 
 
 // fin de pizarra partido
+
+
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+// Clave secreta para firmar los tokens de sesión (Cámbiala por una palabra larga en producción)
+const JWT_SECRET_KEY = "FANTASY_SUPER_SECRET_TOKEN_KEY_2026"; 
+
+// =======================================================================
+// 🤝 1. ENDPOINT POST: Registro de Usuarios (Soporta miles de registros)
+// =======================================================================
+app.post('/api/auth/register', async (req, res) => {
+    const { id_club_cuenta, id_rol, nombre, email, password, categoria } = req.body;
+
+    // Validación de campos obligatorios
+    if (!id_club_cuenta || !id_rol || !nombre || !email || !password) {
+        return res.status(400).json({ success: false, error: "Faltan parámetros obligatorios en el registro." });
+    }
+
+    try {
+        // Encriptamos la contraseña con un factor de coste seguro (10 rondas de salt)
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(password, saltRounds);
+
+        const sqlInsertarUsuario = `
+            INSERT INTO fantasy_liga.usuarios (id_club_cuenta, id_rol, nombre, email, password_hash, categoria) 
+            VALUES (?, ?, ?, ?, ?, ?)`;
+
+        db.query(sqlInsertarUsuario, [id_club_cuenta, id_rol, nombre, email, passwordHash, categoria || 'Senior'], (err, result) => {
+            if (err) {
+                // Si el correo ya existe en la base de datos, MySQL arrojará un error de duplicado (code ER_DUP_ENTRY)
+                if (err.code === 'ER_DUP_ENTRY') {
+                    return res.status(400).json({ success: false, error: "El correo electrónico ya está registrado en el sistema." });
+                }
+                console.error("🔴 Error al insertar usuario en MySQL:", err.message);
+                return res.status(500).json({ success: false, error: err.message });
+            }
+            
+            console.log(`👤 ¡Éxito multi-inquilino! Nuevo usuario registrado para el Club ID: [${id_club_cuenta}], Rol: [${id_rol}]`);
+            res.json({ success: true, message: "Usuario creado correctamente con encriptación hash." });
+        });
+
+    } catch (error) {
+        console.error("🔴 Error en el proceso hash de registro:", error);
+        res.status(500).json({ success: false, error: "Error interno del servidor." });
+    }
+});
+
+// =======================================================================
+// 🔐 2. ENDPOINT POST: Inicio de Sesión Inteligente (Login)
+// =======================================================================
+app.post('/api/auth/login', (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ success: false, error: "Por favor, introduce tu email y contraseña." });
+    }
+
+    // Buscamos al usuario por su email único en la base de datos
+    const sqlBuscarUsuario = `SELECT * FROM fantasy_liga.usuarios WHERE email = ? AND estado_cuenta = 'activo'`;
+
+    db.query(sqlBuscarUsuario, [email], async (err, rows) => {
+        if (err) {
+            console.error("🔴 Error al buscar usuario en MySQL:", err.message);
+            return res.status(500).json({ success: false, error: err.message });
+        }
+
+        // Si la fila viene vacía, el correo no existe o la cuenta está suspendida
+        if (!rows || rows.length === 0) {
+            return res.status(401).json({ success: false, error: "Credenciales inválidas o cuenta inactiva." });
+        }
+
+        const usuario = rows[0];
+
+        try {
+            // 🎯 COMPARACIÓN SEGURA: Comparamos la contraseña en texto plano con el Hash encriptado de MySQL
+            const contraseñaCorrecta = await bcrypt.compare(password, usuario.password_hash);
+
+            if (!contraseñaCorrecta) {
+                return res.status(401).json({ success: false, error: "Contraseña incorrecta." });
+            }
+
+            // 👑 GENERACIÓN DE PASAPORTE VIRTUAL (JWT TOKEN):
+            // Empaquetamos sus niveles de poder (Rol) y su Club dentro del token
+            const tokenSesion = jwt.sign(
+                { 
+                    id_usuario: usuario.id_usuario,
+                    id_club_cuenta: usuario.id_club_cuenta,
+                    id_rol: usuario.id_rol,
+                    categoria: usuario.categoria,
+                    nombre: usuario.nombre
+                },
+                JWT_SECRET_KEY,
+                { expiresIn: '24h' } // La sesión durará activa 24 horas en la tablet del míster
+            );
+
+            console.log(`🔐 Sesión iniciada: [${usuario.nombre}] del Club ID: [${usuario.id_club_cuenta}] ingresó con Rol ID: [${usuario.id_rol}]`);
+
+            // Enviamos el token y los datos limpios al frontend
+            res.json({
+                success: true,
+                token: tokenSesion,
+                usuario: {
+                    nombre: usuario.nombre,
+                    id_rol: usuario.id_rol,
+                    id_club_cuenta: usuario.id_club_cuenta,
+                    categoria: usuario.categoria
+                }
+            });
+
+        } catch (error) {
+            console.error("🔴 Error al verificar credenciales:", error);
+            res.status(500).json({ success: false, error: "Error en la verificación de seguridad." });
+        }
+    });
+});
+
 
 
 

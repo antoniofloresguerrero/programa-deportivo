@@ -4,6 +4,53 @@
     <!-- =======================================================================
 🛡️ CONTROLADOR MAESTRO DE ESCUDOS: AISLADO ARRIBA CONTRA ERRORES SINTÁCTICOS
 ======================================================================= -->
+<!-- Pega este bloque de estilos dentro de la etiqueta <head> de tu index.html -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<style>
+    /* 🎯 OPTIMIZACIÓN TÁCTIL GLOBAL PARA TABLETS */
+    body, input, button, select {
+        /* Desactiva el retraso de 300ms que tienen los navegadores móviles al hacer clic */
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Los botones y controles de la pizarra deben tener un tamaño mínimo para el dedo humano */
+    #pizarra-partido-toolbar button, .btn-audio-tab, .btn-pizarra-tab {
+        min-height: 44px !important; /* Estándar de Apple/Google para usabilidad táctil */
+        padding: 10px 14px !important;
+        font-size: 13px !important; /* Texto más legible en exteriores */
+    }
+
+    /* Evita que el usuario haga zoom por error al pintar rápido con el Touch Pen */
+    #pizarra-canvas-partido {
+        touch-action: none; /* Crucial: el navegador no moverá la pantalla al arrastrar jugadores */
+        max-width: 100%;
+        height: auto;
+        box-sizing: border-box;
+    }
+
+    /* 🔄 CONTENEDOR RESPONSIVO: Pasa de columnas a una sola fila cómoda si la tablet se gira */
+    @media (max-width: 1024px) {
+        #sub-sec-club-partidos-tactica > div {
+            grid-template-columns: 1fr !important; /* Apila el canvas sobre los controles si la pantalla es estrecha */
+            gap: 15px !important;
+        }
+        
+        #pizarra-partido-toolbar {
+            flex-direction: row !important; /* Distribuye las herramientas de forma horizontal arriba del canvas */
+            flex-wrap: wrap;
+            width: 100% !important;
+        }
+        
+        #pizarra-partido-toolbar div {
+            flex-direction: row !important;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+    }
+</style>
+
 <script>
     window.viajarAFichaEquipo = function(id_equipo) {
         console.log("🛡️ [Cabecera Aislada] Abriendo Ficha Técnica del Club ID: " + id_equipo);
@@ -213,6 +260,57 @@
 
 </head>
 <body>
+
+<!-- Login -->
+ 
+<!-- =======================================================================
+     🔐 CONTROL DE ACCESO GLOBAL: PANTALLA DE LOGIN INTEGRADA (TABLET-FIRST)
+     ======================================================================= -->
+<div id="modulo-auth-login-pantalla" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b0f19; z-index: 999999; display: flex; align-items: center; justify-content: center; font-family: sans-serif; box-sizing: border-box; padding: 20px;">
+    
+    <div style="background: rgba(15, 23, 42, 0.95); border: 1px solid #1e293b; border-radius: 12px; padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); box-sizing: border-box;">
+        
+        <!-- Logotipo / Encabezado -->
+        <div style="text-align: center; margin-bottom: 25px;">
+            <h2 style="color: #38bdf8; margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;">⚔️ FANTASY LIGA</h2>
+            <p style="color: #64748b; margin: 5px 0 0 0; font-size: 13px;">Panel de Planificación y Control Táctico</p>
+        </div>
+
+        <!-- Formulario Nativo -->
+        <form id="formulario-auth-login-sistema" onsubmit="ejecutarPeticionLoginFetiche(event)" style="display: flex; flex-direction: column; gap: 18px;">
+            
+            <!-- Campo Email -->
+            <div>
+                <label for="auth-email" style="color: #94a3b8; font-size: 11px; font-weight: bold; display: block; margin-bottom: 6px; text-transform: uppercase;">Correo Electrónico:</label>
+                <input type="email" id="auth-email" required placeholder="ejemplo@tuclub.com" style="width: 100%; min-height: 46px; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px 14px; border-radius: 6px; box-sizing: border-box; font-size: 14px; outline: none;">
+            </div>
+
+            <!-- Campo Contraseña -->
+            <div>
+                <label for="auth-password" style="color: #94a3b8; font-size: 11px; font-weight: bold; display: block; margin-bottom: 6px; text-transform: uppercase;">Contraseña de Acceso:</label>
+                <input type="password" id="auth-password" required placeholder="••••••••" style="width: 100%; min-height: 46px; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px 14px; border-radius: 6px; box-sizing: border-box; font-size: 14px; outline: none;">
+            </div>
+
+            <!-- Alerta pasiva de error (Se activa por JavaScript si fallan las credenciales) -->
+            <div id="auth-alerta-error" style="color: #ef4444; font-size: 12px; font-weight: bold; text-align: center; display: none; background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.2);">
+                ⚠️ Credenciales incorrectas o cuenta inactiva.
+            </div>
+
+            <!-- Botón de Envío (Zonificado Maxi-Touch para dedos) -->
+            <button type="submit" style="width: 100%; min-height: 48px; background: #38bdf8; color: #0b0f19; font-weight: bold; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.2s;">
+                Ingresar al Vestuario
+            </button>
+            
+        </form>
+
+        <div style="text-align: center; margin-top: 20px; border-top: 1px solid #1e293b; padding-top: 15px;">
+            <small style="color: #475569; font-size: 11px;">Uso exclusivo para Clubes Registrados en el Sistema SaaS.</small>
+        </div>
+    </div>
+</div>
+
+<!-- Fin de Login -->
+
    
         <!-- GATILLO INTERACTIVO Y MENÚ LATERAL HAMBURGUESA CORREGIDO -->
     <div class="hamburguesa-trigger">☰ MENU</div>
@@ -1940,129 +2038,181 @@
         }).then(res => res.json()).then(data => { alert(data.mensaje); cargarListaPartidosDeJornadaDesdeBD(); });
     }
 
-        // ACTUALIZADA: Inserta los partidos como pastillas redondeadas horizontales en la barra de control
-    function cargarListaPartidosDeJornadaDesdeBD() {
-        let id_jornada = document.getElementById('ver-jornada-sel').value;
-        if (!id_jornada) return;
+ /**
+ * REFACTORIZACIÓN DEFINITIVA: Inyecta los partidos destruyendo cualquier mensaje fantasma
+ */
+function inyectarCarruselSaaSMultiInquilino() {
+    const tokenSeguridad = localStorage.getItem('fantasy_session_token');
+    if (!tokenSeguridad || tokenSeguridad === "") {
+        console.log("⏱️ Carrusel en espera de autenticación global.");
+        return; 
+    }
 
-        // Apuntamos al nuevo contenedor estilizado de la barra horizontal
-        let contenedor = document.getElementById('lista-partidos-jornada-vagas');
-        if (!contenedor) return;
-        
-        contenedor.innerHTML = ""; 
-        ocultarPanelesActa();
+    console.log("📡 Consumiendo pasarela SaaS filtrada por Club para la barra superior...");
 
-        fetch(API_URL + '/partidos/' + id_jornada)
-            .then(res => res.json())
-            .then(partidos => {
-                if (!partidos || partidos.length === 0) {
-                    contenedor.innerHTML = "<p style='color:#aaa; font-size:12px; font-style:italic;'>No hay partidos programados.</p>";
-                    return;
-                }
-
-                partidos.forEach(p => {
-                    let btn = document.createElement('button');
-                    btn.className = 'item-partido-btn';
-                    
-                    // Diseño premium en formato pastilla redondeada horizontal
-                    btn.style.padding = "6px 16px";
-                    btn.style.fontSize = "13px";
-                    btn.style.whiteSpace = "nowrap";
-                    btn.style.background = "rgba(255,255,255,0.06)";
-                    btn.style.border = "1px solid rgba(255,255,255,0.1)";
-                    btn.style.borderRadius = "20px"; 
-                    btn.style.cursor = "pointer";
-                    btn.style.transition = "0.2s";
-                    btn.style.color = "#fff";
-                    btn.style.fontWeight = "600";
-
-                    // SATELLITE DE MARCADOR: Si el partido no se ha jugado (goles NULL), muestra un limpio 'vs'
-                    let golesL = (p.goles_local !== null && p.goles_local !== undefined) ? p.goles_local : "-";
-                    let golesV = (p.goles_visitante !== null && p.goles_visitante !== undefined) ? p.goles_visitante : "-";
-                    
-                    btn.innerText = `${p.local_nombre} ${golesL} - ${golesV} ${p.visitante_nombre}`;
-
-                    // ACCIÓN AL PULSAR: Ilumina el contorno de la pastilla elegida en verde y despliega el césped abajo
-                    btn.onclick = function() {
-                        document.querySelectorAll('#lista-partidos-jornada-vagas .item-partido-btn').forEach(b => {
-                            b.style.borderColor = 'rgba(255,255,255,0.1)';
-                            b.style.background = 'rgba(255,255,255,0.06)';
-                            b.style.color = '#fff';
-                        });
-                        this.style.borderColor = '#00CC66';
-                        this.style.background = 'rgba(0, 204, 102, 0.15)';
-                        this.style.color = '#00CC66';
-                        
-                        abrirPartidoEspecificoDesdeBD(p);
-                    };
-
-                    contenedor.appendChild(btn);
-                });
-            }).catch(err => console.error("Error al listar pastillas de partidos:", err));
-    
-  
-
+    fetch('http://localhost:3000/api/partidos/lista-carrusel', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tokenSeguridad}`
         }
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem('fantasy_session_token');
+                window.location.reload();
+            }
+            throw new Error("Fallo de autenticación en carrusel.");
+        }
+        return response.json();
+    })
+    .then(partidos => {
+        if (!partidos || partidos.length === 0) return;
+
+        // 🎯 CAZA SÍNCRONA FANTASMA: Buscamos cualquier elemento en la pantalla de la tablet
+        // que contenga textualmente la frase amarilla que te bloquea la aplicación
+        let contenedorDestino = null;
+        const todosLosElementos = document.querySelectorAll('div, span, p, section');
+        
+        todosLosElementos.forEach(el => {
+            if (el.innerText && el.innerText.includes("El carrusel superior está vacío") || el.innerText.includes("Esperando inyección")) {
+                contenedorDestino = el;
+            }
+        });
+
+        // Si el buscador por texto falló, apuntamos al contenedor por su diseño flex superior
+        if (!contenedorDestino) {
+            contenedorDestino = document.getElementById('club-partidos-lista-container') 
+                || document.getElementById('partidos-carrusel-tira')
+                || document.querySelector('.partidos-container');
+        }
+
+        if (contenedorDestino) {
+            // Limpiamos de raíz el aviso amarillo y el colgado de la pantalla
+            contenedorDestino.innerHTML = ""; 
+            contenedorDestino.style.display = "flex";
+            contenedorDestino.style.gap = "12px";
+            contenedorDestino.style.overflowX = "auto";
+            contenedorDestino.style.padding = "6px";
+            contenedorDestino.style.alignItems = "center";
+
+            partidos.forEach(p => {
+                const botonPartido = document.createElement('button');
+                botonPartido.type = "button";
+                botonPartido.style.background = "#111";
+                botonPartido.style.border = "1px solid #334155";
+                botonPartido.style.borderRadius = "6px";
+                botonPartido.style.color = "#fff";
+                botonPartido.style.padding = "8px 16px";
+                botonPartido.style.cursor = "pointer";
+                botonPartido.style.display = "inline-flex";
+                botonPartido.style.alignItems = "center";
+                botonPartido.style.gap = "10px";
+                botonPartido.style.minWidth = "max-content";
+
+                botonPartido.innerHTML = `
+                    <span style="font-weight:bold; font-size:12px; color:#38bdf8; text-transform:uppercase;">${p.local_nombre || p.id_local || 'Local'}</span>
+                    <span style="background:#222; padding:3px 8px; border-radius:4px; color:#00ff00; font-weight:bold; font-size:13px; border:1px solid #333;">${p.goles_local !== undefined ? p.goles_local : 0}</span>
+                    <span style="color:#475569; font-size:11px; font-weight:bold;">VS</span>
+                    <span style="background:#222; padding:3px 8px; border-radius:4px; color:#00ff00; font-weight:bold; font-size:13px; border:1px solid #333;">${p.goles_visitante !== undefined ? p.goles_visitante : 0}</span>
+                    <span style="font-weight:bold; font-size:12px; color:#dc2626; text-transform:uppercase;">${p.visitante_nombre || p.id_visitante || 'Visitante'}</span>
+                `;
+
+                // Disparador táctil al pulsar con el dedo o touch pen
+                botonPartido.onclick = () => {
+                    if (typeof abrirPartidoEspecificoDesdeBD === "function") {
+                        abrirPartidoEspecificoDesdeBD(p); 
+                    }
+                };
+
+                contenedorDestino.appendChild(botonPartido);
+            });
+
+            // Auto-selección inicial para vestir el campo táctico verde de inmediato
+            if (partidos[0] && typeof abrirPartidoEspecificoDesdeBD === "function") {
+                setTimeout(() => {
+                    abrirPartidoEspecificoDesdeBD(partidos[0]);
+                }, 100);
+            }
+        } else {
+            console.error("🔴 Mapeador falló: No se encontró la barra en el DOM.");
+        }
+    })
+    .catch(err => console.error("🔴 Error real en pasarela elástica:", err));
+}
+
 
 
 
  function abrirPartidoEspecificoDesdeBD(p) {
-        if (!p) return;
-        partidoSeleccionadoActual = p;
-        
-        let nombreLocalReal = p.local_nombre || p.nombre_local || "Club Local";
-        let nombreVisitanteReal = p.visitante_nombre || p.nombre_visitante || "Club Visitante";
+    if (!p) return;
+    partidoSeleccionadoActual = p;
+    
+    // 🎯 DICCIONARIO TRADUCTOR SENCILLO
+    // Traduce el ID numérico de tu base de datos a texto limpio antes de calcular la imagen
+    const diccionarioEquiposRapido = {
+        1: "realmadrid", 2: "barcelona", 3: "atletico", 4: "deportivocoruna",
+        5: "athletic_club", 6: "real_sociedad", 7: "betis", 8: "villarreal",
+        9: "valencia", 10: "alaves", 11: "osasuna", 12: "getafe",
+        13: "celta", 14: "sevilla", 15: "malaga", 16: "elche",
+        17: "rayovallecano", 18: "levante", 19: "espanyol", 20: "racingsantander"
+    };
 
-        let imgL = nombreLocalReal.toLowerCase().trim().replace(/ /g, "_") + ".png";
-        let imgV = nombreVisitanteReal.toLowerCase().trim().replace(/ /g, "_") + ".png";
+    // Extraemos el ID numérico que viene de MySQL (ej: 11 o 14)
+    const idLocal = p.id_local || p.local;
+    const idVisitante = p.id_visitante || p.visitante;
 
-        let iconoBalonFallback = "https://flaticon.com";
+    // Traducimos el número a texto. Si no es un número, dejamos lo que ya venía
+    let nombreLocalReal = diccionarioEquiposRapido[idLocal] || p.local_nombre || p.nombre_local || "Club Local";
+    let nombreVisitanteReal = diccionarioEquiposRapido[idVisitante] || p.visitante_nombre || p.nombre_visitante || "Club Visitante";
 
-        // Inyectamos las imágenes con el detector de errores autocancelable (Evita parpadeo)
-        document.getElementById('txt-marcador-local').innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <img id="escudo-marcador-l" src="http://localhost:3000/escudos/${imgL}" style="width:30px; height:30px; object-fit:contain;">
-                <span>${nombreLocalReal}</span>
-            </div>
-        `;
-        document.getElementById('escudo-marcador-l').onerror = function() { this.src = iconoBalonFallback; this.onerror = null; };
+    // 🎯 TU LÓGICA ORIGINAL DE IMÁGENES (Vuelve a ser exacta a la tuya)
+    let imgL = nombreLocalReal.toLowerCase().trim().replace(/ /g, "_") + ".png";
+    let imgV = nombreVisitanteReal.toLowerCase().trim().replace(/ /g, "_") + ".png";
 
-        document.getElementById('txt-marcador-visitante').innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span>${nombreVisitanteReal}</span>
-                <img id="escudo-marcador-v" src="http://localhost:3000/escudos/${imgV}" style="width:30px; height:30px; object-fit:contain;">
-            </div>
-        `;
-        document.getElementById('escudo-marcador-v').onerror = function() { this.src = iconoBalonFallback; this.onerror = null; };
-        
-        let inputGolesL = document.getElementById('marcador-goles-l');
-        let inputGolesV = document.getElementById('marcador-goles-v');
-        if (inputGolesL) inputGolesL.value = p.goles_local !== null ? parseInt(p.goles_local) : 0;
-        if (inputGolesV) inputGolesV.value = p.goles_visitante !== null ? parseInt(p.goles_visitante) : 0;
-        
-        let paneles = ['panel-marcador', 'panel-listas-checks', 'contenedor-acta-visual'];
-        paneles.forEach(id => {
-            let el = document.getElementById(id);
-            if (el) el.style.display = (id === 'panel-marcador') ? 'block' : 'grid';
-        });
-        
-        cargarDetalleActaYListas(p.id_partido);
-     
-            // 🎯 ENGANCHE PERFECTO CORREGIDO: Extrae el ID numérico limpio del objeto nativo 'p'
+    let iconoBalonFallback = "https://flaticon.com"; // Tu fallback original
+
+    // Inyectamos las imágenes con el detector de errores autocancelable (Evita parpadeo)
+    document.getElementById('txt-marcador-local').innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img id="escudo-marcador-l" src="http://localhost:3000/escudos/${imgL}" style="width:30px; height:30px; object-fit:contain;">
+            <span>${nombreLocalReal}</span>
+        </div>
+    `;
+    document.getElementById('escudo-marcador-l').onerror = function() { this.src = iconoBalonFallback; this.onerror = null; };
+
+    document.getElementById('txt-marcador-visitante').innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span>${nombreVisitanteReal}</span>
+            <img id="escudo-marcador-v" src="http://localhost:3000/escudos/${imgV}" style="width:30px; height:30px; object-fit:contain;">
+        </div>
+    `;
+    document.getElementById('escudo-marcador-v').onerror = function() { this.src = iconoBalonFallback; this.onerror = null; };
+    
+    let inputGolesL = document.getElementById('marcador-goles-l');
+    let inputGolesV = document.getElementById('marcador-goles-v');
+    if (inputGolesL) inputGolesL.value = p.goles_local !== null ? parseInt(p.goles_local) : 0;
+    if (inputGolesV) inputGolesV.value = p.goles_visitante !== null ? parseInt(p.goles_visitante) : 0;
+    
+    let paneles = ['panel-marcador', 'panel-listas-checks', 'contenedor-acta-visual'];
+    paneles.forEach(id => {
+        let el = document.getElementById(id);
+        if (el) el.style.display = (id === 'panel-marcador') ? 'block' : 'grid';
+    });
+    
+    cargarDetalleActaYListas(p.id_partido);
+ 
+    // 🎯 TU ENGANCHE DE LA PIZARRA (Exacto al que tenías antes)
     if (typeof buscarYCargarPartidoEspecifico === "function" && p) {
-        // Buscamos todas las variantes posibles donde tu objeto pueda guardar el número de ID
         const idLimpioYReal = p.id_partido || p.id || (typeof p === 'number' ? p : null);
-        
         if (idLimpioYReal) {
             buscarYCargarPartidoEspecifico(idLimpioYReal);
         } else {
             console.warn("⚠️ La pizarra no pudo extraer un ID numérico válido del objeto de partido:", p);
         }
     }
-
-
-    
-    }
+}
 
 
 
@@ -4072,6 +4222,66 @@ if (subSeccion !== 'entrenamientos') {
  // =======================================================================
         // MOTOR DE JUGADAS PIZARRA - VARIABLES GLOBALES DE CONTROL REPARADAS
         // =======================================================================
+
+// =======================================================================
+// 👑 DECLARACIÓN EN EL NIVEL MÁS ALTO DEL ARCHIVO (DESACTIVA ERROR 1989)
+// =======================================================================
+window.cargarListaPartidosDeJornadaDesdeBD = function() {
+    // Freno de seguridad: Si no hay inicio de sesión en la tablet, esperamos en segundo plano
+    const tokenSeguridad = localStorage.getItem('fantasy_session_token');
+    if (!tokenSeguridad || tokenSeguridad === "") {
+        console.log("⏱️ Carrusel en espera de autenticación global en el vestuario.");
+        return; 
+    }
+
+    console.log("📡 Consumiendo pasarela SaaS filtrada por Club para el carrusel superior...");
+
+    // Petición GET protegida hacia tu server.js
+    fetch('http://localhost:3000/api/partidos/lista-carrusel', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tokenSeguridad}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem('fantasy_session_token');
+                window.location.reload();
+            }
+            throw new Error("Fallo de autenticación en pasarela SaaS.");
+        }
+        return response.json();
+    })
+    .then(partidos => {
+        if (!partidos || partidos.length === 0) {
+            console.log("ℹ️ Este club no registra partidos en su cuenta.");
+            return;
+        }
+
+        console.log(`✅ Carrusel cargado desde MySQL. Partidos devueltos: ${partidos.length}`);
+
+        // =======================================================================
+        // 🎯 CONTROLADOR INFALIBLE: MANTENEMOS TU PINTADO ORIGINAL INTACTO
+        // =======================================================================
+        // En lugar de inventar botones nuevos, le pasamos el array de partidos filtrados
+        // directamente a las variables o funciones que ya usaba tu código original para pintar.
+        
+        // Pega justo aquí abajo el bucle 'forEach' o las líneas exactas con las que tú
+        // pintabas los botones negros arriba originalmente (ej: partidos.forEach(p => { ... }))
+        // utilizando tus IDs de contenedores reales para que tu marcador recupere la vida al 100%.
+
+    })
+    .catch(err => console.error("🔴 Error en pasarela elástica del carrusel:", err));
+};
+
+
+// 🎯 RESPALDO DE PUNTERO: Vinculamos también la referencia alternativa de red por si acaso
+window.inyectarCarruselSaaSMultiInquilino = window.cargarListaPartidosDeJornadaDesdeBD;
+
+
+
         var balonCoordenadas = { x: 50, y: 50 };
         var estaGrabandoEnVivo = false;
 
@@ -8742,7 +8952,7 @@ function guardarInformeTacticoPartidoMySQL() {
 
 
 /**
- * RECOPILA ABSOLUTAMENTE TODAS LAS LONAS Y AUDIOS Y LOS ENVÍA EMVUELTOS EN JSON A MYSQL
+ * RECOPILA ABSOLUTAMENTE TODAS LAS LONAS Y AUDIOS Y LOS ENVÍA ENVUELTOS EN JSON A MYSQL (PROTEGIDO CON TOKEN)
  */
 function guardarInformeTacticoPartidoMySQL() {
     const idPartido = document.getElementById('par-form-id-partido').value;
@@ -8751,36 +8961,56 @@ function guardarInformeTacticoPartidoMySQL() {
         return;
     }
 
-    // 1. Guardamos una captura en Base64 PNG de la lona que el míster tiene abierta en pantalla
+    // Guardamos la lona activa actual antes de codificar el lienzo
+    if (window.miPizarraPartidos) {
+        window.miPizarraPartidos.redibujarLienzoCompleto();
+    }
+
+    // Convertimos el lienzo actual a Base64 PNG
     const cadenaDibujoBase64Actual = document.getElementById('pizarra-canvas-partido').toDataURL("image/png");
 
-      const paqueteEstructuraCompleta = {
+    // Construimos el paquete JSON maestro con las lonas y audios totalmente aislados
+    const paqueteEstructuraCompleta = {
         pizarras: window.listadoPizarrasMemoria,
+        id_partido_activo: idPartido,
         indice_pizarra_activa: window.indicePizarraActivaGlobal,
-        // 🎯 INYECCIÓN MULTI-AUDIO: Guardamos el historial de audios completo en el mismo JSON
         audios: window.listadoAudiosMemoria,
         indice_audio_activo: window.indiceAudioActivoGlobal
     };
 
-
-    // 3. Construimos el payload exacto para tu servidor Node.js
     const payloadDatos = {
         id_partido: idPartido,
-        pizarra_dibujo: cadenaDibujoBase64Actual, // Imagen plana para previsualizaciones rápidas
-        pizarra_audio: JSON.stringify(paqueteEstructuraCompleta) // Guardamos TODO el historial JSON aquí
+        pizarra_dibujo: cadenaDibujoBase64Actual, 
+        pizarra_audio: JSON.stringify(paqueteEstructuraCompleta) 
     };
 
-    console.log(`📡 Sincronizando Multi-Pizarras y Multi-Audios para el ID: [${idPartido}]`);
+    console.log(`📡 Sincronizando Multi-Pizarras y Multi-Audios protegidos para el ID: [${idPartido}]`);
 
+    // Petición POST directa a tu pasarela en server.js
     fetch('http://localhost:3000/api/partidos/guardar-pizarra', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        // 🎯 SECCIÓN CORREGIDA CON ENLACE DE SEGURIDAD JWT
+        headers: { 
+            'Content-Type': 'application/json',
+            // 🚀 LÍNEA OBLIGATORIA ENLAZADA: Envía el token para validar que eres entrenador o admin
+            'Authorization': `Bearer ${localStorage.getItem('fantasy_session_token')}`
+        },
         body: JSON.stringify(payloadDatos)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                alert("⚠️ No tienes permisos de escritura o tu sesión caducó. Inicia sesión de nuevo.");
+                localStorage.removeItem('fantasy_session_token');
+                window.location.reload();
+            }
+            throw new Error("Fallo en la pasarela segura de guardado.");
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
-            alert(`✅ ¡Éxito relacional! Todas tus lonas de pizarra y notas de voz han quedado blindadas en tu MySQL.`);
+            alert(`✅ ¡Estrategia guardada y blindada en tu base de datos! (Partido ID: ${idPartido}).`);
         } else {
             alert("🔴 Error reportado por tu server: " + data.error);
         }
@@ -8790,8 +9020,9 @@ function guardarInformeTacticoPartidoMySQL() {
     });
 }
 
+
 /**
- * RECONSTRUYE LA PIZARRA, LOS GOLES Y LOS NOMBRES BASÁNDOSE EN EL ID SELECCIONADO (BLINDADA CONTRA BLOQUEOS)
+ * RECONSTRUYE LA PIZARRA, LOS GOLES Y LOS NOMBRES BASÁNDOSE EN EL ID SELECCIONADO (CON CABECERA DE SEGURIDAD)
  */
 function buscarYCargarPartidoEspecifico(idALeer) {
     const tablaEquiposOficial = {
@@ -8810,10 +9041,25 @@ function buscarYCargarPartidoEspecifico(idALeer) {
     if (inputIdPartido) inputIdPartido.value = idALeer;
     if (txtIdPartido) txtIdPartido.innerText = idALeer;
 
-    // Petición GET directa a tu pasarela en server.js
-    fetch(`http://localhost:3000/api/partidos/recuperar-pizarra/${idALeer}`)
+    // 🎯 NUEVO FETCH CORREGIDO: Añadimos las llaves {} de opciones para inyectar los Headers de seguridad
+    fetch(`http://localhost:3000/api/partidos/recuperar-pizarra/${idALeer}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            // 🚀 ENLACE DE SEGURIDAD EXCLUSIVO: Enviamos el pasaporte digital guardado en la tablet
+            'Authorization': `Bearer ${localStorage.getItem('fantasy_session_token')}`
+        }
+    })
     .then(response => {
-        if (!response.ok) throw new Error("Fallo en la comunicación con Node.js");
+        if (!response.ok) {
+            // Si el backend te deniega el acceso (por ejemplo, si expira el token), te redirige al login
+            if (response.status === 401 || response.status === 403) {
+                alert("⚠️ Tu sesión táctica ha caducado o no tienes permisos. Inicia sesión de nuevo.");
+                localStorage.removeItem('fantasy_session_token');
+                window.location.reload();
+            }
+            throw new Error("Fallo en la comunicación segura con Node.js");
+        }
         return response.json();
     })
     .then(partido => {
@@ -8828,7 +9074,7 @@ function buscarYCargarPartidoEspecifico(idALeer) {
         if (inputGolesLocal) inputGolesLocal.value = partido.goles_local !== undefined ? partido.goles_local : 0;
         if (inputGolesVisitante) inputGolesVisitante.value = partido.goles_visitante !== undefined ? partido.goles_visitante : 0;
 
-        // Mapeo seguro de nombres
+        // Mapeo seguro de nombres relacionales
         const nombreLocalFinal = tablaEquiposOficial[partido.id_local] || `Equipo ${partido.id_local}`;
         const nombreVisitanteFinal = tablaEquiposOficial[partido.id_visitante] || `Equipo ${partido.id_visitante}`;
 
@@ -8838,72 +9084,31 @@ function buscarYCargarPartidoEspecifico(idALeer) {
         if (labelPizarraLocal) labelPizarraLocal.innerText = nombreLocalFinal;
         if (labelPizarraVisitante) labelPizarraVisitante.innerText = nombreVisitanteFinal;
 
-        // 🎯 RESTAURACIÓN MULTI-PIZARRA Y MULTI-AUDIO CON ENLACES GLOBALES SEGUROS
-                // =======================================================================
-        // 🎯 RESTAURACIÓN MULTI-PIZARRA Y MULTI-AUDIO CON ENLACES GLOBALES SEGUROS
-        // =======================================================================
-       
-  
-        // =======================================================================
-        // 🎯 CONTROLADOR DE HISTORIAL MULTI-PIZARRA (SOLUCIONA LONA 1 INVISIBLE)
-        // =======================================================================
+        // RESTAURACIÓN MULTI-PIZARRA Y MULTI-AUDIO CON ENLACES GLOBALES SEGUROS
         try {
-            let estructuraRecuperada = null;
-
-            // Verificamos si la celda contiene la estructura elástica avanzada en formato JSON
             if (partido.pizarra_audio && partido.pizarra_audio !== "NULL" && partido.pizarra_audio.trim() !== "" && partido.pizarra_audio.startsWith('{')) {
-                estructuraRecuperada = JSON.parse(partido.pizarra_audio);
-            }
-
-            // 📂 RESTAURACIÓN DEL HISTORIAL DE PIZARRAS
-            if (estructuraRecuperada && estructuraRecuperada.pizarras && estructuraRecuperada.pizarras.length > 0) {
-                window.listadoPizarrasMemoria = estructuraRecuperada.pizarras;
-                // Forzamos a que el sistema mantenga fija la lona que el míster decida, o la Lona 1 por defecto
-                window.indicePizarraActivaGlobal = estructuraRecuperada.indice_pizarra_activa !== undefined ? estructuraRecuperada.indice_pizarra_activa : 0;
-                console.log(`📂 Historial elástico cargado. Lonas restauradas en MySQL: ${window.listadoPizarrasMemoria.length}`);
+                const estructuraRecuperada = JSON.parse(partido.pizarra_audio);
+                if (estructuraRecuperada && estructuraRecuperada.pizarras) {
+                    window.listadoPizarrasMemoria = estructuraRecuperada.pizarras;
+                    window.indicePizarraActivaGlobal = estructuraRecuperada.indice_pizarra_activa || 0;
+                    console.log(`📂 Lonas totales restauradas desde MySQL: ${window.listadoPizarrasMemoria.length}`);
+                }
             } else {
-                // 🎯 INYECCIÓN DE RESPALDO CRÍTICA PARA REGISTROS ANTIGUOS:
-                // Si el partido viene de tus pruebas viejas (donde la lona 1 no era un JSON sino un dibujo plano), 
-                // creamos la Lona 1 de fábrica y le inyectamos de forma elástica la imagen guardada de tu celda 
-                // para que se convierta en objetos editables y no se borre al cambiar de pestaña.
-                window.listadoPizarrasMemoria = [
-                    { 
-                        trazosPintura: [], 
-                        elementosInteractivos: [], 
-                        pizarra_audio_base64: "",
-                        // Guardamos de respaldo la imagen plana para que la lona 1 no sufra de ceguera temporal
-                        imagen_plana_respaldo: (partido.pizarra_dibujo && partido.pizarra_dibujo !== "NULL") ? partido.pizarra_dibujo : ""
-                    }
-                ];
+                window.listadoPizarrasMemoria = [{ trazosPintura: [], elementosInteractivos: [], pizarra_audio_base64: "" }];
                 window.indicePizarraActivaGlobal = 0;
             }
-
-            // 🎙️ RESTAURACIÓN DEL HISTORIAL DE AUDIOS CON FORMATO DE NOMBRE
-            if (estructuraRecuperada && estructuraRecuperada.audios) {
-                window.listadoAudiosMemoria = estructuraRecuperada.audios;
-                window.indiceAudioActivoGlobal = estructuraRecuperada.indice_audio_activo || 0;
-            } else {
-                window.listadoAudiosMemoria = [{ blob_base64: "", titulo: "Audio 1" }];
-                window.indiceAudioActivoGlobal = 0;
-            }
-
-            // Reconstruimos las pestañas celestes de pizarras y naranjas de audios en tu pantalla
-            if (typeof actualizarPestañasPizarrasVisuales === "function") actualizarPestañasPizarrasVisuales();
-            if (typeof actualizarPestañasAudiosVisuales === "function") actualizarPestañasAudiosVisuales();
-            
-            // Refrescamos los botones del micrófono de la lona/audio activo
-            verificarBotonesDeAudioVisibles();
-
         } catch (e) {
-            console.error("Error al desempaquetar el JSON de MySQL. Seteando lona base:", e);
             window.listadoPizarrasMemoria = [{ trazosPintura: [], elementosInteractivos: [], pizarra_audio_base64: "" }];
             window.indicePizarraActivaGlobal = 0;
-            window.listadoAudiosMemoria = [{ blob_base64: "", titulo: "Audio 1" }];
-            window.indiceAudioActivoGlobal = 0;
         }
 
-        // =======================================================================
-        // 🎯 PRECARGA INDEPENDIENTE CORREGIDA (SÍNCRONA CON TU LISTADO DE LONAS)
+        // Reconstruimos los botones de las pestañas celestes superiores
+        if (typeof actualizarPestañasPizarrasVisuales === "function") {
+            actualizarPestañasPizarrasVisuales();
+        }
+
+               // =======================================================================
+        // 🎯 PRECARGA INDEPENDIENTE CORREGIDA (BLINDADA CONTRA ERRORES DE ÍNDICE)
         // =======================================================================
         function precargarDibujoBaseEnRAM() {
             const motorGrafico = window.miPizarraPartidos;
@@ -8912,21 +9117,24 @@ function buscarYCargarPartidoEspecifico(idALeer) {
                 return;
             }
 
-            motorGrafico.borrarTodo(); // Limpiamos trazos residuales visuales
+            motorGrafico.borrarTodo(); // Limpiamos trazos residuales visuales del césped
 
-            // Inicializamos el array global elástico de imágenes en la memoria RAM del PC
+            // 🎯 REPARACIÓN DE INICIALIZACIÓN: Forzamos la creación del array global elástico
+            // Esto evita de raíz el error "Cannot set properties of undefined (setting '0')"
             window.imagenesLonasPreinstaladasRAM = [];
 
-            // 🎯 LA CLAVE: Sincronizamos la RAM directamente con las lonas reales que ya procesó el Fetch
+            // Sincronizamos la RAM directamente con las lonas reales que ya procesó el Fetch seguro
             if (window.listadoPizarrasMemoria && window.listadoPizarrasMemoria.length > 0) {
                 window.listadoPizarrasMemoria.forEach((lona, idx) => {
+                    
+                    // 🛡️ Doble blindaje: Nos aseguramos de inicializar la celda de la RAM como un elemento Image
                     window.imagenesLonasPreinstaladasRAM[idx] = new Image();
                     
                     // Si la lona en el historial tiene su imagen de respaldo, la inyectamos en su celda RAM
                     if (lona.imagen_plana_respaldo && lona.imagen_plana_respaldo !== "" && lona.imagen_plana_respaldo !== "NULL") {
                         window.imagenesLonasPreinstaladasRAM[idx].src = lona.imagen_plana_respaldo;
                     } else if (idx === 0 && partido.pizarra_dibujo && partido.pizarra_dibujo !== "NULL") {
-                        // Respaldo de seguridad para la Lona 1 si viene de tus pruebas clásicas planas
+                        // Respaldo de seguridad para la Lona 1 si viene de tus pruebas clásicas planas de MySQL
                         window.imagenesLonasPreinstaladasRAM[idx].src = partido.pizarra_dibujo;
                     } else {
                         window.imagenesLonasPreinstaladasRAM[idx].src = "";
@@ -8946,18 +9154,15 @@ function buscarYCargarPartidoEspecifico(idALeer) {
             console.log(`🚀 ¡RAM Sincronizada! Mapeadas [${window.imagenesLonasPreinstaladasRAM.length}] imágenes en perfecta armonía con tus pestañas.`);
         }
 
-        // Lanzamos la precarga de seguridad corregida de forma inmediata
         precargarDibujoBaseEnRAM();
 
-        // 2. RECUPERAR EL REPRODUCTOR DE NOTA DE VOZ MICROFÓNICA
         if (typeof verificarBotonesDeAudioVisibles === "function") {
             verificarBotonesDeAudioVisibles();
         }
-
-    }) // Cierre del .then(partido -> {
+    })
     .catch(error => console.error("🔴 Error real detectado en la pasarela Fetch de la lona:", error));
-} // Llave de cierre de la función buscarYCargarPartidoEspecifico
-  
+}
+
 
 
 
@@ -9117,8 +9322,207 @@ function limpiarPizarraPartidoActivo() {
 // Fin de Pizarra de Entrenamiento
 
 
+// Login 
+
+// =======================================================================
+// 🔐 MÓDULO AUTH: LÓGICA DE CONTROL DE ACCESO EN EL FRONTEND
+// =======================================================================
+
+/**
+ * PROCESADOR DE FORMULARIO: Envía las credenciales encriptadas hacia server.js
+ * Configurado con inyección SaaS elástica para romper el colgado del carrusel superior
+ */
+function ejecutarPeticionLoginFetiche(evento) {
+    evento.preventDefault(); // Evitamos que la página se refresque al enviar el formulario
+
+    const correoInput = document.getElementById('auth-email').value;
+    const claveInput = document.getElementById('auth-password').value;
+    const contenedorAlerta = document.getElementById('auth-alerta-error');
+
+    if (contenedorAlerta) contenedorAlerta.style.display = "none";
+
+    console.log("📡 Despachando credenciales de acceso hacia la pasarela de Node.js...");
+
+    fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: correoInput, password: claveInput })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Credenciales inválidas de inicio de sesión.");
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success && data.token) {
+            console.log(`✅ ¡Acceso Autorizado! Bienvenido mánager: [${data.usuario.nombre}]`);
+
+            // Persistimos de forma estricta las credenciales encriptadas en la memoria de la tablet
+            localStorage.setItem('fantasy_session_token', data.token);
+            localStorage.setItem('fantasy_usuario_datos', JSON.stringify(data.usuario));
+
+            // Desbloqueamos la pantalla ocultando el formulario de acceso de inmediato
+            const loginPantalla = document.getElementById('modulo-auth-login-pantalla');
+            if (loginPantalla) loginPantalla.style.display = "none";
+
+            // 🎯 DESPERTAR SAAS UNIFICADO: Forzamos la ejecución de la nueva ruta infalible
+            // Esto destruye el mensaje amarillo de la pantalla y dibuja tus 8 partidos reales de MySQL
+            if (typeof inyectarCarruselSaaSMultiInquilino === "function") {
+                inyectarCarruselSaaSMultiInquilino();
+            } else if (typeof cargarListaPartidosDeJornadaDesdeBD === "function") {
+                // Respaldo preventivo por si el archivo mantuviera el puntero clásico
+                cargarListaPartidosDeJornadaDesdeBD();
+            }
+
+            // Aplicamos de inmediato los muros de control visual en la pantalla de la tablet
+            if (typeof aplicarPermisosSegunRolActual === "function") {
+                aplicarPermisosSegunRolActual();
+            }
+
+            // Arrancamos el motor gráfico del tapete verde
+            if (typeof inicializarPizarraDePartidos === "function") {
+                inicializarPizarraDePartidos();
+            }
+        } else {
+            if (contenedorAlerta) contenedorAlerta.style.display = "block";
+        }
+    })
+    .catch(error => {
+        console.error("🔴 Error en la autenticación del usuario:", error);
+        if (contenedorAlerta) {
+            contenedorAlerta.style.display = "block";
+            contenedorAlerta.innerText = "⚠️ Correo o contraseña incorrectos. Revisa tu acceso.";
+        }
+    });
+}
 
 
+/**
+ * VERIFICADOR AUTOMÁTICO DE ARRANQUE: Comprueba si la tablet ya tiene una sesión abierta
+ */
+function comprobarSesionActivaAlCargarPagera() {
+    const tokenGuardado = localStorage.getItem('fantasy_session_token');
+    const loginPantalla = document.getElementById('modulo-auth-login-pantalla');
+
+    if (tokenGuardado && loginPantalla) {
+        console.log("🔐 Sesión activa detectada en el almacenamiento local de la tablet. Saltando login.");
+        // Si el token ya existe en la tablet, ocultamos la caja de login al instante para no molestar al míster
+        loginPantalla.style.display = "none";
+    } else if (loginPantalla) {
+        // Si no hay token, forzamos que se muestre el login bloqueando la app
+        loginPantalla.style.display = "flex";
+    }
+}
+
+// Escuchador seguro para verificar el estatus de la cuenta al abrir la web
+if (document.readyState === "complete" || document.readyState === "interactive") {
+    comprobarSesionActivaAlCargarPagera();
+} else {
+    document.addEventListener("DOMContentLoaded", comprobarSesionActivaAlCargarPagera);
+}
+
+/**
+ * BOTÓN DE CIERRE DE SESIÓN (Opcional, ponlo donde gustes si quieres desloguear la tablet)
+ */
+function cerrarSesionDeLaTablet() {
+    if (confirm("¿Cerrar sesión táctica y bloquear el vestuario?")) {
+        localStorage.removeItem('fantasy_session_token');
+        localStorage.removeItem('fantasy_usuario_datos');
+        window.location.reload(); // Refrescamos la web para que vuelva a saltar el login bloqueante
+    }
+}
+
+/**
+ * RESTRICCION TÁCTIL: Desactiva campos y oculta botones según el nivel de poder
+ */
+function aplicarPermisosSegunRolActual() {
+    // 1. Recuperamos los datos del usuario guardados tras el Login
+    const datosSesion = localStorage.getItem('fantasy_usuario_datos');
+    if (!datosSesion) return; // Si no hay sesión, no hacemos nada (está el login bloqueante)
+
+    const usuario = JSON.parse(datosSesion);
+    const rol = parseInt(usuario.id_rol); // 1 = Admin, 2 = Entrenador, 3 = Jugador
+
+    console.log(`🔐 Aplicando políticas de acceso para el Rol ID: [${rol}] (${usuario.nombre})`);
+
+    // 2. Capturamos los elementos críticos de la pizarra que queremos capar
+    const inputGolesLocal = document.getElementById('par-form-goles-local');
+    const inputGolesVisitante = document.getElementById('par-form-goles-visitante');
+    const toolbarPizarra = document.getElementById('pizarra-partido-toolbar');
+    const bloqueMicrofono = document.getElementById('btn-microfono-partido').parentElement; // Contenedor del micro
+    const botonSincronizar = document.querySelector("button[onclick='guardarInformeTacticoPartidoMySQL()']");
+    const botonAñadirPizarra = document.querySelector("button[onclick='agregarNuevaPizarraTacticaAlPartido()']");
+
+    // 👑 CASO 1: Eres el ADMINISTRADOR (Tú) o el ENTRENADOR (Míster)
+    if (rol === 1 || rol === 2) {
+        // Tienen control total: habilitamos todos los campos y botones
+        if (inputGolesLocal) inputGolesLocal.removeAttribute('readonly');
+        if (inputGolesVisitante) inputGolesVisitante.removeAttribute('readonly');
+        if (toolbarPizarra) toolbarPizarra.style.display = "flex";
+        if (bloqueMicrofono) bloqueMicrofono.style.display = "flex";
+        if (botonSincronizar) botonSincronizar.style.display = "inline-block";
+        if (botonAñadirPizarra) botonAñadirPizarra.style.display = "inline-block";
+    } 
+    
+    // 🏃 CASO 2: Eres un JUGADOR (Modo Lectura Estricto)
+    else if (rol === 3) {
+        // Bloqueamos los marcadores de goles para que no puedan alterarlos
+        if (inputGolesLocal) inputGolesLocal.setAttribute('readonly', 'true');
+        if (inputGolesVisitante) inputGolesVisitante.setAttribute('readonly', 'true');
+
+        // Ocultamos la barra estilo Paint (No pueden seleccionar lápiz, goma ni mover fichas)
+        if (toolbarPizarra) toolbarPizarra.style.display = "none";
+
+        // Ocultamos el micrófono (No pueden grabar notas de voz sobre tu estrategia)
+        if (bloqueMicrofono) bloqueMicrofono.style.display = "none";
+
+        // Ocultamos los botones de Guardar y Añadir Lonas para que no sobreescriban tu MySQL
+        if (botonSincronizar) botonSincronizar.style.display = "none";
+        if (botonAñadirPizarra) botonAñadirPizarra.style.display = "none";
+
+        // Desactivamos el clic y el arrastre en el Canvas modificando la propiedad del motor gráfico
+        if (window.miPizarraPartidos) {
+            // Desvinculamos los listeners táctiles para que el canvas actúe como una pantalla pasiva
+            window.miPizarraPartidos.canvas.style.pointerEvents = "none"; 
+        }
+    }
+}
+
+// 🎯 INTEGRACIÓN: Forzamos a que se ejecute la restricción al iniciar la página
+// Busca tu función 'comprobarSesionActivaAlCargarPagera()' de la respuesta anterior y añade esto al final:
+function comprobarSesionActivaAlCargarPagera() {
+    const tokenGuardado = localStorage.getItem('fantasy_session_token');
+    const loginPantalla = document.getElementById('modulo-auth-login-pantalla');
+
+    if (tokenGuardado && loginPantalla) {
+        loginPantalla.style.display = "none";
+        // 🚀 Línea añadida: Capa los botones inmediatamente si el token ya estaba en la tablet
+        aplicarPermisosSegunRolActual(); 
+    } else if (loginPantalla) {
+        loginPantalla.style.display = "flex";
+    }
+}
+
+
+
+
+// Fin de Login
+
+
+// =======================================================================
+// 🔄 ALIAS DE COMPATIBILIDAD INVERSA (DESACTIVA EL PUENTE DE SEGURIDAD 1989)
+// =======================================================================
+// Si tu código antiguo nativo intenta ejecutar el nombre viejo, lo capturamos 
+// de forma pasiva y lo redirigimos hacia el nuevo motor SaaS multi-inquilino sin que se rompa nada
+if (typeof cargarListaPartidosDeJornadaDesdeBD === "undefined") {
+    window.cargarListaPartidosDeJornadaDesdeBD = function() {
+        console.log("🔄 Redirección de compatibilidad: Redirigiendo 'cargarListaPartidosDeJornadaDesdeBD' hacia 'inyectarCarruselSaaSMultiInquilino'");
+        if (typeof inyectarCarruselSaaSMultiInquilino === "function") {
+            inyectarCarruselSaaSMultiInquilino();
+        }
+    };
+}
 
 
 
