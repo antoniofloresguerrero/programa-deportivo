@@ -8,8 +8,8 @@ app.use(express.static(__dirname));
 
 app.use(cors());
 // CORRECCIÓN RADICAL: Eleva el límite de carga a 50MB para soportar películas de fotogramas continuos gigantes
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // INDICA A NODE QUE EXPONGA TU CARPETA DE FOTOS DE FORMA SEGURA EN INTERNET
 const path = require('path'); // Pon esta línea arriba del todo si no la tienes

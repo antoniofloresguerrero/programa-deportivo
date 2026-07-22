@@ -222,8 +222,8 @@
         <a href="#" onclick="cambiarSeccion('sec-equipos-galeria')">🛡️ Equipos</a>
         <a href="#" onclick="cambiarSeccion('partidos')">🏟️ Partidos</a>
         <a href="#" onclick="cambiarSeccion('clasificacion')">🏆 Clasificación</a>
-        <!-- CORRECCIÓN: Viaja a actas y ejecuta el cálculo en vivo eliminando el error de id nulo -->
-        <a href="#" onclick="cambiarSeccion('partidos'); calcularAnalisisQuinielaEnVivo();">🔮 Realizar Quiniela</a>
+       
+        <!-- <a href="#" onclick="cambiarSeccion('partidos'); calcularAnalisisQuinielaEnVivo();">🔮 Realizar Quiniela</a>-->
     </div>
 
 
@@ -438,102 +438,137 @@
 
 <!-- Pizarra de Entrenamiento-->
 
-
 <!-- =======================================================================
-     ⚔️ SECCIÓN EXCLUSIVA: PIZARRA TÁCTICA Y PREPARACIÓN DE PARTIDOS V2
+     ⚔️ SECCIÓN EXCLUSIVA: EDITOR TÁCTICO MULTI-PIZARRA PARA PARTIDOS
      ======================================================================= -->
 <div id="sub-sec-club-partidos-tactica" style="display: block; width: 100%; box-sizing: border-box; font-family: sans-serif; color: #fff;">
-    <div style="display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; width: 100%;">
+    
+    <!-- CONTENEDOR PRINCIPAL A ANCHO COMPLETO (1 SOLA COLUMNA) -->
+    <div style="background: rgba(15, 15, 15, 0.85); border-radius: 10px; border: 1px solid #333; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); box-sizing: border-box; width: 100%;">
         
-        <!-- COLUMNA IZQUIERDA: MARCADOR INTEGRADO Y CANVAS -->
-        <div style="background: rgba(15, 15, 15, 0.85); border-radius: 10px; border: 1px solid #333; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); box-sizing: border-box;">
-            
-            <h3 style="color:#38bdf8; margin-top:0; font-size:14px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:10px; letter-spacing:0.5px;">
-                ⚔️ Planificación Táctica (Partido ID: <span id="par-txt-id-partido">Nuevo</span>)
-            </h3>
-            
-            <!-- ID oculto del partido para sincronizar los cambios -->
-            <input type="hidden" id="par-form-id-partido" value="">
+        <h3 style="color:#38bdf8; margin-top:0; font-size:14px; text-transform:uppercase; border-bottom:1px solid #333; padding-bottom:10px; letter-spacing:0.5px;">
+            ⚔️ Planificación Táctica (Partido ID: <span id="par-txt-id-partido">Nuevo</span>)
+        </h3>
+        
+        <!-- IDs ocultos necesarios para sincronizar la persistencia -->
+        <input type="hidden" id="par-form-id-partido" value="">
+        <input type="hidden" id="par-form-pizarra-activa-index" value="0">
 
-            <!-- Campos de Configuración del Encuentro (Jornada y Marcador en paralelo) -->
-            <div style="display: grid; grid-template-columns: 140px 1fr; gap: 15px; margin-bottom: 15px; align-items: end;">
-                <div>
-                    <label style="color:#aaa; font-size:10px; font-weight:bold; display:block; margin-bottom:4px;">Jornada:</label>
-                    <input type="number" id="par-form-jornada" value="1" min="1" readonly style="width:100%; background:#222; border:1px solid #444; color:#ff9900; padding:6px; border-radius:4px; box-sizing:border-box; font-weight:bold; text-align:center;">
-                </div>
-                
-                <!-- Bloque de Marcador con Nombres Dinámicos -->
-                <div style="display: flex; align-items: center; justify-content: center; gap: 12px; background: rgba(0,0,0,0.4); padding: 4px 15px; border-radius: 4px; border: 1px solid #222; height: 32px; box-sizing: border-box;">
-                    <!-- Nombre Local -->
-                    <span id="txt-nombre-local" style="font-size: 11px; font-weight: bold; color: #38bdf8; min-width: 100px; text-align: right; text-transform: uppercase; letter-spacing: 0.5px;">LOCAL</span>
-                    
-                    <!-- Input Gol Local -->
-                    <input type="number" id="par-form-goles-local" value="0" min="0" style="width:40px; background:#111; border:1px solid #444; color:#fff; padding:3px; text-align:center; border-radius:4px; font-weight:bold; font-size:12px;">
-                    
-                    <span style="color: #555; font-size: 10px; font-weight: bold;">VS</span>
-                    
-                    <!-- Input Gol Visitante -->
-                    <input type="number" id="par-form-goles-visitante" value="0" min="0" style="width:40px; background:#111; border:1px solid #444; color:#fff; padding:3px; text-align:center; border-radius:4px; font-weight:bold; font-size:12px;">
-                    
-                    <!-- Nombre Visitante -->
-                    <span id="txt-nombre-visitante" style="font-size: 11px; font-weight: bold; color: #dc2626; min-width: 100px; text-align: left; text-transform: uppercase; letter-spacing: 0.5px;">VISITANTE</span>
-                </div>
+        <!-- Cabecera de Configuración (Jornada y Marcador) -->
+        <div style="display: grid; grid-template-columns: 140px 1fr; gap: 15px; margin-bottom: 15px; align-items: end;">
+            <div>
+                <label style="color:#aaa; font-size:10px; font-weight:bold; display:block; margin-bottom:4px;">Jornada:</label>
+                <input type="number" id="par-form-jornada" value="1" min="1" readonly style="width:100%; background:#222; border:1px solid #444; color:#ff9900; padding:6px; border-radius:4px; box-sizing:border-box; font-weight:bold; text-align:center;">
             </div>
-
-            <!-- Sistema de Audio integrado -->
-            <div style="display: flex; gap: 8px; align-items: center; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 15px;">
-                <button id="btn-microfono-partido" type="button" style="background:#334155; color:#fff; padding:8px 14px; font-weight:bold; border-radius:4px; font-size:11px; cursor:pointer; border:none;" onclick="conmutarGrabacionAudioPartido()">🎤 Grabar Instrucción de Voz</button>
-                <button id="btn-reproducir-audio-partido" type="button" style="background:#ff9900; color:#000; padding:8px 14px; font-weight:bold; border-radius:4px; font-size:11px; cursor:pointer; border:none; display:none;" onclick="reproducirAudioPartidoEnMemoria()">🔊 Escuchar Dictado</button>
-                <button id="btn-eliminar-audio-partido" type="button" style="background:#ff4444; color:#fff; padding:8px 14px; font-weight:bold; border-radius:4px; font-size:11px; cursor:pointer; border:none; display:none;" onclick="borrarAudioPartidoEnMemoria()">🗑️ Eliminar Voz</button>
-                <span id="txt-estado-audio" style="font-size: 11px; color: #888;">Sin nota de voz asignada</span>
-            </div>
-
-            <!-- Caja contenedora de la Pizarra Táctica -->
-            <div style="margin: 15px 0; background: rgba(20, 25, 35, 0.85); border-radius: 8px; border: 1px solid #38bdf8; padding: 15px; box-sizing: border-box; width: 100%;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <strong style="color:#38bdf8; font-size:12px; text-transform:uppercase; letter-spacing:0.5px;">📋 Pizarra de Alineación y Movimientos Tácticos</strong>
-                    <button class="btn-g" type="button" style="background:#ff4444; color:#fff; border:none; padding:4px 12px; font-size:10px; font-weight:bold; border-radius:3px; cursor:pointer;" onclick="limpiarPizarraPartidoActivo()">🧹 Borrar Todo</button>
-                </div>
-                <div style="display: flex; gap: 12px; background: #0f172a; padding: 10px; border-radius: 6px; box-sizing: border-box;">
-                    <!-- BARRA DE HERRAMIENTAS LATERAL ESTILO PAINT (Con más separación vertical) -->
-                    <div id="pizarra-partido-toolbar" style="display: flex; flex-direction: column; gap: 10px; background: rgba(30, 41, 59, 0.7); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); min-width: 135px; box-sizing: border-box;">
-                        <span style="color:#aaa; font-size:9px; font-weight:bold; text-transform:uppercase; text-align:center; display:block; border-bottom:1px solid #444; padding-bottom:6px;">Trazados</span>
-                        <button id="par-tool-trazo" class="btn-g active" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:10px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('trazo', this)">✏️ Línea Pase</button>
-                        <button id="par-tool-goma" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:10px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('goma', this)">🧽 Goma</button>
-                        
-                        <span style="color:#aaa; font-size:9px; font-weight:bold; text-transform:uppercase; text-align:center; display:block; border-bottom:1px solid #444; padding:6px 0 4px 0;">Plantilla</span>
-                        <button id="par-tool-local" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:10px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('jugador-local', this)">🔵 Nuestro XI</button>
-                        <button id="par-tool-rival" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:10px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('jugador-visitante', this)">🔴 Rival</button>
-                        <button id="par-tool-balon" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:10px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('balon', this)">⚽ Balón</button>
-                    </div>
-
-                    <!-- EL LIENZO DEL CANVAS -->
-                    <canvas id="pizarra-canvas-partido" width="750" height="460" style="flex-grow:1; border: 1px solid #334155; border-radius: 4px; cursor: crosshair; background: #1e3a1e;"></canvas>
-                </div>
+            
+            <div style="display: flex; align-items: center; justify-content: center; gap: 12px; background: rgba(0,0,0,0.4); padding: 4px 15px; border-radius: 4px; border: 1px solid #222; height: 32px; box-sizing: border-box;">
+                <span id="txt-nombre-local" style="font-size: 11px; font-weight: bold; color: #38bdf8; min-width: 100px; text-align: right; text-transform: uppercase;">LOCAL</span>
+                <input type="number" id="par-form-goles-local" value="0" min="0" style="width:40px; background:#111; border:1px solid #444; color:#fff; padding:3px; text-align:center; border-radius:4px; font-weight:bold; font-size:12px;">
+                <span style="color: #555; font-size: 10px; font-weight: bold;">VS</span>
+                <input type="number" id="par-form-goles-visitante" value="0" min="0" style="width:40px; background:#111; border:1px solid #444; color:#fff; padding:3px; text-align:center; border-radius:4px; font-weight:bold; font-size:12px;">
+                <span id="txt-nombre-visitante" style="font-size: 11px; font-weight: bold; color: #dc2626; min-width: 100px; text-align: left; text-transform: uppercase;">VISITANTE</span>
             </div>
         </div>
+
+       <!-- Sistema Multi-Audio Integrado y Calibrado (MySQL) -->
+<div style="display: flex; flex-direction: column; gap: 10px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 15px;">
+    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <button id="btn-microfono-partido" type="button" style="background:#334155; color:#fff; padding:8px 14px; font-weight:bold; border-radius:4px; font-size:11px; cursor:pointer; border:none;" onclick="conmutarGrabacionAudioPartido()">🎤 Grabar Instrucción de Voz</button>
+      <!-- <button id="btn-reproducir-audio-partido" type="button" style="background:#ff9900; color:#000; padding:8px 14px; font-weight:bold; border-radius:4px; font-size:11px; cursor:pointer; border:none; display:none;" onclick="reproducirAudioPartidoEnMemoria()">🔊 Escuchar Dictado</button>
+        <button id="btn-eliminar-audio-partido" type="button" style="background:#ff4444; color:#fff; padding:8px 14px; font-weight:bold; border-radius:4px; font-size:11px; cursor:pointer; border:none; display:none;" onclick="borrarAudioPartidoEnMemoria()">🗑️ Eliminar Voz</button> -->
         
-        <!-- COLUMNA DERECHA: REGISTRO Y PREPARACIÓN DE ACCIONES (MYSQL) -->
-        <div style="background: rgba(15, 15, 15, 0.85); border-radius: 10px; border: 1px solid #333; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); box-sizing: border-box; height: 100%;">
-            <strong style="color:#ff9900; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:4px;">💾 Control de Guardado</strong>
-            <small style="color:#888; font-size:10px; display:block; margin-bottom:15px;">Guarda la estrategia y el dictado de audio para este partido en la base de datos.</small>
+        <!-- Botón para expandir audios solicitado -->
+        <button type="button" style="background:#0284c7; color:#fff; padding:6px 12px; font-weight:bold; border-radius:4px; font-size:11px; cursor:pointer; border:none; margin-left: auto;" onclick="agregarNuevoBloqueDeAudioAlPartido()">➕ Añadir Audio</button>
+    </div>
+
+    <!-- Contenedor dinámico de Pestañas de Audios 
+    <div style="display: flex; gap: 6px; align-items: center; border-top: 1px solid #222; padding-top: 8px; margin-top: 2px;">
+        <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase;">Notas Grabadas:</span>
+        <div id="par-contenedor-pestañas-audios" style="display: flex; gap: 4px;">
+            <!-- Se poblará por software: [Audio 1] [Audio 2] -->
+            <!--<button class="btn-audio-tab active" style="background:#ff9900; color:#000; font-size:10px; font-weight:bold; padding:4px 8px; border:none; border-radius:3px; cursor:pointer;">Audio 1</button>
+        </div> -->
+        <!-- Contenedor dinámico de Pestañas de Audios -->
+    <div style="display: flex; gap: 6px; align-items: center; border-top: 1px solid #222; padding-top: 8px; margin-top: 2px;">
+        <span style="color:#888; font-size:10px; font-weight:bold; text-transform:uppercase;">Notas Grabadas:</span>
+        <div id="par-contenedor-pestañas-audios" style="display: flex; gap: 4px;">
+            <button class="btn-audio-tab active" style="background:#ff9900; color:#000; font-size:10px; font-weight:bold; padding:4px 8px; border:none; border-radius:3px; cursor:pointer;">Audio 1</button>
+        </div>
+        
+        <!-- 🎯 ¡AQUÍ VA LA ETIQUETA QUE FALTA! Ponla justo en este rincón -->
+        <span id="txt-estado-audio" style="font-size: 11px; color: #888; margin-left: auto; font-style: italic;">Sin nota de voz asignada</span>
+    </div>
+    
+</div>
+
+<style>
+    .btn-audio-tab { background: #1e293b; color: #888; font-size: 10px; font-weight: bold; padding: 4px 10px; border: 1px solid #334155; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+    .btn-audio-tab.active { background: #ff9900 !important; color: #000 !important; border-color: #ff9900 !important; }
+</style>
+
+
+        <!-- Caja de la Pizarra Táctica -->
+        <div style="margin: 15px 0; background: rgba(20, 25, 35, 0.85); border-radius: 8px; border: 1px solid #38bdf8; padding: 15px; box-sizing: border-box; width: 100%;">
             
-            <button type="button" style="width:100%; background:#38bdf8; color:#000; font-weight:bold; font-size:12px; padding:10px; border-radius:4px; border:none; cursor:pointer; margin-bottom:10px;" onclick="guardarInformeTacticoPartidoMySQL()">💾 Sincronizar con Base de Datos</button>
-            
-            <div style="border-top: 1px solid #333; padding-top:15px; margin-top:5px;">
-                <span style="color:#aaa; font-size:10px; font-weight:bold; display:block; margin-bottom:4px;">Estatus Relacional:</span>
-                <p style="color:#888; font-size:11px; margin:0; line-height:1.4;">La pizarra se acopla de manera automática al partido que selecciones en tu carrusel superior.</p>
+            <!-- BARRA DE ACCIONES SUPERIOR REUBICADA -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button class="btn-g" type="button" style="background:#0284c7; color:#fff; border:none; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:4px; cursor:pointer;" onclick="agregarNuevaPizarraTacticaAlPartido()">➕ Añadir Pizarra</button>
+                    <span style="color:#aaa; font-size:11px; font-weight:bold; margin-left: 5px;">Pizarras:</span>
+                    <div id="par-contenedor-pestañas-pizarras" style="display: flex; gap: 4px;">
+                        <button class="btn-pizarra-tab active" onclick="cambiarDePizarraFilaIndex(0)">Lona 1</button>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" style="background:#22c55e; color:#fff; font-weight:bold; font-size:11px; padding:6px 14px; border-radius:4px; border:none; cursor:pointer;" onclick="guardarInformeTacticoPartidoMySQL()">💾 Sincronizar con Base de Datos</button>
+                    <button class="btn-g" type="button" style="background:#ff4444; color:#fff; border:none; padding:6px 12px; font-size:11px; font-weight:bold; border-radius:4px; cursor:pointer;" onclick="limpiarPizarraPartidoActivo()">🧹 Borrar Todo</button>
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px; background: #0f172a; padding: 10px; border-radius: 6px; box-sizing: border-box;">
+                
+                <!-- BARRA DE HERRAMIENTAS LATERAL CON MÓDULO "CORRER" -->
+                <div id="pizarra-partido-toolbar" style="display: flex; flex-direction: column; gap: 20px; background: rgba(30, 41, 59, 0.7); padding: 15px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); min-width: 145px; box-sizing: border-box;">
+                    
+                    <!-- BLOQUE 1: TRAZOS -->
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <span style="color:#aaa; font-size:9px; font-weight:bold; text-transform:uppercase; text-align:center; display:block; border-bottom:1px solid #444; padding-bottom:6px; margin-bottom: 2px;">Trazados</span>
+                        <button id="par-tool-trazo" class="btn-g active" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:12px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('trazo', this)">✏️ Línea Pase</button>
+                        
+                        <!-- 🎯 NUEVA OPCIÓN SOLICITADA: TRAZO DE DESMARQUE -->
+                        <button id="par-tool-correr" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:12px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('correr', this)">🏃 Correr (Desmarque)</button>
+                        
+                        <button id="par-tool-goma" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:12px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('goma', this)">🧽 Goma</button>
+                    </div>
+                    
+                    <!-- BLOQUE 2: PLANTILLA -->
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <span style="color:#aaa; font-size:9px; font-weight:bold; text-transform:uppercase; text-align:center; display:block; border-bottom:1px solid #444; padding-bottom:6px; margin-bottom: 2px;">Plantilla</span>
+                        <button id="par-tool-local" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:12px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('jugador-local', this)">🔵 Nuestro XI</button>
+                        <button id="par-tool-rival" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:12px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('jugador-visitante', this)">🔴 Rival</button>
+                        <button id="par-tool-balon" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:12px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('balon', this)">⚽ Balón</button>
+                    </div>
+                </div>
+
+                <!-- EL LIENZO DEL CANVAS -->
+                <canvas id="pizarra-canvas-partido" width="750" height="460" style="flex-grow:1; border: 1px solid #334155; border-radius: 4px; cursor: crosshair; background: #1e3a1e;"></canvas>
             </div>
         </div>
     </div>
 </div>
 
-
+<!-- ESTILOS DE CONTROL VISUAL PARA LAS PESTAÑAS MULTI-PIZARRA -->
 <style>
     #pizarra-partido-toolbar .btn-g.active { background: #38bdf8 !important; color: #000 !important; border-color: #38bdf8 !important; font-weight: bold; }
-    .btn-partido-item { transition: all 0.2s ease; }
-    .btn-partido-item:hover { background: #22d3ee !important; color: #000 !important; border-color: #22d3ee !important; }
+    .btn-pizarra-tab { background: #1e293b; color: #888; font-size: 10px; font-weight: bold; padding: 5px 12px; border: 1px solid #334155; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+    .btn-pizarra-tab.active { background: #38bdf8 !important; color: #000 !important; border-color: #38bdf8 !important; }
 </style>
+
+<script>
+
+
+</script>
+
 
 
 
@@ -5528,10 +5563,7 @@ if (subSeccion !== 'entrenamientos') {
 
 
 
- function reproducirAudioTemporalEnMemoria() {
-            if (!window.audioNotaBase64Actual) return;
-            var audio = new Audio(window.audioNotaBase64Actual); audio.play();
-        }
+ 
 
         function purgarAudioTemporalEnMemoria() {
             window.audioNotaBase64Actual = "";
@@ -7635,12 +7667,7 @@ function resetearFormularioYBotonesAccion() {
 //
 
 
-// =======================================================================
-// VARIABLES GLOBALES DE AUDIO (MEDIA RECORDER PARA NOTAS VERBALES)
-// =======================================================================
-let grabadorMediosPartido = null;
-let fragmentosAudioPartido = [];
-let cadenaAudioBase64Global = ""; // Guarda el audio final en formato Base64 para MySQL
+
 
 // =======================================================================
 // MOTOR GRÁFICO DE LA PIZARRA TÁCTICA
@@ -7672,43 +7699,7 @@ class MotorPizarraPartidos {
     }
 
     /**
-     * Enlaza los escuchadores para capturar ratón y eventos multitáctiles
-     */
-    inicializarEventos() {
-        // --- EVENTOS CON RATÓN (ORDENADOR) ---
-        this.canvas.addEventListener('mousedown', (e) => this.alIniciarPresion(this.obtenerCoordenadas(e)));
-        this.canvas.addEventListener('mousemove', (e) => this.alMoverPresion(this.obtenerCoordenadas(e)));
-        this.canvas.addEventListener('mouseup', () => this.alFinalizarPresion());
-        this.canvas.addEventListener('mouseleave', () => this.alFinalizarPresion());
-
-        // --- EVENTOS PANTALLAS TÁCTILES (MÓVILES / TABLETS) ---
-        this.canvas.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) {
-                e.preventDefault(); 
-                this.alIniciarPresion(this.obtenerCoordenadas(e.touches[0]));
-            }
-        }, { passive: false });
-
-        this.canvas.addEventListener('touchmove', (e) => {
-            if (e.touches.length === 1) {
-                e.preventDefault();
-                this.alMoverPresion(this.obtenerCoordenadas(e.touches[0]));
-            }
-        }, { passive: false });
-
-        this.canvas.addEventListener('touchend', () => this.alFinalizarPresion());
-    }
-
-    /**
-     * Mapea la posición exacta X / Y dentro del recuadro del Canvas
-     */
-    obtenerCoordenadas(evento) {
-        const rect = this.canvas.getBoundingClientRect();
-        return {
-            x: evento.clientX - rect.left,
-            y: evento.clientY - rect.top
-        };
-    }
+  
 
     /**
      * Alterna la clase active visual en el menú lateral estilo Paint
@@ -7723,8 +7714,9 @@ class MotorPizarraPartidos {
             botonPresionado.classList.add('active');
         }
     }
-    /**
-     * DIBUJA EL TERRENO DE JUEGO Y REPRODUCE LOS TRAZOS Y OBJETOS GUARDADOS
+      /**
+     * DIBUJA EL TERRENO DE JUEGO Y REPRODUCE LOS TRAZOS Y OBJETOS DE LA PIZARRA ACTIVA
+     * OPTIMIZADO: Evita la ceguera de la Lona 1 forzando el estampe del respaldo de imagen
      */
     redibujarLienzoCompleto() {
         const w = this.canvas.width;
@@ -7734,68 +7726,95 @@ class MotorPizarraPartidos {
         this.ctx.fillStyle = '#1b4332'; 
         this.ctx.fillRect(0, 0, w, h);
 
-        // 2. Líneas Blancas del Campo (Con un toque de transparencia)
+        // 2. Líneas Blancas del Campo
         this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
         this.ctx.lineWidth = 2.5;
+        this.ctx.setLineDash([]); 
 
-        // Línea exterior general
         this.ctx.strokeRect(25, 25, w - 50, h - 50);
-        
-        // Línea de medio campo
         this.ctx.beginPath();
         this.ctx.moveTo(w / 2, 25);
         this.ctx.lineTo(w / 2, h - 25);
         this.ctx.stroke();
-        
-        // Círculo central
         this.ctx.beginPath();
         this.ctx.arc(w / 2, h / 2, 65, 0, Math.PI * 2);
         this.ctx.stroke();
-        
-        // Punto central de saque
         this.ctx.beginPath();
         this.ctx.arc(w / 2, h / 2, 3, 0, Math.PI * 2);
         this.ctx.fillStyle = '#ffffff';
         this.ctx.fill();
-
-        // Áreas de Portería Izquierda (Grande y Chica)
         this.ctx.strokeRect(25, h / 2 - 110, 95, 220); 
         this.ctx.strokeRect(25, h / 2 - 45, 35, 90);    
-
-        // Áreas de Portería Derecha (Grande y Chica)
         this.ctx.strokeRect(w - 120, h / 2 - 110, 95, 220); 
         this.ctx.strokeRect(w - 60, h / 2 - 45, 35, 90);    
 
-        // 3. Renderizado de Trazos Libres de Pintura (Lápiz y Goma)
-        this.trazosPintura.forEach(trazo => {
-            if (trazo.puntos.length < 2) return;
+        // Aseguramos existencia de la memoria elástica global
+        if (!window.listadoPizarrasMemoria || window.listadoPizarrasMemoria.length === 0) {
+            window.listadoPizarrasMemoria = [{ trazosPintura: [], elementosInteractivos: [], pizarra_audio_base64: "", imagen_plana_respaldo: "" }];
+        }
+        if (window.indicePizarraActivaGlobal === undefined || window.indicePizarraActivaGlobal < 0 || window.indicePizarraActivaGlobal >= window.listadoPizarrasMemoria.length) {
+            window.indicePizarraActivaGlobal = 0;
+        }
+
+        const datosLonaActual = window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal];
+        if (!datosLonaActual) return;
+
+        // 🎯 3. ESCUDO DE RESCATE INTEGRAL (SI LA LONA FUE RESETEADA POR EL SCRIPT FANTASMA)
+        // Si el array vectorial está vacío pero guardamos la fotografía Base64 de lo que pintaste antes,
+        // la estampamos inmediatamente para que el usuario no vea el campo en blanco al cambiar de pestaña.
+        if (datosLonaActual.imagen_plana_respaldo && datosLonaActual.imagen_plana_respaldo !== "" && datosLonaActual.trazosPintura.length === 0 && datosLonaActual.elementosInteractivos.length === 0) {
+            const imgRescate = new Image();
+            imgRescate.src = datosLonaActual.imagen_plana_respaldo;
+            imgRescate.onload = () => {
+                this.ctx.drawImage(imgRescate, 0, 0);
+                console.log(`📸 Foto de seguridad estampada con éxito en la lona: [Lona ${window.indicePizarraActivaGlobal + 1}]`);
+            };
+            return; // Cortamos el flujo aquí porque la foto ya contiene todo el dibujo congelado
+        }
+
+        // 4. Renderizado de Trazos Vectoriales Normales
+        datosLonaActual.trazosPintura.forEach(trazo => {
+            if (!trazo || !trazo.puntos || trazo.puntos.length < 2) return;
             this.ctx.beginPath();
             this.ctx.moveTo(trazo.puntos[0].x, trazo.puntos[0].y);
             for (let i = 1; i < trazo.puntos.length; i++) {
-                this.ctx.lineTo(trazo.puntos[i].x, trazo.puntos[i].y);
+                if (trazo.puntos[i]) this.ctx.lineTo(trazo.puntos[i].x, trazo.puntos[i].y);
             }
             this.ctx.lineCap = 'round';
             this.ctx.lineJoin = 'round';
             this.ctx.lineWidth = trazo.grosor;
-            this.ctx.strokeStyle = trazo.tipo === 'goma' ? '#1b4332' : trazo.color;
+            
+            if (trazo.tipo === 'correr') {
+                this.ctx.strokeStyle = '#ff9900';   
+                this.ctx.setLineDash([8, 6]);        
+            } else if (trazo.tipo === 'goma') {
+                this.ctx.strokeStyle = '#1b4332';   
+                this.ctx.setLineDash([]);           
+            } else {
+                this.ctx.strokeStyle = trazo.color || '#ffffff'; 
+                this.ctx.setLineDash([]);           
+            }
             this.ctx.stroke();
         });
 
-        // 4. Renderizado de Elementos Móviles (Fichas y Balón)
-        this.elementosInteractivos.forEach(el => {
+        this.ctx.setLineDash([]); 
+
+        // 5. Renderizado de Elementos Móviles Normales
+        datosLonaActual.elementosInteractivos.forEach(el => {
+            if (!el) return;
             this.ctx.save();
             this.ctx.beginPath();
 
             if (el.tipo === 'jugador-local') {
                 this.ctx.arc(el.x, el.y, el.radio, 0, Math.PI * 2);
-                this.ctx.fillStyle = '#0284c7'; // Azul táctico
+                this.ctx.fillStyle = '#0284c7'; 
                 this.ctx.fill();
                 this.ctx.lineWidth = 2;
                 this.ctx.strokeStyle = '#ffffff';
                 this.ctx.stroke();
             } else if (el.tipo === 'jugador-visitante') {
                 this.ctx.arc(el.x, el.y, el.radio, 0, Math.PI * 2);
-                this.ctx.fillStyle = '#dc2626'; // Rojo rival
+                this.ctx.fillStyle = '#dc2626'; 
                 this.ctx.fill();
                 this.ctx.lineWidth = 2;
                 this.ctx.strokeStyle = '#ffffff';
@@ -7807,7 +7826,6 @@ class MotorPizarraPartidos {
                 this.ctx.lineWidth = 1.5;
                 this.ctx.strokeStyle = '#000000';
                 this.ctx.stroke();
-                // Dibujo de costuras internas tipo balón
                 this.ctx.moveTo(el.x - 5, el.y); this.ctx.lineTo(el.x + 5, el.y);
                 this.ctx.moveTo(el.x, el.y - 5); this.ctx.lineTo(el.x, el.y + 5);
                 this.ctx.stroke();
@@ -7815,27 +7833,105 @@ class MotorPizarraPartidos {
             this.ctx.restore();
         });
     }
+
+
+
+      /**
+     * 1. CAPTURA DE EVENTOS INTEGRADA Y LIMPIA (PASA COORDENADAS PURAS)
+     */
+    inicializarEventos() {
+        // --- INTERFAZ PARA RATÓN (ORDENADOR) ---
+        this.canvas.addEventListener('mousedown', (e) => this.alIniciarPresion(this.obtenerCoordenadas(e)));
+        this.canvas.addEventListener('mousemove', (e) => this.alMoverPresion(this.obtenerCoordenadas(e)));
+        this.canvas.addEventListener('mouseup', () => this.alFinalizarPresion());
+        this.canvas.addEventListener('mouseleave', () => this.alFinalizarPresion());
+
+        // --- INTERFAZ TÁCTIL (MÓVILES / TABLETS) ---
+        this.canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                e.preventDefault(); 
+                this.alIniciarPresion(this.obtenerCoordenadas(e));
+            }
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1) {
+                e.preventDefault();
+                this.alMoverPresion(this.obtenerCoordenadas(e));
+            }
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchend', () => this.alFinalizarPresion());
+    }
+
+      /**
+     * TRADUCTOR DE COORDENADAS CON CORRECCIÓN DE ESCALA Y DESFASE GRÁFICO
+     * Resuelve el problema de que los iconos aparezcan movidos o desplazados
+     */
+    obtenerCoordenadas(evento) {
+        // 1. Detectamos si es un evento táctil de móvil o un clic de ratón
+        const e = (evento.touches && evento.touches.length > 0) ? evento.touches[0] : evento;
+        
+        // 2. Escaneamos la posición visual exacta del rectángulo en la pantalla actual
+        const rect = this.canvas.getBoundingClientRect();
+        
+        // 3. 🎯 CALIBRACIÓN MATEMÁTICA ANCHURA Y ALTURA (Escala los píxeles de dibujo)
+        // Dividimos el ancho/alto de desarrollo (750x460) entre el espacio visual real que ocupa en Chrome
+        const escalaX = this.canvas.width / rect.width;
+        const escalaY = this.canvas.height / rect.height;
+        
+        // 4. Retornamos las coordenadas locales exactas aplicándole el multiplicador de escala
+        return {
+            x: (e.clientX - rect.left) * escalaX,
+            y: (e.clientY - rect.top) * escalaY
+        };
+    }
+
+
     /**
-     * GESTIÓN DE ACCIONES AL PRESIONAR EL LIENZO
+     * 3. RECEPTOR DE PRESIÓN (RECIBE COORDENADAS YA FILTRADAS)
+     */
+     /**
+   
+
+
+  
+
+     /**
+     * GESTIÓN DE ACCIONES AL PRESIONAR EL LIENZO TÁCTICO
      */
     alIniciarPresion(pos) {
+        if (!window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal]) {
+            window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal] = { trazosPintura: [], elementosInteractivos: [], pizarra_audio_base64: "" };
+        }
+        const datosLonaActual = window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal];
+
         const elementoDetectado = this.buscarElementoBajoCursor(pos);
         
-        // 1. Si detecta una ficha y no está la goma activa, se prepara para arrastrarla
+        // A. Si toca una ficha y no es la goma, activa modo arrastrar
         if (elementoDetectado && this.herramientaActiva !== 'goma') {
             this.objetoArrastrandose = elementoDetectado;
             return;
         }
 
-        // 2. Si está la goma activa y toca una ficha, la elimina de la pizarra
-        if (this.herramientaActiva === 'goma' && elementoDetectado) {
-            this.elementosInteractivos = this.elementosInteractivos.filter(el => el.id !== elementoDetectado.id);
-            this.redibujarLienzoCompleto();
-            return;
+        // B. Borrado estático por aproximación con la goma
+        if (this.herramientaActiva === 'goma') {
+            const radioBorradoGoma = this.grosorGoma || 25;
+            const fichasAntesDeBorrar = datosLonaActual.elementosInteractivos.length;
+            
+            datosLonaActual.elementosInteractivos = datosLonaActual.elementosInteractivos.filter(el => {
+                const distancia = Math.sqrt((pos.x - el.x) ** 2 + (pos.y - el.y) ** 2);
+                return distancia > (el.radio + radioBorradoGoma);
+            });
+            
+            if (datosLonaActual.elementosInteractivos.length !== fichasAntesDeBorrar) {
+                this.redibujarLienzoCompleto();
+                return;
+            }
         }
 
-        // 3. Si está el lápiz o la goma libre en el césped, activa el modo dibujo tradicional
-        if (this.herramientaActiva === 'trazo' || this.herramientaActiva === 'goma') {
+        // C. 🎯 COMPROBACIÓN REPARADA: Solo si es estrictamente un trazado activa el pincel de líneas
+        if (this.herramientaActiva === 'trazo' || this.herramientaActiva === 'correr' || this.herramientaActiva === 'goma') {
             this.dibujando = true;
             const nuevoTrazo = {
                 tipo: this.herramientaActiva,
@@ -7843,33 +7939,39 @@ class MotorPizarraPartidos {
                 color: this.colorPincel,
                 grosor: this.herramientaActiva === 'goma' ? this.grosorGoma : this.grosorPincel
             };
-            this.trazosPintura.push(nuevoTrazo);
+            datosLonaActual.trazosPintura.push(nuevoTrazo);
             return;
         }
 
-        // 4. Si es una herramienta de ficha (local, rival, balón), crea un objeto nuevo en esa posición
+        // D. Si no es un trazo, es obligatoriamente una FICHA (Nuestro XI, Rival o Balón)
         this.crearNuevoObjetoEnLienzo(this.herramientaActiva, pos);
     }
 
     /**
-     * GESTIÓN DE MOVIMIENTOS MIENTRAS SE MANTIENE PRESIONADO EL LIENZO
+     * INSERTA UNA NUEVA FICHA EN LA COORDENADA LIMPIA
      */
-    alMoverPresion(pos) {
-        // Caso A: Dibujando trazos libres en el campo
-        if (this.dibujando) {
-            const trazoActual = this.trazosPintura[this.trazosPintura.length - 1];
-            trazoActual.puntos.push(pos);
-            this.redibujarLienzoCompleto();
-            return;
-        }
+    crearNuevoObjetoEnLienzo(tipo, pos) {
+        // Doble blindaje: Si la herramienta activa es pintar líneas, cancelamos la creación
+        if (tipo === 'trazo' || tipo === 'correr' || tipo === 'goma') return;
 
-        // Caso B: Desplazando un jugador o balón seleccionado
-        if (this.objetoArrastrandose) {
-            this.objetoArrastrandose.x = pos.x;
-            this.objetoArrastrandose.y = pos.y;
-            this.redibujarLienzoCompleto();
+        if (!window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal]) {
+            window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal] = { trazosPintura: [], elementosInteractivos: [], pizarra_audio_base64: "" };
         }
+        const datosLonaActual = window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal];
+
+        const nuevoElemento = {
+            id: Date.now() + Math.random(),
+            tipo: tipo, // 'jugador-local', 'jugador-visitante', 'balon'
+            x: pos.x,
+            y: pos.y,
+            radio: tipo === 'balon' ? 10 : 15
+        };
+
+        datosLonaActual.elementosInteractivos.push(nuevoElemento);
+        this.redibujarLienzoCompleto(); // Forzamos el repintado del césped para que aparezca la ficha
+        console.log(`✨ Ficha colocada correctamente en lona: ${tipo}`);
     }
+
 
     /**
      * LIBERA LAS BANDERAS DE ARRASTRE AL SOLTAR EL CURSOR O EL DEDO
@@ -7879,23 +7981,65 @@ class MotorPizarraPartidos {
         this.objetoArrastrandose = null;
     }
 
-    /**
-     * INSERTA UNA NUEVA FICHA EN LA BASE DE DATOS VOLÁTIL DE LA PIZARRA
+  
+     /**
+     * GESTIÓN DE MOVIMIENTOS EN TIEMPO REAL: REPARADO CON RADIO DE COLISIÓN AMPLIADO PARA LA GOMA
      */
-    crearNuevoObjetoEnLienzo(tipo, pos) {
-        if (tipo === 'trazo' || tipo === 'goma') return;
+    alMoverPresion(pos) {
+        const datosLonaActual = listadoPizarrasMemoria[indicePizarraActivaGlobal];
+        if (!datosLonaActual) return;
 
-        const nuevoElemento = {
-            id: Date.now() + Math.random(),
-            tipo: tipo,
-            x: pos.x,
-            y: pos.y,
-            radio: tipo === 'balon' ? 10 : 15
-        };
+        if (this.dibujando) {
+            const trazoActual = datosLonaActual.trazosPintura[datosLonaActual.trazosPintura.length - 1];
+            if (trazoActual && trazoActual.puntos) {
+                trazoActual.puntos.push(pos);
+            }
 
-        this.elementosInteractivos.push(nuevoElemento);
-        this.redibujarLienzoCompleto();
+            // 🎯 ENFOQUE DE BORRADO DE ALTA SENSIBILIDAD:
+            // Si estás borrando, calculamos la distancia a todas las fichas. Si pasas a una distancia
+            // menor que el grosor de la goma, la ficha se elimina instantáneamente sin fallar por velocidad.
+            if (this.herramientaActiva === 'goma') {
+                const radioBorradoGoma = this.grosorGoma || 25; // Usamos el grosor físico de tu borrador
+                
+                datosLonaActual.elementosInteractivos = datosLonaActual.elementosInteractivos.filter(el => {
+                    const distanciaFichaCursor = Math.sqrt((pos.x - el.x) ** 2 + (pos.y - el.y) ** 2);
+                    // Si el cursor pasó lo suficientemente cerca de la ficha, la borramos (retorna false para filtrar)
+                    const loTocaLaGoma = distanciaFichaCursor <= (el.radio + radioBorradoGoma);
+                    if (loTocaLaGoma) {
+                        console.log(`🧽 Goma eliminó icono tipo: [${el.tipo}] por proximidad física.`);
+                    }
+                    return !loTocaLaGoma;
+                });
+            }
+
+            this.redibujarLienzoCompleto();
+            return;
+        }
+
+        if (this.objetoArrastrandose) {
+            this.objetoArrastrandose.x = pos.x;
+            this.objetoArrastrandose.y = pos.y;
+            this.redibujarLienzoCompleto();
+        }
     }
+
+
+    /**
+     * LIMPIEZA TOTAL DE LA CAPA EN USO
+     */
+    borrarTodo() {
+        const datosLonaActual = listadoPizarrasMemoria[indicePizarraActivaGlobal];
+        if (datosLonaActual) {
+            // Vaciamos por completo tanto las fichas como las líneas de esta lona
+            datosLonaActual.elementosInteractivos = [];
+            datosLonaActual.trazosPintura = [];
+        }
+        this.redibujarLienzoCompleto();
+        console.log(`🧹 Lona ${indicePizarraActivaGlobal + 1} reseteada por completo.`);
+    }
+
+  
+
 
     /**
      * BUSCA MATEMÁTICAMENTE SI HAY UN JUGADOR O BALÓN BAJO EL CURSOR
@@ -7909,84 +8053,332 @@ class MotorPizarraPartidos {
         return null;
     }
 
-    /**
-     * REINICIA POR COMPLETO LOS ELEMENTOS GRÁFICOS Y TRAZOS
-     */
-    borrarTodo() {
-        this.elementosInteractivos = [];
-        this.trazosPintura = [];
-        this.redibujarLienzoCompleto();
+  
+
+}
+
+// =======================================================================
+// VARIABLES GLOBALES MULTI-PIZARRA Y MULTI-AUDIO REPARADAS
+// =======================================================================
+// =======================================================================
+// 🎙️ DECLARACIÓN DE SEGURIDAD ABSOLUTA DEL MICROFÓNO EN WINDOW
+// =======================================================================
+// Forzamos al navegador a registrar las variables en la raíz de la memoria 
+// para solucionar el ReferenceError antes de que se ejecute cualquier botón
+if (typeof window.grabadorMediosPartido === "undefined") {
+    window.grabadorMediosPartido = null;
+}
+if (typeof window.fragmentosAudioPartido === "undefined") {
+    window.fragmentosAudioPartido = [];
+}
+
+
+// Declaramos todas las variables en la cabecera para que no den fallos de inicialización abajo
+if (typeof miPizarraPartidos === "undefined") {
+    window.miPizarraPartidos = null;
+}
+
+// Al declararlas aquí arriba, todas las funciones de abajo podrán leerlas sin errores de inicialización
+if (typeof listadoPizarrasMemoria === "undefined") {
+    window.listadoPizarrasMemoria = [
+        { trazosPintura: [], elementosInteractivos: [], pizarra_audio_base64: "" }
+    ];
+}
+if (typeof indicePizarraActivaGlobal === "undefined") {
+    window.indicePizarraActivaGlobal = 0;
+}
+
+// Base de datos elástica para múltiples notas de voz independientes
+if (typeof window.listadoAudiosMemoria === "undefined" || window.listadoAudiosMemoria === null) {
+    window.listadoAudiosMemoria = [""]; // Empieza con el Audio 1 vacío por defecto
+}
+if (typeof window.indiceAudioActivoGlobal === "undefined") {
+    window.indiceAudioActivoGlobal = 0; // Puntero al audio que está escuchando el míster
+}
+
+
+
+
+
+
+/**
+ * ➕ AÑADE UNA NUEVA RANURA TÁCTICA CONGELANDO PRIMERO LA ANTERIOR EN MEMORIA
+ * Corrige de forma definitiva que la Lona 1 se quede en blanco al saltar a la Lona 2
+ */
+function agregarNuevaPizarraTacticaAlPartido() {
+    // 1. Inicialización de emergencia si la estructura base no existiera
+    if (!window.listadoPizarrasMemoria || window.listadoPizarrasMemoria.length === 0) {
+        window.listadoPizarrasMemoria = [{ trazosPintura: [], elementosInteractivos: [], pizarra_audio_base64: "" }];
+    }
+
+    // 🎯 2. CONGELADOR DE SEGURIDAD CRÍTICO:
+    // Antes de avanzar a la lona nueva, obligamos a que lo que esté pintado actualmente en el Canvas 
+    // se convierta en una imagen Base64 estática y la guardamos en la lona vieja (Índice actual).
+    // Esto garantiza que tus trazos de la Lona 1 queden blindados en memoria y no se borren.
+    if (window.indicePizarraActivaGlobal !== undefined && window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal]) {
+        const canvasElement = document.getElementById('pizarra-canvas-partido');
+        if (canvasElement) {
+            // Guardamos la captura de la lona actual en su slot correspondiente
+            window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal].imagen_plana_respaldo = canvasElement.toDataURL("image/png");
+            console.log(`💾 Lona ${window.indicePizarraActivaGlobal + 1} guardada preventivamente en memoria.`);
+        }
+    }
+
+    // 3. Insertamos la Lona nueva limpia en el array elástico
+    window.listadoPizarrasMemoria.push({
+        trazosPintura: [],
+        elementosInteractivos: [],
+        pizarra_audio_base64: "",
+        imagen_plana_respaldo: ""
+    });
+
+    // 4. Cambiamos el puntero global hacia la lona recién creada (la última)
+    window.indicePizarraActivaGlobal = window.listadoPizarrasMemoria.length - 1;
+    
+    const inputIndexOculto = document.getElementById('par-form-pizarra-activa-index');
+    if (inputIndexOculto) inputIndexOculto.value = window.indicePizarraActivaGlobal;
+
+    // Refrescamos las pestañas celestes superiores del HTML para que aparezca "Lona 3", "Lona 4", etc.
+    if (typeof actualizarPestañasPizarrasVisuales === "function") {
+        actualizarPestañasPizarrasVisuales();
+    }
+    
+    // 5. Limpiamos visualmente el lienzo e instruimos al motor a pintar el césped limpio para trabajar
+    if (window.miPizarraPartidos) {
+        window.miPizarraPartidos.ctx.clearRect(0, 0, window.miPizarraPartidos.canvas.width, window.miPizarraPartidos.canvas.height);
+        window.miPizarraPartidos.redibujarLienzoCompleto();
+    }
+    
+    // Reseteamos el estatus de los botones del audio para la nueva lona en blanco
+    if (typeof verificarBotonesDeAudioVisibles === "function") {
+        verificarBotonesDeAudioVisibles();
+    }
+    
+    console.log(`➕ Ranura táctica expandida con éxito. Capas totales en memoria: ${window.listadoPizarrasMemoria.length}`);
+}
+
+
+
+function cambiarDePizarraFilaIndex(nuevoIndex) {
+    if (!window.listadoPizarrasMemoria || nuevoIndex < 0 || nuevoIndex >= window.listadoPizarrasMemoria.length) return;
+
+    // Congelador de seguridad de la lona anterior
+    const canvasElement = document.getElementById('pizarra-canvas-partido');
+    if (canvasElement && window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal]) {
+        window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal].imagen_plana_respaldo = canvasElement.toDataURL("image/png");
+    }
+
+    window.indicePizarraActivaGlobal = nuevoIndex;
+
+    if (typeof actualizarPestañasPizarrasVisuales === "function") actualizarPestañasPizarrasVisuales();
+    if (window.miPizarraPartidos) window.miPizarraPartidos.redibujarLienzoCompleto();
+
+    // 🎯 ADICIÓN DE CONECTIVIDAD: Al cambiar de lona, reconstruimos las pestañas naranjas de sus audios y los botones
+    if (typeof actualizarPestañasAudiosVisuales === "function") {
+        actualizarPestañasAudiosVisuales();
+    }
+    if (typeof verificarBotonesDeAudioVisibles === "function") {
+        verificarBotonesDeAudioVisibles();
     }
 }
+
+
+
+
+/**
+ * RECONSTRUYE EL HTML DE LAS PESTAÑAS DE LONAS Y PERMITE CAMBIARLES EL NOMBRE CON DOBLE CLIC
+ */
+function actualizarPestañasPizarrasVisuales() {
+    const contenedorTabs = document.getElementById('par-contenedor-pestañas-pizarras');
+    if (!contenedorTabs) return;
+
+    // Vaciamos el contenedor anterior para evitar duplicidades
+    contenedorTabs.innerHTML = "";
+
+    window.listadoPizarrasMemoria.forEach((pizarra, index) => {
+        // Aseguramos que la lona tenga una propiedad título por defecto de fábrica si no existe
+        if (!pizarra.titulo) {
+            pizarra.titulo = `Lona ${index + 1}`;
+        }
+
+        // Creamos un mini contenedor para agrupar el botón de la lona y su botón de borrar
+        const divGrupo = document.createElement('div');
+        divGrupo.style.display = "inline-flex";
+        divGrupo.style.alignItems = "center";
+        divGrupo.style.background = (index === window.indicePizarraActivaGlobal) ? "#38bdf8" : "#1e293b";
+        divGrupo.style.borderRadius = "4px";
+        divGrupo.style.padding = "2px 6px";
+        divGrupo.style.gap = "6px";
+        divGrupo.style.border = "1px solid #334155";
+
+        // 1. Botón Principal de acceso a la lona
+        const botonTab = document.createElement('button');
+        botonTab.type = "button";
+        botonTab.style.background = "transparent";
+        botonTab.style.border = "none";
+        botonTab.style.color = (index === window.indicePizarraActivaGlobal) ? "#000" : "#888";
+        botonTab.style.fontSize = "10px";
+        botonTab.style.fontWeight = "bold";
+        botonTab.style.cursor = "pointer";
+        
+        // 🎯 RENDERIZADO DEL NOMBRE: Mostramos el título personalizado guardado en memoria
+        botonTab.innerText = pizarra.titulo;
+        
+        // Acción de un solo clic: abre y visualiza esa lona en el césped
+        botonTab.onclick = () => cambiarDePizarraFilaIndex(index);
+
+        // 🎯 ACCIÓN DE DOBLE CLIC SOLICITADA: Abre un prompt para renombrar la lona al vuelo
+        botonTab.ondblclick = (e) => {
+            e.stopPropagation(); // Evitamos conflictos de propagación del clic
+            const nuevoNombreLona = prompt(`Introduce el nuevo nombre para esta lona táctica:`, botonTab.innerText);
+            if (nuevoNombreLona && nuevoNombreLona.trim() !== "") {
+                window.listadoPizarrasMemoria[index].titulo = nuevoNombreLona.trim();
+                actualizarPestañasPizarrasVisuales(); // Refrescamos las pestañas con el nuevo texto
+            }
+        };
+
+        // Texto informativo flotante de ayuda pasiva
+        botonTab.title = "Haz doble clic para cambiar el nombre de esta lona táctica";
+        divGrupo.appendChild(botonTab);
+
+        // 2. Botón de Eliminar Lona (Mantiene tu funcionalidad de aspa elástica intacta)
+        if (window.listadoPizarrasMemoria.length > 1) {
+            const botonEliminarLona = document.createElement('span');
+            botonEliminarLona.innerText = "❌";
+            botonEliminarLona.style.fontSize = "9px";
+            botonEliminarLona.style.cursor = "pointer";
+            botonEliminarLona.style.padding = "2px";
+            botonEliminarLona.style.color = (index === window.indicePizarraActivaGlobal) ? "#000" : "#ef4444";
+            botonEliminarLona.title = `Eliminar por completo esta lona`;
+            
+            botonEliminarLona.onclick = (e) => {
+                e.stopPropagation(); 
+                const tituloLonaActual = pizarra.titulo || `Lona ${index + 1}`;
+                if (confirm(`¿Estás seguro de que deseas eliminar permanentemente la pestaña [${tituloLonaActual}] de este partido?`)) {
+                    window.listadoPizarrasMemoria.splice(index, 1);
+                    if (window.indicePizarraActivaGlobal >= window.listadoPizarrasMemoria.length) {
+                        window.indicePizarraActivaGlobal = window.listadoPizarrasMemoria.length - 1;
+                    }
+                    actualizarPestañasPizarrasVisuales();
+                    if (window.miPizarraPartidos) {
+                        window.miPizarraPartidos.redibujarLienzoCompleto();
+                    }
+                    console.log(`🗑️ Lona eliminada. Pizarras restantes: ${window.listadoPizarrasMemoria.length}`);
+                }
+            };
+            divGrupo.appendChild(botonEliminarLona);
+        }
+
+        contenedorTabs.appendChild(divGrupo);
+    });
+}
+
+
+ /* GRABA LA INSTRUCCIÓN DE VOZ ASOCIÁNDOLA A LA PESTAÑA DE AUDIO SELECCIONADA
+ * Blindada al 100% contra errores de inicialización y definición en archivos grandes
+ */
+function conmutarGrabacionAudioPartido() {
+    // 🎯 DOBLE BLINDAJE CRÍTICO: Registramos de inmediato las propiedades en la raíz de window 
+    // por si el orden del script de más de 8000 líneas las dejó como indefinidas
+    if (typeof window.grabadorMediosPartido === "undefined") window.grabadorMediosPartido = null;
+    if (typeof window.fragmentosAudioPartido === "undefined") window.fragmentosAudioPartido = [];
+
+    const btnMicro = document.getElementById('btn-microfono-partido');
+    const txtEstado = document.getElementById('txt-estado-audio');
+
+    // Evaluamos el estado usando estrictamente el puntero window global absoluto
+    if (!window.grabadorMediosPartido || window.grabadorMediosPartido.state === "inactive") {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                // Instanciamos el grabador nativo directamente en las celdas globales de window
+                window.grabadorMediosPartido = new MediaRecorder(stream);
+                window.fragmentosAudioPartido = [];
+
+                window.grabadorMediosPartido.ondataavailable = (e) => {
+                    if (e.data.size > 0) window.fragmentosAudioPartido.push(e.data);
+                };
+
+                                // Busca esta sección exacta dentro del onstop de tu función del micrófono:
+                window.grabadorMediosPartido.onstop = () => {
+                    const audioBlob = new Blob(window.fragmentosAudioPartido, { type: 'audio/wav' });
+                    const lector = new FileReader();
+                    lector.readAsDataURL(audioBlob);
+                    lector.onloadend = () => {
+                        if (!window.listadoAudiosMemoria) window.listadoAudiosMemoria = [];
+                        
+                        // 🎯 ADAPTACIÓN MULTI-AUDIO: Guardamos respetando la estructura con su título original
+                        const tituloActual = (window.listadoAudiosMemoria[window.indiceAudioActivoGlobal] && window.listadoAudiosMemoria[window.indiceAudioActivoGlobal].titulo)
+                            ? window.listadoAudiosMemoria[window.indiceAudioActivoGlobal].titulo
+                            : `Audio ${window.indiceAudioActivoGlobal + 1}`;
+
+                        window.listadoAudiosMemoria[window.indiceAudioActivoGlobal] = {
+                            blob_base64: lector.result,
+                            titulo: tituloActual
+                        };
+                        
+                      /*  if (txtEstado) {
+                            txtEstado.innerText = `¡Nota de voz guardada en [${tituloActual}]!`;
+                            txtEstado.style.color = "#00CC66";
+                        }*/
+                        
+                        actualizarPestañasAudiosVisuales();
+                        verificarBotonesDeAudioVisibles();
+                    };
+                };
+
+                // Arrancamos físicamente la captura de hardware del micrófono
+                window.grabadorMediosPartido.start();
+                
+                if (btnMicro) {
+                    btnMicro.innerText = "🛑 Detener Grabación";
+                    btnMicro.style.background = "#dc2626";
+                }
+                if (txtEstado) { 
+                    txtEstado.innerText = `🎙️ Grabando nota en Audio ${window.indiceAudioActivoGlobal + 1}...`; 
+                    txtEstado.style.color = "#ff9900"; 
+                }
+            })
+            .catch(err => {
+                console.error("🔴 Error de hardware al conectar el micrófono:", err);
+                alert("Error de acceso al micrófono. Otorgue permisos de grabación en Chrome.");
+            });
+    } else {
+        // Si el estado es "recording", detenemos el proceso de forma segura
+        window.grabadorMediosPartido.stop();
+        
+        // Apagamos físicamente el hardware del micrófono (Luz roja/verde de Chrome)
+        if (window.grabadorMediosPartido.stream) {
+            window.grabadorMediosPartido.stream.getTracks().forEach(track => track.stop());
+        }
+        
+        if (btnMicro) {
+            btnMicro.innerText = "🎤 Grabar Instrucción de Voz";
+            btnMicro.style.background = "#334155";
+        }
+    }
+}
+
+
+
+function limpiarPizarraPartidoActivo() {
+    if (confirm("¿Limpiar por completo los trazos y fichas de la lona actual?")) {
+        if (miPizarraPartidos) miPizarraPartidos.borrarTodo();
+    }
+}
+
+// Escuchador seguro para no pisar tus window.onload nativos de tus jornadas
+if (document.readyState === "complete" || document.readyState === "interactive") {
+    inicializarPizarraDePartidos();
+} else {
+    document.addEventListener("DOMContentLoaded", inicializarPizarraDePartidos);
+}
+
 // =======================================================================
 // MOTOR NATIVO DEL MICRÓFONO (API MEDIARECORDER) PARA NOTAS VERBALES
 // =======================================================================
 
-/**
- * Activa o detiene la grabación del micrófono de forma consecutiva
- */
-function conmutarGrabacionAudioPartido() {
-    const btnMicro = document.getElementById('btn-microfono-partido');
-    const txtEstado = document.getElementById('txt-estado-audio');
 
-    // Caso 1: Si no está grabando, solicitamos permisos e iniciamos el micro
-    if (!grabadorMediosPartido || grabadorMediosPartido.state === "inactive") {
-        navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(stream => {
-                grabadorMediosPartido = new MediaRecorder(stream);
-                fragmentosAudioPartido = [];
 
-                grabadorMediosPartido.ondataavailable = (e) => {
-                    if (e.data.size > 0) fragmentosAudioPartido.push(e.data);
-                };
-
-                // Cuando se detiene, empaquetamos el audio y lo convertimos a Base64
-                grabadorMediosPartido.onstop = () => {
-                    const audioBlob = new Blob(fragmentosAudioPartido, { type: 'audio/wav' });
-                    
-                    // Convertimos el archivo binario a String Base64 para guardarlo en MySQL
-                    const lector = new FileReader();
-                    lector.readAsDataURL(audioBlob);
-                    lector.onloadend = () => {
-                        cadenaAudioBase64Global = lector.result; // Almacena el "data:audio/wav;base64,..."
-                        txtEstado.innerText = "¡Nota de voz procesada y cargada en memoria!";
-                        txtEstado.style.color = "#00CC66";
-                        
-                        // Encendemos los botones de control de audio de la interfaz
-                        document.getElementById('btn-reproducir-audio-partido').style.display = "inline-block";
-                        document.getElementById('btn-eliminar-audio-partido').style.display = "inline-block";
-                    };
-                };
-
-                grabadorMediosPartido.start();
-                btnMicro.innerText = "🛑 Detener Grabación";
-                btnMicro.style.background = "#dc2626";
-                txtEstado.innerText = "🎙️ Escuchando micrófono... habla ahora.";
-                txtEstado.style.color = "#ff9900";
-            })
-            .catch(err => {
-                alert("Error al acceder al micrófono. Asegúrate de otorgar permisos en tu navegador.");
-                console.error("Permiso denegado micro:", err);
-            });
-    } else {
-        // Caso 2: Si ya estaba grabando, detenemos el proceso
-        grabadorMediosPartido.stop();
-        // Apagamos físicamente el hardware del micrófono
-        grabadorMediosPartido.stream.getTracks().forEach(track => track.stop());
-        
-        btnMicro.innerText = "🎤 Grabar Instrucción de Voz";
-        btnMicro.style.background = "#334155";
-    }
-}
-
-/**
- * Decodifica la variable Base64 de memoria y la reproduce instantáneamente en los altavoces
- */
-function reproducirAudioPartidoEnMemoria() {
-    if (!cadenaAudioBase64Global) return;
-    const elementoAudio = new Audio(cadenaAudioBase64Global);
-    elementoAudio.play();
-}
 
 /**
  * Limpia las variables de audio y reajusta los botones visuales
@@ -8002,10 +8394,252 @@ function borrarAudioPartidoEnMemoria() {
         txtEstado.style.color = "#888";
     }
 }
-// =======================================================================
-// PASARELA FETCH/AJAX: INTEGRACIÓN Y RECUPERACIÓN CON MYSQL
-// =======================================================================
 
+/**
+ * ➕ AÑADE UNA NUEVA RANURA DE AUDIO CONFIGURADA COMO OBJETO DESDE EL INICIO
+ */
+function agregarNuevoBloqueDeAudioAlPartido() {
+    if (!window.listadoAudiosMemoria) window.listadoAudiosMemoria = [];
+
+    // Inyectamos el slot como objeto de fábrica
+    window.listadoAudiosMemoria.push({
+        blob_base64: "",
+        titulo: `Audio ${window.listadoAudiosMemoria.length + 1}`
+    });
+
+    // Cambiamos el foco del reproductor a la pestaña recién creada
+    window.indiceAudioActivoGlobal = window.listadoAudiosMemoria.length - 1;
+    
+    // Reconstruimos el carrusel de botones naranjas y refrescamos los controles
+    actualizarPestañasAudiosVisuales();
+    verificarBotonesDeAudioVisibles();
+    
+    console.log(`➕ Nueva ranura de voz estructurada. Audios totales en memoria: ${window.listadoAudiosMemoria.length}`);
+}
+
+
+/**
+ * CAMBIA EL REPRODUCTOR DE FORMA ESTRICTA AL AUDIO QUE SESELECCIONE
+ * Soluciona el problema de que siempre se escuche el mismo dictado
+ */
+function cambiarDeAudioFilaIndex(nuevoIndex) {
+    if (!window.listadoAudiosMemoria || nuevoIndex < 0 || nuevoIndex >= window.listadoAudiosMemoria.length) return;
+    
+    // 🎯 MOVEMOS EL PUNTERO: Fijamos el índice del audio activo al que acaba de cliquear el usuario
+    window.indiceAudioActivoGlobal = nuevoIndex;
+    
+    // 1. Refrescamos las clases visuales de los botones naranjas de arriba
+    if (typeof actualizarPestañasAudiosVisuales === "function") {
+        actualizarPestañasAudiosVisuales();
+    }
+    
+    // 2. 🚀 CRÍTICO: Forzamos a la interfaz a verificar si la pista cliqueada tiene audio y actualizamos el reproductor
+    if (typeof verificarBotonesDeAudioVisibles === "function") {
+        verificarBotonesDeAudioVisibles();
+    }
+
+    console.log(`🎙️ Cambiando foco del reproductor al Audio Índice: [${nuevoIndex}] -> Nombre: ${window.listadoAudiosMemoria[nuevoIndex].titulo || 'Audio'}`);
+}
+
+/**
+ * REPRODUCE CON TOTAL PRECISIÓN LA NOTA DE VOZ DE LA PESTAÑA NARANJA QUE TENGAS SELECCIONADA
+ * Corrige de forma definitiva el error 'cadenaAudioBase64Global is not defined'
+ */
+function reproducirAudioPartidoEnMemoria() {
+    // 1. Validamos de seguridad que el array global de audios exista y tenga datos en la ranura activa
+    if (!window.listadoAudiosMemoria || !window.listadoAudiosMemoria[window.indiceAudioActivoGlobal]) {
+        alert("⚠️ Selecciona una pestaña de audio válida antes de escuchar.");
+        return;
+    }
+    
+    // 2. Extraemos el objeto estructurado de la pestaña seleccionada (pasar, desmarque, Técnico...)
+    const audioObj = window.listadoAudiosMemoria[window.indiceAudioActivoGlobal];
+    
+    // 🎯 EXTRACCIÓN BINARIA CORRECTA: Extraemos la propiedad de texto largo Base64 de la ranura actual
+    const cadenaUrlAudioReal = (audioObj && typeof audioObj === "object") ? audioObj.blob_base64 : audioObj;
+    const tituloDelAudio = (audioObj && audioObj.titulo) ? audioObj.titulo : `Audio ${window.indiceAudioActivoGlobal + 1}`;
+
+    // 3. Si la ranura contiene una nota de voz grabada en Base64 válida
+    if (cadenaUrlAudioReal && typeof cadenaUrlAudioReal === "string" && cadenaUrlAudioReal.trim() !== "" && cadenaUrlAudioReal !== "NULL") {
+        
+        // Creamos la instancia de reproducción nativa de Chrome inyectando el string decodificado
+        const hardwareAltavoz = new Audio(cadenaUrlAudioReal);
+        
+        // Activamos la salida física de sonido hacia tus altavoces o auriculares
+        hardwareAltavoz.play()
+            .then(() => console.log(`🔊 [Éxito Hardware] Reproduciendo dictado táctico: [${tituloDelAudio}]`))
+            .catch(err => {
+                console.error("Fallo de hardware al enviar el audio a tus auriculares:", err);
+                alert("No se pudo iniciar la reproducción. Asegúrate de otorgar los permisos de sonido automático en Chrome.");
+            });
+    } else {
+        alert(`⚠️ La pestaña [${tituloDelAudio}] está vacía.\nPresiona el botón de 'Grabar Instrucción de Voz' para registrar tus directrices antes de escuchar.`);
+    }
+}
+
+
+
+function actualizarPestañasAudiosVisuales() {
+    const contenedor = document.getElementById('par-contenedor-pestañas-audios');
+    if (!contenedor) return;
+    contenedor.innerHTML = "";
+
+    // Aseguramos que la estructura elástica de audios contenga objetos válidos
+    window.listadoAudiosMemoria.forEach((item, index) => {
+        if (typeof item === "string") {
+            window.listadoAudiosMemoria[index] = {
+                blob_base64: item,
+                titulo: `Audio ${index + 1}`
+            };
+        }
+        
+        const audioObj = window.listadoAudiosMemoria[index];
+        
+        // 1. Creamos un contenedor (cajita) individual para el audio
+        const divGrupoAudio = document.createElement('div');
+        divGrupoAudio.style.display = "inline-flex";
+        divGrupoAudio.style.alignItems = "center";
+        // Si es el audio seleccionado, lo iluminamos en naranja, si no, se queda oscuro
+        divGrupoAudio.style.background = (index === window.indiceAudioActivoGlobal) ? "#ff9900" : "#1e293b";
+        divGrupoAudio.style.borderRadius = "4px";
+        divGrupoAudio.style.padding = "2px 8px";
+        divGrupoAudio.style.gap = "8px";
+        divGrupoAudio.style.border = "1px solid #334155";
+        divGrupoAudio.style.cursor = "pointer";
+        divGrupoAudio.style.transition = "all 0.2s";
+
+        // Al hacer clic en cualquier parte de la cajita, se selecciona ese audio activo
+        divGrupoAudio.onclick = () => cambiarDeAudioFilaIndex(index);
+
+        // 2. 🎯 SÍMBOLO IZQUIERDO: Icono de reproducir (▶)
+        const simboloPlay = document.createElement('span');
+        simboloPlay.innerText = "▶";
+        simboloPlay.style.fontSize = "10px";
+        // Si el audio seleccionado está activo se pone en negro, si no, en gris reflectante
+        simboloPlay.style.color = (index === window.indiceAudioActivoGlobal) ? "#000" : "#888";
+        simboloPlay.style.cursor = "pointer";
+        simboloPlay.title = `Reproducir de inmediato el audio: ${audioObj.titulo}`;
+        
+        // Al hacer clic en el símbolo de play, dispara el reproductor nativo del altavoz
+        simboloPlay.onclick = (e) => {
+            e.stopPropagation(); // Evita conflictos con la selección de la pestaña
+            window.indiceAudioActivoGlobal = index; // Movemos el foco a esta pista
+            actualizarPestañasAudiosVisuales();
+            if (typeof reproducirAudioPartidoEnMemoria === "function") {
+                reproducirAudioPartidoEnMemoria();
+            }
+        };
+        divGrupoAudio.appendChild(simboloPlay);
+
+        // 3. TEXTO CENTRAL: Nombre personalizado de la nota táctica
+        const textoTitulo = document.createElement('span');
+        textoTitulo.innerText = audioObj.titulo || `Audio ${index + 1}`;
+        textoTitulo.style.color = (index === window.indiceAudioActivoGlobal) ? "#000" : "#fff";
+        textoTitulo.style.fontSize = "11px";
+        textoTitulo.style.fontWeight = "bold";
+        textoTitulo.style.userSelect = "none";
+        
+        // Mantenemos el doble clic por si el míster quiere renombrarlo (ej: pasar, desmarque...)
+        textoTitulo.ondblclick = (e) => {
+            e.stopPropagation();
+            const nuevoNombre = prompt(`Introduce el nuevo nombre para este audio:`, textoTitulo.innerText);
+            if (nuevoNombre && nuevoNombre.trim() !== "") {
+                window.listadoAudiosMemoria[index].titulo = nuevoNombre.trim();
+                actualizarPestañasAudiosVisuales();
+                if (typeof verificarBotonesDeAudioVisibles === "function") {
+                    verificarBotonesDeAudioVisibles();
+                }
+            }
+        };
+        divGrupoAudio.appendChild(textoTitulo);
+
+        // 4. 🎯 SÍMBOLO DERECHO: Icono de eliminar (❌) REPARADO Y ELÁSTICO
+        const simboloBorrar = document.createElement('span');
+        simboloBorrar.innerText = "❌";
+        simboloBorrar.style.fontSize = "9px";
+        simboloBorrar.style.cursor = "pointer";
+        simboloBorrar.style.padding = "2px";
+        simboloBorrar.style.color = (index === window.indiceAudioActivoGlobal) ? "#000" : "#ef4444";
+        simboloBorrar.title = `Eliminar permanentemente esta pestaña de audio`;
+        
+        // Acción física corregida para extirpar el elemento de la interfaz visual
+        simboloBorrar.onclick = (e) => {
+            e.stopPropagation(); // Evita conflictos con la selección de la tarjeta
+            
+            const tituloActual = audioObj.titulo || `Audio ${index + 1}`;
+            
+            if (confirm(`¿Estás seguro de que deseas eliminar por completo la pestaña [${tituloActual}]?`)) {
+                
+                // 🎯 ELIMINACIÓN REAL: Removemos la posición específica del array elástico
+                window.listadoAudiosMemoria.splice(index, 1);
+                
+                // Salvaguarda: Si el míster elimina todas las pestañas, forzamos una inicial limpia por defecto
+                if (window.listadoAudiosMemoria.length === 0) {
+                    window.listadoAudiosMemoria = [{ blob_base64: "", titulo: "Audio 1" }];
+                }
+
+                // Reajustamos el puntero activo para evitar que apunte a un índice inexistente
+                if (window.indiceAudioActivoGlobal >= window.listadoAudiosMemoria.length) {
+                    window.indiceAudioActivoGlobal = window.listadoAudiosMemoria.length - 1;
+                }
+                
+                // 🚀 ACTUALIZACIÓN INMEDIATA: Reconstruimos los botones e informativos en pantalla
+                actualizarPestañasAudiosVisuales();
+                
+                if (typeof verificarBotonesDeAudioVisibles === "function") {
+                    verificarBotonesDeAudioVisibles();
+                }
+                
+                console.log(`🗑️ Pestaña destruida de la memoria de forma limpia: [${tituloActual}]`);
+            }
+        };
+        divGrupoAudio.appendChild(simboloBorrar);
+
+        // Inyectamos la pestaña terminada en la barra de control superior
+        contenedor.appendChild(divGrupoAudio);
+    });
+}
+
+
+/**
+ * REPARADA: Verifica el estatus del audio activo leyendo de la propiedad .blob_base64
+ */
+function verificarBotonesDeAudioVisibles() {
+    if (!window.listadoAudiosMemoria || window.listadoAudiosMemoria.length === 0) {
+        window.listadoAudiosMemoria = [{ blob_base64: "", titulo: "Audio 1" }];
+    }
+    if (window.indiceAudioActivoGlobal === undefined || window.indiceAudioActivoGlobal < 0 || window.indiceAudioActivoGlobal >= window.listadoAudiosMemoria.length) {
+        window.indiceAudioActivoGlobal = 0;
+    }
+
+    // 🎯 REPARACIÓN DE OBJETO: Extraemos el ítem de la pestaña activa
+    const audioObj = window.listadoAudiosMemoria[window.indiceAudioActivoGlobal];
+    
+    // Si el ítem es un texto plano de pruebas antiguas, lo leemos directo; si es objeto, sacamos su blob
+    const audioCadena = (audioObj && typeof audioObj === "object") ? audioObj.blob_base64 : audioObj;
+    const tituloActual = (audioObj && audioObj.titulo) ? audioObj.titulo : `Audio ${window.indiceAudioActivoGlobal + 1}`;
+
+    const txtEstado = document.getElementById('txt-estado-audio');
+    const btnRep = document.getElementById('btn-reproducir-audio-partido');
+    const btnEliminar = document.getElementById('btn-eliminar-audio-partido');
+
+    // Evaluamos la propiedad de texto de forma segura
+    if (audioCadena && typeof audioCadena === "string" && audioCadena.trim() !== "" && audioCadena !== "NULL") {
+        if (btnRep) btnRep.style.display = "inline-block";
+        if (btnEliminar) btnEliminar.style.display = "inline-block";
+       /* if (txtEstado) { 
+            txtEstado.innerText = `🔊 [${tituloActual}] contiene un dictado de voz listo para escuchar.`; 
+            txtEstado.style.color = "#00CC66"; 
+        }*/
+    } else {
+        if (btnRep) btnRep.style.display = "none";
+        if (btnEliminar) btnEliminar.style.display = "none";
+        if (txtEstado) { 
+            txtEstado.innerText = `Sin grabación en la pestaña [${tituloActual}]`; 
+            txtEstado.style.color = "#888"; 
+        }
+    }
+}
 
 
 
@@ -8069,7 +8703,56 @@ function guardarInformeTacticoPartidoMySQL() {
 
 
 /**
- * RECONSTRUYE LA PIZARRA, LOS GOLES Y LOS NOMBRES BASÁNDOSE EN EL ID SELECCIONADO
+ * RECOPILA ABSOLUTAMENTE TODAS LAS LONAS Y AUDIOS Y LOS ENVÍA EMVUELTOS EN JSON A MYSQL
+ */
+function guardarInformeTacticoPartidoMySQL() {
+    const idPartido = document.getElementById('par-form-id-partido').value;
+    if (!idPartido || idPartido === "" || idPartido === "Nuevo") {
+        alert("⚠️ Selecciona primero un partido en el carrusel superior para poder guardar.");
+        return;
+    }
+
+    // 1. Guardamos una captura en Base64 PNG de la lona que el míster tiene abierta en pantalla
+    const cadenaDibujoBase64Actual = document.getElementById('pizarra-canvas-partido').toDataURL("image/png");
+
+      const paqueteEstructuraCompleta = {
+        pizarras: window.listadoPizarrasMemoria,
+        indice_pizarra_activa: window.indicePizarraActivaGlobal,
+        // 🎯 INYECCIÓN MULTI-AUDIO: Guardamos el historial de audios completo en el mismo JSON
+        audios: window.listadoAudiosMemoria,
+        indice_audio_activo: window.indiceAudioActivoGlobal
+    };
+
+
+    // 3. Construimos el payload exacto para tu servidor Node.js
+    const payloadDatos = {
+        id_partido: idPartido,
+        pizarra_dibujo: cadenaDibujoBase64Actual, // Imagen plana para previsualizaciones rápidas
+        pizarra_audio: JSON.stringify(paqueteEstructuraCompleta) // Guardamos TODO el historial JSON aquí
+    };
+
+    console.log(`📡 Sincronizando Multi-Pizarras y Multi-Audios para el ID: [${idPartido}]`);
+
+    fetch('http://localhost:3000/api/partidos/guardar-pizarra', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payloadDatos)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`✅ ¡Éxito relacional! Todas tus lonas de pizarra y notas de voz han quedado blindadas en tu MySQL.`);
+        } else {
+            alert("🔴 Error reportado por tu server: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error("🔴 Fallo de conexión con server.js:", error);
+    });
+}
+
+/**
+ * RECONSTRUYE LA PIZARRA, LOS GOLES Y LOS NOMBRES BASÁNDOSE EN EL ID SELECCIONADO (BLINDADA CONTRA BLOQUEOS)
  */
 function buscarYCargarPartidoEspecifico(idALeer) {
     const tablaEquiposOficial = {
@@ -8116,37 +8799,110 @@ function buscarYCargarPartidoEspecifico(idALeer) {
         if (labelPizarraLocal) labelPizarraLocal.innerText = nombreLocalFinal;
         if (labelPizarraVisitante) labelPizarraVisitante.innerText = nombreVisitanteFinal;
 
-        // 1. DIBUJAR LOS TRAZOS DE LA PIZARRA EN EL CANVAS
-        if (miPizarraPartidos) {
-            miPizarraPartidos.borrarTodo(); // Reseteamos trazos anteriores
+        // 🎯 RESTAURACIÓN MULTI-PIZARRA Y MULTI-AUDIO CON ENLACES GLOBALES SEGUROS
+                // =======================================================================
+        // 🎯 RESTAURACIÓN MULTI-PIZARRA Y MULTI-AUDIO CON ENLACES GLOBALES SEGUROS
+        // =======================================================================
+       
+  
+        // =======================================================================
+        // 🎯 CONTROLADOR DE HISTORIAL MULTI-PIZARRA (SOLUCIONA LONA 1 INVISIBLE)
+        // =======================================================================
+        try {
+            let estructuraRecuperada = null;
+
+            // Verificamos si la celda contiene la estructura elástica avanzada en formato JSON
+            if (partido.pizarra_audio && partido.pizarra_audio !== "NULL" && partido.pizarra_audio.trim() !== "" && partido.pizarra_audio.startsWith('{')) {
+                estructuraRecuperada = JSON.parse(partido.pizarra_audio);
+            }
+
+            // 📂 RESTAURACIÓN DEL HISTORIAL DE PIZARRAS
+            if (estructuraRecuperada && estructuraRecuperada.pizarras && estructuraRecuperada.pizarras.length > 0) {
+                window.listadoPizarrasMemoria = estructuraRecuperada.pizarras;
+                // Forzamos a que el sistema mantenga fija la lona que el míster decida, o la Lona 1 por defecto
+                window.indicePizarraActivaGlobal = estructuraRecuperada.indice_pizarra_activa !== undefined ? estructuraRecuperada.indice_pizarra_activa : 0;
+                console.log(`📂 Historial elástico cargado. Lonas restauradas en MySQL: ${window.listadoPizarrasMemoria.length}`);
+            } else {
+                // 🎯 INYECCIÓN DE RESPALDO CRÍTICA PARA REGISTROS ANTIGUOS:
+                // Si el partido viene de tus pruebas viejas (donde la lona 1 no era un JSON sino un dibujo plano), 
+                // creamos la Lona 1 de fábrica y le inyectamos de forma elástica la imagen guardada de tu celda 
+                // para que se convierta en objetos editables y no se borre al cambiar de pestaña.
+                window.listadoPizarrasMemoria = [
+                    { 
+                        trazosPintura: [], 
+                        elementosInteractivos: [], 
+                        pizarra_audio_base64: "",
+                        // Guardamos de respaldo la imagen plana para que la lona 1 no sufra de ceguera temporal
+                        imagen_plana_respaldo: (partido.pizarra_dibujo && partido.pizarra_dibujo !== "NULL") ? partido.pizarra_dibujo : ""
+                    }
+                ];
+                window.indicePizarraActivaGlobal = 0;
+            }
+
+            // 🎙️ RESTAURACIÓN DEL HISTORIAL DE AUDIOS CON FORMATO DE NOMBRE
+            if (estructuraRecuperada && estructuraRecuperada.audios) {
+                window.listadoAudiosMemoria = estructuraRecuperada.audios;
+                window.indiceAudioActivoGlobal = estructuraRecuperada.indice_audio_activo || 0;
+            } else {
+                window.listadoAudiosMemoria = [{ blob_base64: "", titulo: "Audio 1" }];
+                window.indiceAudioActivoGlobal = 0;
+            }
+
+            // Reconstruimos las pestañas celestes de pizarras y naranjas de audios en tu pantalla
+            if (typeof actualizarPestañasPizarrasVisuales === "function") actualizarPestañasPizarrasVisuales();
+            if (typeof actualizarPestañasAudiosVisuales === "function") actualizarPestañasAudiosVisuales();
             
-            if (partido.pizarra_dibujo && partido.pizarra_dibujo !== "NULL" && partido.pizarra_dibujo.trim() !== "") {
-                const imagenFondoPizarra = new Image();
-                imagenFondoPizarra.src = partido.pizarra_dibujo;
-                imagenFondoPizarra.onload = () => {
-                    miPizarraPartidos.ctx.drawImage(imagenFondoPizarra, 0, 0);
-                };
+            // Refrescamos los botones del micrófono de la lona/audio activo
+            verificarBotonesDeAudioVisibles();
+
+        } catch (e) {
+            console.error("Error al desempaquetar el JSON de MySQL. Seteando lona base:", e);
+            window.listadoPizarrasMemoria = [{ trazosPintura: [], elementosInteractivos: [], pizarra_audio_base64: "" }];
+            window.indicePizarraActivaGlobal = 0;
+            window.listadoAudiosMemoria = [{ blob_base64: "", titulo: "Audio 1" }];
+            window.indiceAudioActivoGlobal = 0;
+        }
+
+        // =======================================================================
+        // 🎯 1. DIBUJAR LOS TRAZOS EN EL CANVAS (CORREGIDO MULTI-CAPA)
+        // =======================================================================
+        function estamparDibujoEnElCesped() {
+            const motorGrafico = window.miPizarraPartidos;
+            
+            if (motorGrafico) {
+                motorGrafico.borrarTodo(); // Limpiamos residuos
+                
+                // Si la lona actual en memoria tiene guardados trazos vectoriales, el motor los dibuja solos
+                const lonaActiva = window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal];
+                
+                if (lonaActiva && lonaActiva.trazosPintura && (lonaActiva.trazosPintura.length > 0 || lonaActiva.elementosInteractivos.length > 0)) {
+                    motorGrafico.redibujarLienzoCompleto();
+                } else if (partido.pizarra_dibujo && partido.pizarra_dibujo !== "NULL" && partido.pizarra_dibujo.trim() !== "") {
+                    // Si los arrays vectoriales están vacíos pero la celda de MySQL tiene la imagen plana de tus pruebas antiguas,
+                    // la estampamos de fondo de seguridad en el césped verde para que no aparezca en blanco
+                    const imagenFondoPizarra = new Image();
+                    imagenFondoPizarra.src = partido.pizarra_dibujo;
+                    imagenFondoPizarra.onload = () => {
+                        motorGrafico.ctx.drawImage(imagenFondoPizarra, 0, 0);
+                        console.log("🎨 Imagen base de MySQL inyectada con éxito en la lona activa.");
+                    };
+                }
+            } else {
+                setTimeout(estamparDibujoEnElCesped, 80);
             }
         }
 
+        estamparDibujoEnElCesped();
+
+
+
         // 2. RECUPERAR EL REPRODUCTOR DE NOTA DE VOZ MICROFÓNICA
         const txtEstado = document.getElementById('txt-estado-audio');
-        const btnReproducir = document.getElementById('btn-reproducir-audio-partido');
-        const btnEliminar = document.getElementById('btn-eliminar-audio-partido');
-
-        if (partido.pizarra_audio && partido.pizarra_audio !== "NULL" && partido.pizarra_audio.trim() !== "") {
-            cadenaAudioBase64Global = partido.pizarra_audio;
-            if (txtEstado) { txtEstado.innerText = "🔊 ¡Nota de voz recuperada con éxito!"; txtEstado.style.color = "#00CC66"; }
-            if (btnReproducir) btnReproducir.style.display = "inline-block";
-            if (btnEliminar) btnEliminar.style.display = "inline-block";
-        } else {
-            cadenaAudioBase64Global = "";
-            if (txtEstado) { txtEstado.innerText = "Este partido no registra archivos de voz"; txtEstado.style.color = "#888"; }
-            if (btnReproducir) btnReproducir.style.display = "none";
-            if (btnEliminar) btnEliminar.style.display = "none";
+        if (typeof verificarBotonesDeAudioVisibles === "function") {
+            verificarBotonesDeAudioVisibles();
         }
     })
-    .catch(error => console.error("🔴 Error pasivo en el volcado JSON:", error));
+    .catch(error => console.error("🔴 Error real detectado en la pasarela Fetch de la lona:", error));
 }
 
 
@@ -8204,28 +8960,30 @@ function limpiarFormularioParaNuevoPartido() {
     txtEstado.innerText = "Sin nota de voz asignada";
     txtEstado.style.color = "#888";
 }
-
-// =======================================================================
-// INITIALIZACIÓN GLOBAL INTEGRADA (CON CARGA AUTOMÁTICA DEL PARTIDO 26)
-// =======================================================================
-
-let miPizarraPartidos = null;
-
+/**
+ * ARRANQUE DEL MOTOR GRÁFICO (REPARADO DEFINITIVO CON NOMBRE DE CLASE COMPATIBLE)
+ */
 function inicializarPizarraDePartidos() {
-    if (miPizarraPartidos !== null) return;
+    if (window.miPizarraPartidos !== null && window.miPizarraPartidos !== undefined) return;
     
     const canvasElement = document.getElementById('pizarra-canvas-partido');
     if (canvasElement) {
-        // 1. Instanciamos el motor gráfico
-        miPizarraPartidos = new MotorPizarraPartidos('pizarra-canvas-partido', 'pizarra-partido-toolbar');
-        console.log("⚽ Pizarra táctica inicializada con éxito.");
-
-        // 2. 🚀 CARGA AUTOMÁTICA INMEDIATA: Forzamos a la pizarra a buscar los datos del partido 26 en MySQL
-        if (typeof buscarYCargarPartidoEspecifico === "function") {
-            buscarYCargarPartidoEspecifico(26);
+        // 🎯 CORRECCIÓN INTEGRAL: Si la versión Avanzada da error, el código usa de respaldo
+        // de forma automática la clase base para que la web nunca se quede congelada en verde.
+        try {
+            if (typeof MotorPizarraPartidosAvanzada !== "undefined") {
+                window.miPizarraPartidos = new MotorPizarraPartidosAvanzada('pizarra-canvas-partido', 'pizarra-partido-toolbar');
+            } else {
+                window.miPizarraPartidos = new MotorPizarraPartidos('pizarra-canvas-partido', 'pizarra-partido-toolbar');
+            }
+            console.log("⚽ Pizarra táctica de partidos inicializada globalmente con éxito.");
+        } catch (error) {
+            console.error("🔴 Error crítico al instanciar el canvas táctico:", error);
         }
     }
 }
+
+
 
 // Aseguramos el disparo seguro sin romper tus window.onload nativos
 if (document.readyState === "complete" || document.readyState === "interactive") {
@@ -8242,28 +9000,39 @@ if (document.readyState === "complete" || document.readyState === "interactive")
 // FUNCIONES PUENTE GLOBALES (CONECTAN EL HTML CON EL MOTOR DE LA PIZARRA)
 // =======================================================================
 
-/**
- * Soluciona el error Uncaught ReferenceError de los botones de herramientas
- */
 
+/**
+ * PUENTE CON BOTONES LATERALES SIN DEPENDENCIAS DE ÁMBITO LOCAL
+ */
 function seleccionarHerramientaPartido(herramienta, botonElemento) {
-    if (miPizarraPartidos) {
-        miPizarraPartidos.cambiarHerramienta(herramienta, botonElemento);
+    // Si la pizarra global no se ha creado todavía, forzamos su arranque en este microsegundo
+    if (!window.miPizarraPartidos) {
+        inicializarPizarraDePartidos();
+    }
+    
+    // Ejecutamos el cambio de herramienta leyendo directamente de la ventana
+    if (window.miPizarraPartidos) {
+        window.miPizarraPartidos.cambiarHerramienta(herramienta, botonElemento);
     } else {
-        console.error("El motor de la pizarra no está inicializado todavía.");
+        console.log(`⏱️ Esperando inicialización del lienzo global para activar la herramienta: [${herramienta}]`);
     }
 }
 
+
 /**
- * Conecta el botón "Borrar Todo" del HTML
+ * PUENTE CONECTADO DIRECTAMENTE AL BOTÓN ROJO SUPERIOR
  */
 function limpiarPizarraPartidoActivo() {
-    if (confirm("¿Limpiar por completo la pizarra táctica del partido?")) {
+    if (confirm("¿Limpiar por completo los trazos y fichas de la lona actual?")) {
         if (miPizarraPartidos) {
+            // Llama de forma estricta al método borrarTodo() de la lona en uso
             miPizarraPartidos.borrarTodo();
+        } else {
+            console.error("No se pudo borrar porque la pizarra no está inicializada.");
         }
     }
 }
+
 
 
 
