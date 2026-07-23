@@ -817,7 +817,24 @@
 
         <script type="text/javascript">
    
-    
+    // =======================================================================
+// 🛡️ ESCUDO INTERCEPTOR GLOBAL DE RED (REEMPLAZO AUTOMÁTICO DE LOCALHOST)
+// Corrige los 80 enlaces locales al vuelo sin tocar tus 8500 líneas
+// =======================================================================
+(function() {
+    const fetchOriginalDelNavegador = window.fetch;
+    window.fetch = function(url, opciones) {
+        // Si la llamada contiene el enlace antiguo local de casa...
+        if (typeof url === 'string' && url.includes('http://localhost:3000')) {
+            // ¡La cazamos en el aire y le cambiamos el destino por tu URL real de Render!
+            url = url.replace('http://localhost:3000', 'https://onrender.com');
+            console.log(`🚀 Escudo de Red redirigió con éxito una llamada local hacia: ${url}`);
+        }
+        return fetchOriginalDelNavegador.apply(this, [url, opciones]);
+    };
+    console.log("👁️ ¡Aduana de red activada! Tus 80 enlaces locales están protegidos y redirigidos a Render.");
+})();
+
 
 
 

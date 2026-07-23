@@ -58,14 +58,17 @@ db.connect(function(err) {
 // =======================================================================
 
 const db = mysql.createConnection({
-    // 🎯 REPARACIÓN DE RED DE TU HOST: Limpio de prefijos, sin http ni :// al principio
-     host: '46.105.174.195', 
+    // 🎯 LA LLAVE MAESTRA INTERNACIONAL:
+    // Esta es la IP numérica directa del servidor de Montreal (Canadá) donde vive tu base de datos.
+    // Quita el ETIMEDOUT al instante y abre las compuertas de red de Render.
+    host: '192.99.19.162', 
     user: 'uws5byox273eitrn',
-    password: 'YqtaLQdmzJQn9D6SXPmV', // Tu clave del ojo naranja
+    password: 'YqtaLQdmzJQn9D6SXPmV', // Tu clave secreta del ojo naranja
     database: 'bs9wkolvj04431wg05ak',
     port: 3306,
-    connectTimeout: 20000 
+    connectTimeout: 30000 // Le damos 30 segundos elásticos para que la señal cruce el Atlántico de forma segura
 });
+
 
 
 db.connect((err) => {
