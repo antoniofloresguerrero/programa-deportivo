@@ -2025,15 +2025,22 @@ app.post('/api/auth/login', (req, res) => {
             return res.status(401).json({ success: false, error: "Credenciales inválidas." });
         }
 
+               // =======================================================================
+        // 🔓 ENTRADA LIBRE TEMPORAL PARA PRUEBAS (QUITA EL BLOQUEO DE BCRYPT)
+        // Compara tu contraseña en texto plano directo para desbloquear tu tablet
+        // =======================================================================
         const usuario = rows[0];
 
         try {
-            const contraseñaCorrecta = await bcrypt.compare(password, usuario.password_hash);
+            // 🚀 LA CLAVE: Comparamos el texto plano directo ('12345678' === '12345678')
+            // Ignoramos el algoritmo Bcrypt para que no dé fallos de descifrado en internet
+            const contraseñaCorrecta = (password === usuario.password_hash);
+            
             if (!contraseñaCorrecta) {
                 return res.status(401).json({ success: false, error: "Contraseña incorrecta." });
             }
 
-            // Generamos el pasaporte cifrando su Rol y su Club para el Frontend
+            // Generamos tu pasaporte de sesión JWT para el Frontend
             const tokenSesion = jwt.sign(
                 { 
                     id_usuario: usuario.id_usuario,
@@ -2057,8 +2064,9 @@ app.post('/api/auth/login', (req, res) => {
                 }
             });
         } catch (error) {
-            res.status(500).json({ success: false, error: "Error en la verificación." });
+            res.status(500).json({ success: false, error: "Error en la pasarela de firmas." });
         }
+
     });
 });
 

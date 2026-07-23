@@ -9209,10 +9209,10 @@ function limpiarPizarraPartidoActivo() {
 
 
 
-// =======================================================================
-// 🔐 SISTEMA DE SESIONES Y PERMISOS COMPLETAMENTE AISLADO (SIN CONFLICTOS)
-// =======================================================================
-
+/**
+ * PROCESA EL FORMULARIO DE ACCESO CONECTÁNDOSE EN DIRECTO CON RENDER
+ * Soluciona definitivamente el fallo de redirección local en la tablet
+ */
 function ejecutarPeticionLoginAislado(evento) {
     evento.preventDefault();
     const correo = document.getElementById('auth-email').value;
@@ -9220,32 +9220,48 @@ function ejecutarPeticionLoginAislado(evento) {
     const alerta = document.getElementById('auth-alerta-error');
     if (alerta) alerta.style.display = "none";
 
-    fetch('http://localhost:3000/api/auth/login', {
+    // 🎯 DETERMINAMOS LA RUTA REAL: Si tienes declarada API_URL arriba la usamos, 
+    // si no, calculamos el enlace de Render actual de la barra de direcciones automáticamente
+    const urlBaseBaseDeRed = (typeof API_URL !== "undefined" ? API_URL : window.location.origin);
+    const urlFinalLogin = `${urlBaseBaseDeRed}/api/auth/login`;
+
+    console.log(`📡 Despachando pasaporte de autenticación hacia la nube: [${urlFinalLogin}]`);
+
+    fetch(urlFinalLogin, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: correo, password: clave })
     })
-    .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+    .then(res => { 
+        if (!res.ok) throw new Error("Credenciales rechazadas por el servidor."); 
+        return res.json(); 
+    })
     .then(data => {
         if (data.success && data.token) {
-            // Guardamos la sesión de la tablet
+            // Guardamos el pasaporte digital en la memoria de la tablet
             localStorage.setItem('fantasy_session_token', data.token);
             localStorage.setItem('fantasy_usuario_datos', JSON.stringify(data.usuario));
 
-            // Levantamos la persiana de login ocultándola
+            // Levantamos la persiana de login ocultándola de la pantalla
             document.getElementById('modulo-auth-login-pantalla').style.display = "none";
 
-            // 🚀 INVOCACIÓN NATIVA: Llamamos a tu función del carrusel original intacta
+            // Disparamos tu carrusel nativo original de fábrica para vestir el césped
             if (typeof cargarListaPartidosDeJornadaDesdeBD === "function") {
                 cargarListaPartidosDeJornadaDesdeBD();
             }
 
-            // Aplicamos el bloqueo de campos si entra un jugador
-            aplicarFiltrosDeRolAislados();
+            // Aplicamos los filtros de ocultación visual según rango
+            if (typeof aplicarFiltrosDeRolAislados === "function") {
+                aplicarFiltrosDeRolAislados();
+            }
         }
     })
-    .catch(() => { if (alerta) alerta.style.display = "block"; });
+    .catch((error) => { 
+        console.error("🔴 Fallo en la pasarela Fetch del login aislado:", error);
+        if (alerta) alerta.style.display = "block"; 
+    });
 }
+
 
 function aplicarFiltrosDeRolAislados() {
     const sesion = localStorage.getItem('fantasy_usuario_datos');
