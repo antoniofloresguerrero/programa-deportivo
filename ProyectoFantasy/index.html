@@ -9223,7 +9223,7 @@ function ejecutarPeticionLoginAislado(evento) {
     // 🎯 DETERMINAMOS LA RUTA REAL: Si tienes declarada API_URL arriba la usamos, 
     // si no, calculamos el enlace de Render actual de la barra de direcciones automáticamente
     const urlBaseBaseDeRed = (typeof API_URL !== "undefined" ? API_URL : window.location.origin);
-    const urlFinalLogin = `${urlBaseBaseDeRed}/api/auth/login`;
+    const urlFinalLogin = `/api/auth/login`;
 
     console.log(`📡 Despachando pasaporte de autenticación hacia la nube: [${urlFinalLogin}]`);
 
