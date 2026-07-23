@@ -29,7 +29,7 @@ app.use('/videos', express.static(path.join(__dirname, 'videos')));
 // INDICA A NODE QUE SIRVA TU CARPETA DE ESCUDOS DE FORMA SEGURA EN EL PUERTO 3000
 app.use('/escudos', express.static(path.join(__dirname, 'escudos')));
 
-
+/*
 // CONFIGURACIÓN DE CONEXIÓN ACTUALIZADA CON EL NUEVO USUARIO
 const db = mysql.createConnection({
     host: 'localhost',
@@ -49,7 +49,37 @@ db.connect(function(err) {
         return;
     }
     console.log('✅ ¡Conectado con éxito a MySQL Workbench (flores futbol)!');
+}); */
+
+
+// =======================================================================
+// 🛜 CONEXIÓN DE SEGURIDAD ENLAZADA HACIA TU BASE DE DATOS EN LA NUBE
+// Sincroniza tu server.js local con los servidores globales de Clever Cloud
+// =======================================================================
+
+const db = mysql.createConnection({
+    // 🎯 REPARACIÓN DE RED DE TU HOST: Limpio de prefijos, sin http ni :// al principio
+     host: '46.105.174.195', 
+    user: 'uws5byox273eitrn',
+    password: 'YqtaLQdmzJQn9D6SXPmV', // Tu clave del ojo naranja
+    database: 'bs9wkolvj04431wg05ak',
+    port: 3306,
+    connectTimeout: 20000 
 });
+
+
+db.connect((err) => {
+    // 🎯 VALIDACIÓN ELÁSTICA: Solo imprimimos el error si la conexión se ha roto de verdad
+    if (err) {
+        console.error("🔴 Conexión local falló. Reintentando enlace hacia la nube...", err.message);
+        return;
+    }
+    // Si todo está en orden, la consola brilla en verde de inmediato
+    console.log("🛰️ [Clever Cloud Conectado] ¡Tu base de datos ya opera de forma global en la nube!");
+});
+
+
+
 
 // 1. OBTENER JORNADAS
 app.get('/api/jornadas', (req, res) => {
@@ -2027,9 +2057,17 @@ app.post('/api/auth/login', (req, res) => {
 });
 
 
-
-
-app.listen(3000, () => {
-    console.log('Servidor corriendo en http://localhost:3000');
+// Cambia tu app.listen original por este:
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 Servidor SaaS corriendo en el puerto ${PORT}`);
 });
+
+
+
+
+
+/*app.listen(3000, () => {
+    console.log('Servidor corriendo en http://localhost:3000');
+});*/
 
