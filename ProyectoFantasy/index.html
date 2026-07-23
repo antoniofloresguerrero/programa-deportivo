@@ -817,24 +817,7 @@
 
         <script type="text/javascript">
    
-    // =======================================================================
-// 🛡️ ESCUDO INTERCEPTOR GLOBAL DE RED (REEMPLAZO AUTOMÁTICO DE LOCALHOST)
-// Corrige los 80 enlaces locales al vuelo sin tocar tus 8500 líneas
-// =======================================================================
-(function() {
-    const fetchOriginalDelNavegador = window.fetch;
-    window.fetch = function(url, opciones) {
-        // Si la llamada contiene el enlace antiguo local de casa...
-        if (typeof url === 'string' && url.includes('http://localhost:3000')) {
-            // ¡La cazamos en el aire y le cambiamos el destino por tu URL real de Render!
-            url = url.replace('http://localhost:3000', 'https://onrender.com');
-            console.log(`🚀 Escudo de Red redirigió con éxito una llamada local hacia: ${url}`);
-        }
-        return fetchOriginalDelNavegador.apply(this, [url, opciones]);
-    };
-    console.log("👁️ ¡Aduana de red activada! Tus 80 enlaces locales están protegidos y redirigidos a Render.");
-})();
-
+            
 
 
 
@@ -1648,11 +1631,7 @@
 
 
 <script>
-   
-   // 🎯 ENLACE GLOBAL DE PRODUCCIÓN EN LA NUBE (RENDER)
-// Al definir esto aquí, todas tus 8500 líneas se actualizarán solas al instante
-// const API_URL = "https://onrender.com";
-    // const API_URL = 'http://localhost:3000/api';
+    const API_URL = 'http://localhost:3000/api';
     let listaJugadoresActaActual = [];
     let partidoSeleccionadoActual = null;
     let jugadorSeleccionadoParaEditar = null;
@@ -9226,10 +9205,10 @@ function limpiarPizarraPartidoActivo() {
 
 
 
-/**
- * PROCESA EL FORMULARIO DE ACCESO CONECTÁNDOSE EN DIRECTO CON RENDER
- * Soluciona definitivamente el fallo de redirección local en la tablet
- */
+// =======================================================================
+// 🔐 SISTEMA DE SESIONES Y PERMISOS COMPLETAMENTE AISLADO (SIN CONFLICTOS)
+// =======================================================================
+
 function ejecutarPeticionLoginAislado(evento) {
     evento.preventDefault();
     const correo = document.getElementById('auth-email').value;
@@ -9237,48 +9216,32 @@ function ejecutarPeticionLoginAislado(evento) {
     const alerta = document.getElementById('auth-alerta-error');
     if (alerta) alerta.style.display = "none";
 
-    // 🎯 DETERMINAMOS LA RUTA REAL: Si tienes declarada API_URL arriba la usamos, 
-    // si no, calculamos el enlace de Render actual de la barra de direcciones automáticamente
-    const urlBaseBaseDeRed = (typeof API_URL !== "undefined" ? API_URL : window.location.origin);
-    const urlFinalLogin = `/api/auth/login`;
-
-    console.log(`📡 Despachando pasaporte de autenticación hacia la nube: [${urlFinalLogin}]`);
-
-    fetch(urlFinalLogin, {
+    fetch('http://localhost:3000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: correo, password: clave })
     })
-    .then(res => { 
-        if (!res.ok) throw new Error("Credenciales rechazadas por el servidor."); 
-        return res.json(); 
-    })
+    .then(res => { if (!res.ok) throw new Error(); return res.json(); })
     .then(data => {
         if (data.success && data.token) {
-            // Guardamos el pasaporte digital en la memoria de la tablet
+            // Guardamos la sesión de la tablet
             localStorage.setItem('fantasy_session_token', data.token);
             localStorage.setItem('fantasy_usuario_datos', JSON.stringify(data.usuario));
 
-            // Levantamos la persiana de login ocultándola de la pantalla
+            // Levantamos la persiana de login ocultándola
             document.getElementById('modulo-auth-login-pantalla').style.display = "none";
 
-            // Disparamos tu carrusel nativo original de fábrica para vestir el césped
+            // 🚀 INVOCACIÓN NATIVA: Llamamos a tu función del carrusel original intacta
             if (typeof cargarListaPartidosDeJornadaDesdeBD === "function") {
                 cargarListaPartidosDeJornadaDesdeBD();
             }
 
-            // Aplicamos los filtros de ocultación visual según rango
-            if (typeof aplicarFiltrosDeRolAislados === "function") {
-                aplicarFiltrosDeRolAislados();
-            }
+            // Aplicamos el bloqueo de campos si entra un jugador
+            aplicarFiltrosDeRolAislados();
         }
     })
-    .catch((error) => { 
-        console.error("🔴 Fallo en la pasarela Fetch del login aislado:", error);
-        if (alerta) alerta.style.display = "block"; 
-    });
+    .catch(() => { if (alerta) alerta.style.display = "block"; });
 }
-
 
 function aplicarFiltrosDeRolAislados() {
     const sesion = localStorage.getItem('fantasy_usuario_datos');
