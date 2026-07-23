@@ -4,53 +4,6 @@
     <!-- =======================================================================
 🛡️ CONTROLADOR MAESTRO DE ESCUDOS: AISLADO ARRIBA CONTRA ERRORES SINTÁCTICOS
 ======================================================================= -->
-<!-- Pega este bloque de estilos dentro de la etiqueta <head> de tu index.html -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<style>
-    /* 🎯 OPTIMIZACIÓN TÁCTIL GLOBAL PARA TABLETS */
-    body, input, button, select {
-        /* Desactiva el retraso de 300ms que tienen los navegadores móviles al hacer clic */
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
-    }
-
-    /* Los botones y controles de la pizarra deben tener un tamaño mínimo para el dedo humano */
-    #pizarra-partido-toolbar button, .btn-audio-tab, .btn-pizarra-tab {
-        min-height: 44px !important; /* Estándar de Apple/Google para usabilidad táctil */
-        padding: 10px 14px !important;
-        font-size: 13px !important; /* Texto más legible en exteriores */
-    }
-
-    /* Evita que el usuario haga zoom por error al pintar rápido con el Touch Pen */
-    #pizarra-canvas-partido {
-        touch-action: none; /* Crucial: el navegador no moverá la pantalla al arrastrar jugadores */
-        max-width: 100%;
-        height: auto;
-        box-sizing: border-box;
-    }
-
-    /* 🔄 CONTENEDOR RESPONSIVO: Pasa de columnas a una sola fila cómoda si la tablet se gira */
-    @media (max-width: 1024px) {
-        #sub-sec-club-partidos-tactica > div {
-            grid-template-columns: 1fr !important; /* Apila el canvas sobre los controles si la pantalla es estrecha */
-            gap: 15px !important;
-        }
-        
-        #pizarra-partido-toolbar {
-            flex-direction: row !important; /* Distribuye las herramientas de forma horizontal arriba del canvas */
-            flex-wrap: wrap;
-            width: 100% !important;
-        }
-        
-        #pizarra-partido-toolbar div {
-            flex-direction: row !important;
-            flex-wrap: wrap;
-            width: 100%;
-        }
-    }
-</style>
-
 <script>
     window.viajarAFichaEquipo = function(id_equipo) {
         console.log("🛡️ [Cabecera Aislada] Abriendo Ficha Técnica del Club ID: " + id_equipo);
@@ -261,55 +214,38 @@
 </head>
 <body>
 
-<!-- Login -->
- 
-<!-- =======================================================================
-     🔐 CONTROL DE ACCESO GLOBAL: PANTALLA DE LOGIN INTEGRADA (TABLET-FIRST)
+    <!-- =======================================================================
+     🔐 CONTROL DE ACCESO AISLADO: PANTALLA DE LOGIN CON BOTONES MAXI-TOUCH
      ======================================================================= -->
 <div id="modulo-auth-login-pantalla" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b0f19; z-index: 999999; display: flex; align-items: center; justify-content: center; font-family: sans-serif; box-sizing: border-box; padding: 20px;">
-    
     <div style="background: rgba(15, 23, 42, 0.95); border: 1px solid #1e293b; border-radius: 12px; padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); box-sizing: border-box;">
         
-        <!-- Logotipo / Encabezado -->
         <div style="text-align: center; margin-bottom: 25px;">
-            <h2 style="color: #38bdf8; margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;">⚔️ FANTASY LIGA</h2>
-            <p style="color: #64748b; margin: 5px 0 0 0; font-size: 13px;">Panel de Planificación y Control Táctico</p>
+            <h2 style="color: #38bdf8; margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;">⚔️ VESTUARIO TÁCTICO</h2>
+            <p style="color: #64748b; margin: 5px 0 0 0; font-size: 13px;">Identifícate para cargar los datos de tu club</p>
         </div>
 
-        <!-- Formulario Nativo -->
-        <form id="formulario-auth-login-sistema" onsubmit="ejecutarPeticionLoginFetiche(event)" style="display: flex; flex-direction: column; gap: 18px;">
-            
-            <!-- Campo Email -->
+        <form id="formulario-auth-login-sistema" onsubmit="ejecutarPeticionLoginAislado(event)" style="display: flex; flex-direction: column; gap: 18px;">
             <div>
-                <label for="auth-email" style="color: #94a3b8; font-size: 11px; font-weight: bold; display: block; margin-bottom: 6px; text-transform: uppercase;">Correo Electrónico:</label>
-                <input type="email" id="auth-email" required placeholder="ejemplo@tuclub.com" style="width: 100%; min-height: 46px; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px 14px; border-radius: 6px; box-sizing: border-box; font-size: 14px; outline: none;">
+                <label style="color: #94a3b8; font-size: 11px; font-weight: bold; display: block; margin-bottom: 6px; text-transform: uppercase;">Correo Electrónico:</label>
+                <input type="email" id="auth-email" reply="email" required placeholder="ejemplo@tuclub.com" style="width: 100%; min-height: 46px; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px 14px; border-radius: 6px; box-sizing: border-box; font-size: 14px; outline: none;">
             </div>
 
-            <!-- Campo Contraseña -->
             <div>
-                <label for="auth-password" style="color: #94a3b8; font-size: 11px; font-weight: bold; display: block; margin-bottom: 6px; text-transform: uppercase;">Contraseña de Acceso:</label>
+                <label style="color: #94a3b8; font-size: 11px; font-weight: bold; display: block; margin-bottom: 6px; text-transform: uppercase;">Contraseña:</label>
                 <input type="password" id="auth-password" required placeholder="••••••••" style="width: 100%; min-height: 46px; background: #0f172a; border: 1px solid #334155; color: #fff; padding: 10px 14px; border-radius: 6px; box-sizing: border-box; font-size: 14px; outline: none;">
             </div>
 
-            <!-- Alerta pasiva de error (Se activa por JavaScript si fallan las credenciales) -->
             <div id="auth-alerta-error" style="color: #ef4444; font-size: 12px; font-weight: bold; text-align: center; display: none; background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.2);">
-                ⚠️ Credenciales incorrectas o cuenta inactiva.
+                ⚠️ Acceso denegado. Revisa tu correo o contraseña.
             </div>
 
-            <!-- Botón de Envío (Zonificado Maxi-Touch para dedos) -->
-            <button type="submit" style="width: 100%; min-height: 48px; background: #38bdf8; color: #0b0f19; font-weight: bold; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.2s;">
-                Ingresar al Vestuario
+            <button type="submit" style="width: 100%; min-height: 48px; background: #38bdf8; color: #0b0f19; font-weight: bold; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;">
+                Ingresar a la Página
             </button>
-            
         </form>
-
-        <div style="text-align: center; margin-top: 20px; border-top: 1px solid #1e293b; padding-top: 15px;">
-            <small style="color: #475569; font-size: 11px;">Uso exclusivo para Clubes Registrados en el Sistema SaaS.</small>
-        </div>
     </div>
 </div>
-
-<!-- Fin de Login -->
 
    
         <!-- GATILLO INTERACTIVO Y MENÚ LATERAL HAMBURGUESA CORREGIDO -->
@@ -642,9 +578,11 @@
                     <!-- BLOQUE 2: PLANTILLA -->
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <span style="color:#aaa; font-size:9px; font-weight:bold; text-transform:uppercase; text-align:center; display:block; border-bottom:1px solid #444; padding-bottom:6px; margin-bottom: 2px;">Plantilla</span>
-                        <button id="par-tool-local" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:12px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('jugador-local', this)">🔵 Nuestro XI</button>
-                        <button id="par-tool-rival" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:12px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('jugador-visitante', this)">🔴 Rival</button>
+                        <button id="par-tool-local" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:12px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('jugador-local', this)">🔵 Local</button>
+                        <button id="par-tool-rival" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:12px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('jugador-visitante', this)">🔴 Visitante</button>
                         <button id="par-tool-balon" class="btn-g" type="button" style="width:100%; height:32px; font-size:11px; text-align:left; padding-left:12px; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaPartido('balon', this)">⚽ Balón</button>
+                    
+                    
                     </div>
                 </div>
 
@@ -1595,6 +1533,9 @@
                         <button id="tool-cono" class="btn-g" type="button" style="width:100% !important; height:28px !important; font-size:11px !important; text-align:left !important; padding-left:8px !important; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaDibujoPizarra('cono')">🔶 Cono</button>
                         <button id="tool-pica" class="btn-g" type="button" style="width:100% !important; height:28px !important; font-size:11px !important; text-align:left !important; padding-left:8px !important; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaDibujoPizarra('pica')">📍 Pica</button>
                         <button id="tool-balon" class="btn-g" type="button" style="width:100% !important; height:28px !important; font-size:11px !important; text-align:left !important; padding-left:8px !important; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaDibujoPizarra('balon')">⚽ Balón</button>
+                      
+                      
+                      
                         <button id="tool-porteria" class="btn-g" type="button" style="width:100% !important; height:28px !important; font-size:11px !important; text-align:left !important; padding-left:8px !important; cursor:pointer; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" onclick="seleccionarHerramientaDibujoPizarra('porteria')">🥅 Arco</button>
                         
                         <span style="color:#aaa; font-size:9px; font-weight:bold; text-transform:uppercase; text-align:center; display:block; border-bottom:1px solid #444; padding:4px 0;">Vestuario</span>
@@ -2038,181 +1979,129 @@
         }).then(res => res.json()).then(data => { alert(data.mensaje); cargarListaPartidosDeJornadaDesdeBD(); });
     }
 
- /**
- * REFACTORIZACIÓN DEFINITIVA: Inyecta los partidos destruyendo cualquier mensaje fantasma
- */
-function inyectarCarruselSaaSMultiInquilino() {
-    const tokenSeguridad = localStorage.getItem('fantasy_session_token');
-    if (!tokenSeguridad || tokenSeguridad === "") {
-        console.log("⏱️ Carrusel en espera de autenticación global.");
-        return; 
-    }
+        // ACTUALIZADA: Inserta los partidos como pastillas redondeadas horizontales en la barra de control
+    function cargarListaPartidosDeJornadaDesdeBD() {
+        let id_jornada = document.getElementById('ver-jornada-sel').value;
+        if (!id_jornada) return;
 
-    console.log("📡 Consumiendo pasarela SaaS filtrada por Club para la barra superior...");
-
-    fetch('http://localhost:3000/api/partidos/lista-carrusel', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${tokenSeguridad}`
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
-                localStorage.removeItem('fantasy_session_token');
-                window.location.reload();
-            }
-            throw new Error("Fallo de autenticación en carrusel.");
-        }
-        return response.json();
-    })
-    .then(partidos => {
-        if (!partidos || partidos.length === 0) return;
-
-        // 🎯 CAZA SÍNCRONA FANTASMA: Buscamos cualquier elemento en la pantalla de la tablet
-        // que contenga textualmente la frase amarilla que te bloquea la aplicación
-        let contenedorDestino = null;
-        const todosLosElementos = document.querySelectorAll('div, span, p, section');
+        // Apuntamos al nuevo contenedor estilizado de la barra horizontal
+        let contenedor = document.getElementById('lista-partidos-jornada-vagas');
+        if (!contenedor) return;
         
-        todosLosElementos.forEach(el => {
-            if (el.innerText && el.innerText.includes("El carrusel superior está vacío") || el.innerText.includes("Esperando inyección")) {
-                contenedorDestino = el;
-            }
-        });
+        contenedor.innerHTML = ""; 
+        ocultarPanelesActa();
 
-        // Si el buscador por texto falló, apuntamos al contenedor por su diseño flex superior
-        if (!contenedorDestino) {
-            contenedorDestino = document.getElementById('club-partidos-lista-container') 
-                || document.getElementById('partidos-carrusel-tira')
-                || document.querySelector('.partidos-container');
+        fetch(API_URL + '/partidos/' + id_jornada)
+            .then(res => res.json())
+            .then(partidos => {
+                if (!partidos || partidos.length === 0) {
+                    contenedor.innerHTML = "<p style='color:#aaa; font-size:12px; font-style:italic;'>No hay partidos programados.</p>";
+                    return;
+                }
+
+                partidos.forEach(p => {
+                    let btn = document.createElement('button');
+                    btn.className = 'item-partido-btn';
+                    
+                    // Diseño premium en formato pastilla redondeada horizontal
+                    btn.style.padding = "6px 16px";
+                    btn.style.fontSize = "13px";
+                    btn.style.whiteSpace = "nowrap";
+                    btn.style.background = "rgba(255,255,255,0.06)";
+                    btn.style.border = "1px solid rgba(255,255,255,0.1)";
+                    btn.style.borderRadius = "20px"; 
+                    btn.style.cursor = "pointer";
+                    btn.style.transition = "0.2s";
+                    btn.style.color = "#fff";
+                    btn.style.fontWeight = "600";
+
+                    // SATELLITE DE MARCADOR: Si el partido no se ha jugado (goles NULL), muestra un limpio 'vs'
+                    let golesL = (p.goles_local !== null && p.goles_local !== undefined) ? p.goles_local : "-";
+                    let golesV = (p.goles_visitante !== null && p.goles_visitante !== undefined) ? p.goles_visitante : "-";
+                    
+                    btn.innerText = `${p.local_nombre} ${golesL} - ${golesV} ${p.visitante_nombre}`;
+
+                    // ACCIÓN AL PULSAR: Ilumina el contorno de la pastilla elegida en verde y despliega el césped abajo
+                    btn.onclick = function() {
+                        document.querySelectorAll('#lista-partidos-jornada-vagas .item-partido-btn').forEach(b => {
+                            b.style.borderColor = 'rgba(255,255,255,0.1)';
+                            b.style.background = 'rgba(255,255,255,0.06)';
+                            b.style.color = '#fff';
+                        });
+                        this.style.borderColor = '#00CC66';
+                        this.style.background = 'rgba(0, 204, 102, 0.15)';
+                        this.style.color = '#00CC66';
+                        
+                        abrirPartidoEspecificoDesdeBD(p);
+                    };
+
+                    contenedor.appendChild(btn);
+                });
+            }).catch(err => console.error("Error al listar pastillas de partidos:", err));
+    
+  
+
         }
-
-        if (contenedorDestino) {
-            // Limpiamos de raíz el aviso amarillo y el colgado de la pantalla
-            contenedorDestino.innerHTML = ""; 
-            contenedorDestino.style.display = "flex";
-            contenedorDestino.style.gap = "12px";
-            contenedorDestino.style.overflowX = "auto";
-            contenedorDestino.style.padding = "6px";
-            contenedorDestino.style.alignItems = "center";
-
-            partidos.forEach(p => {
-                const botonPartido = document.createElement('button');
-                botonPartido.type = "button";
-                botonPartido.style.background = "#111";
-                botonPartido.style.border = "1px solid #334155";
-                botonPartido.style.borderRadius = "6px";
-                botonPartido.style.color = "#fff";
-                botonPartido.style.padding = "8px 16px";
-                botonPartido.style.cursor = "pointer";
-                botonPartido.style.display = "inline-flex";
-                botonPartido.style.alignItems = "center";
-                botonPartido.style.gap = "10px";
-                botonPartido.style.minWidth = "max-content";
-
-                botonPartido.innerHTML = `
-                    <span style="font-weight:bold; font-size:12px; color:#38bdf8; text-transform:uppercase;">${p.local_nombre || p.id_local || 'Local'}</span>
-                    <span style="background:#222; padding:3px 8px; border-radius:4px; color:#00ff00; font-weight:bold; font-size:13px; border:1px solid #333;">${p.goles_local !== undefined ? p.goles_local : 0}</span>
-                    <span style="color:#475569; font-size:11px; font-weight:bold;">VS</span>
-                    <span style="background:#222; padding:3px 8px; border-radius:4px; color:#00ff00; font-weight:bold; font-size:13px; border:1px solid #333;">${p.goles_visitante !== undefined ? p.goles_visitante : 0}</span>
-                    <span style="font-weight:bold; font-size:12px; color:#dc2626; text-transform:uppercase;">${p.visitante_nombre || p.id_visitante || 'Visitante'}</span>
-                `;
-
-                // Disparador táctil al pulsar con el dedo o touch pen
-                botonPartido.onclick = () => {
-                    if (typeof abrirPartidoEspecificoDesdeBD === "function") {
-                        abrirPartidoEspecificoDesdeBD(p); 
-                    }
-                };
-
-                contenedorDestino.appendChild(botonPartido);
-            });
-
-            // Auto-selección inicial para vestir el campo táctico verde de inmediato
-            if (partidos[0] && typeof abrirPartidoEspecificoDesdeBD === "function") {
-                setTimeout(() => {
-                    abrirPartidoEspecificoDesdeBD(partidos[0]);
-                }, 100);
-            }
-        } else {
-            console.error("🔴 Mapeador falló: No se encontró la barra en el DOM.");
-        }
-    })
-    .catch(err => console.error("🔴 Error real en pasarela elástica:", err));
-}
-
 
 
 
  function abrirPartidoEspecificoDesdeBD(p) {
-    if (!p) return;
-    partidoSeleccionadoActual = p;
-    
-    // 🎯 DICCIONARIO TRADUCTOR SENCILLO
-    // Traduce el ID numérico de tu base de datos a texto limpio antes de calcular la imagen
-    const diccionarioEquiposRapido = {
-        1: "realmadrid", 2: "barcelona", 3: "atletico", 4: "deportivocoruna",
-        5: "athletic_club", 6: "real_sociedad", 7: "betis", 8: "villarreal",
-        9: "valencia", 10: "alaves", 11: "osasuna", 12: "getafe",
-        13: "celta", 14: "sevilla", 15: "malaga", 16: "elche",
-        17: "rayovallecano", 18: "levante", 19: "espanyol", 20: "racingsantander"
-    };
+        if (!p) return;
+        partidoSeleccionadoActual = p;
+        
+        let nombreLocalReal = p.local_nombre || p.nombre_local || "Club Local";
+        let nombreVisitanteReal = p.visitante_nombre || p.nombre_visitante || "Club Visitante";
 
-    // Extraemos el ID numérico que viene de MySQL (ej: 11 o 14)
-    const idLocal = p.id_local || p.local;
-    const idVisitante = p.id_visitante || p.visitante;
+        let imgL = nombreLocalReal.toLowerCase().trim().replace(/ /g, "_") + ".png";
+        let imgV = nombreVisitanteReal.toLowerCase().trim().replace(/ /g, "_") + ".png";
 
-    // Traducimos el número a texto. Si no es un número, dejamos lo que ya venía
-    let nombreLocalReal = diccionarioEquiposRapido[idLocal] || p.local_nombre || p.nombre_local || "Club Local";
-    let nombreVisitanteReal = diccionarioEquiposRapido[idVisitante] || p.visitante_nombre || p.nombre_visitante || "Club Visitante";
+        let iconoBalonFallback = "https://flaticon.com";
 
-    // 🎯 TU LÓGICA ORIGINAL DE IMÁGENES (Vuelve a ser exacta a la tuya)
-    let imgL = nombreLocalReal.toLowerCase().trim().replace(/ /g, "_") + ".png";
-    let imgV = nombreVisitanteReal.toLowerCase().trim().replace(/ /g, "_") + ".png";
+        // Inyectamos las imágenes con el detector de errores autocancelable (Evita parpadeo)
+        document.getElementById('txt-marcador-local').innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img id="escudo-marcador-l" src="http://localhost:3000/escudos/${imgL}" style="width:30px; height:30px; object-fit:contain;">
+                <span>${nombreLocalReal}</span>
+            </div>
+        `;
+        document.getElementById('escudo-marcador-l').onerror = function() { this.src = iconoBalonFallback; this.onerror = null; };
 
-    let iconoBalonFallback = "https://flaticon.com"; // Tu fallback original
-
-    // Inyectamos las imágenes con el detector de errores autocancelable (Evita parpadeo)
-    document.getElementById('txt-marcador-local').innerHTML = `
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <img id="escudo-marcador-l" src="http://localhost:3000/escudos/${imgL}" style="width:30px; height:30px; object-fit:contain;">
-            <span>${nombreLocalReal}</span>
-        </div>
-    `;
-    document.getElementById('escudo-marcador-l').onerror = function() { this.src = iconoBalonFallback; this.onerror = null; };
-
-    document.getElementById('txt-marcador-visitante').innerHTML = `
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <span>${nombreVisitanteReal}</span>
-            <img id="escudo-marcador-v" src="http://localhost:3000/escudos/${imgV}" style="width:30px; height:30px; object-fit:contain;">
-        </div>
-    `;
-    document.getElementById('escudo-marcador-v').onerror = function() { this.src = iconoBalonFallback; this.onerror = null; };
-    
-    let inputGolesL = document.getElementById('marcador-goles-l');
-    let inputGolesV = document.getElementById('marcador-goles-v');
-    if (inputGolesL) inputGolesL.value = p.goles_local !== null ? parseInt(p.goles_local) : 0;
-    if (inputGolesV) inputGolesV.value = p.goles_visitante !== null ? parseInt(p.goles_visitante) : 0;
-    
-    let paneles = ['panel-marcador', 'panel-listas-checks', 'contenedor-acta-visual'];
-    paneles.forEach(id => {
-        let el = document.getElementById(id);
-        if (el) el.style.display = (id === 'panel-marcador') ? 'block' : 'grid';
-    });
-    
-    cargarDetalleActaYListas(p.id_partido);
- 
-    // 🎯 TU ENGANCHE DE LA PIZARRA (Exacto al que tenías antes)
+        document.getElementById('txt-marcador-visitante').innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span>${nombreVisitanteReal}</span>
+                <img id="escudo-marcador-v" src="http://localhost:3000/escudos/${imgV}" style="width:30px; height:30px; object-fit:contain;">
+            </div>
+        `;
+        document.getElementById('escudo-marcador-v').onerror = function() { this.src = iconoBalonFallback; this.onerror = null; };
+        
+        let inputGolesL = document.getElementById('marcador-goles-l');
+        let inputGolesV = document.getElementById('marcador-goles-v');
+        if (inputGolesL) inputGolesL.value = p.goles_local !== null ? parseInt(p.goles_local) : 0;
+        if (inputGolesV) inputGolesV.value = p.goles_visitante !== null ? parseInt(p.goles_visitante) : 0;
+        
+        let paneles = ['panel-marcador', 'panel-listas-checks', 'contenedor-acta-visual'];
+        paneles.forEach(id => {
+            let el = document.getElementById(id);
+            if (el) el.style.display = (id === 'panel-marcador') ? 'block' : 'grid';
+        });
+        
+        cargarDetalleActaYListas(p.id_partido);
+     
+            // 🎯 ENGANCHE PERFECTO CORREGIDO: Extrae el ID numérico limpio del objeto nativo 'p'
     if (typeof buscarYCargarPartidoEspecifico === "function" && p) {
+        // Buscamos todas las variantes posibles donde tu objeto pueda guardar el número de ID
         const idLimpioYReal = p.id_partido || p.id || (typeof p === 'number' ? p : null);
+        
         if (idLimpioYReal) {
             buscarYCargarPartidoEspecifico(idLimpioYReal);
         } else {
             console.warn("⚠️ La pizarra no pudo extraer un ID numérico válido del objeto de partido:", p);
         }
     }
-}
+
+
+    
+    }
 
 
 
@@ -3254,41 +3143,41 @@ function eliminarPartidoYActualizarLigaBD() {
         };
 
 
-               // =======================================================================
+        // =======================================================================
         // DISPARADOR MAESTRO REPARADO: CONECTA EL TERCER BOTÓN "PARTIDOS DEL CLUB"
         // =======================================================================
+       
         function cambiarSubSeccionEquipos(subSeccion) {
-            // Añade esto en la primera línea de tu función cambiarSubSeccionEquipo(subSeccion) para limpiar la lona al volver atrás:
-if (subSeccion !== 'entrenamientos') {
-    let panelEntrenamiento = document.getElementById('sub-sec-club-entrenamientos-nativo');
-    if (panelEntrenamiento) panelEntrenamiento.style.display = 'none';
-    
-    // Quitamos la clase activa al botón de entrenamientos si se pincha en Datos del Club o Plantilla
-    let btnEntrenoTab = document.getElementById('sub-btn-entrenamientos');
-    if (btnEntrenoTab) btnEntrenoTab.classList.remove('active');
+    // 1. Limpieza preventiva al salir de entrenamientos
+    if (subSeccion !== 'entrenamientos') {
+        let panelEntrenamiento = document.getElementById('sub-sec-club-entrenamientos-nativo');
+        if (panelEntrenamiento) panelEntrenamiento.style.display = 'none';
+        
+        let btnEntrenoTab = document.getElementById('sub-btn-entrenamientos');
+        if (btnEntrenoTab) btnEntrenoTab.classList.remove('active');
+    }
+
+    console.log("Cambiando subpestaña visual del club hacia: " + subSeccion);
+
+    // ... Aquí mantienes intacto tu código original de ocultar/mostrar DIVs con style.display ...
+
+    // 2. Disparador de la pestaña central (Plantilla)
+    if (subSeccion === 'plantilla') {
+        let idClubActivo = typeof idEquipoSeleccionadoFicha !== "undefined" ? idEquipoSeleccionadoFicha : 1;
+        if (typeof cargarPlantillaJugadoresClubFicha === "function") {
+            cargarPlantillaJugadoresClubFicha(idClubActivo);
+        }
+    }
+
+    // 3. Disparador de la pestaña de Partidos o Calendario (Lectura de MySQL)
+    if (subSeccion === 'partidos' || subSeccion === 'calendario') {
+        let idClubActivo = typeof idEquipoSeleccionadoFicha !== "undefined" ? idEquipoSeleccionadoFicha : 1;
+        if (typeof cargarHistorialPartidosClubFicha === "function") {
+            cargarHistorialPartidosClubFicha(idClubActivo);
+        }
+    }
 }
 
-            console.log("Cambiando subpestaña visual del club hacia: " + subSeccion);
-
-            // ... Aquí mantienes intacto tu código original de ocultar/mostrar DIVs con style.display ...
-
-            // 1. Cable de la pestaña central (Plantilla)
-            if (subSeccion === 'plantilla') {
-                let idClubActivo = typeof idEquipoSeleccionadoFicha !== "undefined" ? idEquipoSeleccionadoFicha : 1;
-                if (typeof cargarPlantillaJugadoresClubFicha === "function") {
-                    cargarPlantillaJugadoresClubFicha(idClubActivo);
-                }
-            }
-
-            // 2. CORRECCIÓN CLAVE: Cable de tu tercer botón solicitado ('partidos')
-            // Cuando el usuario pulsa en el botón horizontal, este if despierta la lectura de MySQL
-            if (subSeccion === 'partidos' || subSeccion === 'calendario') {
-                let idClubActivo = typeof idEquipoSeleccionadoFicha !== "undefined" ? idEquipoSeleccionadoFicha : 1;
-                if (typeof cargarHistorialPartidosClubFicha === "function") {
-                    cargarHistorialPartidosClubFicha(idClubActivo);
-                }
-            }
-        }
 
               // =======================================================================
         // RECONSTRUIDO: BLOQUE A CON AUTO-ESCANER DE VISIBILIDAD (NUNCA FALLA)
@@ -4222,66 +4111,6 @@ if (subSeccion !== 'entrenamientos') {
  // =======================================================================
         // MOTOR DE JUGADAS PIZARRA - VARIABLES GLOBALES DE CONTROL REPARADAS
         // =======================================================================
-
-// =======================================================================
-// 👑 DECLARACIÓN EN EL NIVEL MÁS ALTO DEL ARCHIVO (DESACTIVA ERROR 1989)
-// =======================================================================
-window.cargarListaPartidosDeJornadaDesdeBD = function() {
-    // Freno de seguridad: Si no hay inicio de sesión en la tablet, esperamos en segundo plano
-    const tokenSeguridad = localStorage.getItem('fantasy_session_token');
-    if (!tokenSeguridad || tokenSeguridad === "") {
-        console.log("⏱️ Carrusel en espera de autenticación global en el vestuario.");
-        return; 
-    }
-
-    console.log("📡 Consumiendo pasarela SaaS filtrada por Club para el carrusel superior...");
-
-    // Petición GET protegida hacia tu server.js
-    fetch('http://localhost:3000/api/partidos/lista-carrusel', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${tokenSeguridad}`
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
-                localStorage.removeItem('fantasy_session_token');
-                window.location.reload();
-            }
-            throw new Error("Fallo de autenticación en pasarela SaaS.");
-        }
-        return response.json();
-    })
-    .then(partidos => {
-        if (!partidos || partidos.length === 0) {
-            console.log("ℹ️ Este club no registra partidos en su cuenta.");
-            return;
-        }
-
-        console.log(`✅ Carrusel cargado desde MySQL. Partidos devueltos: ${partidos.length}`);
-
-        // =======================================================================
-        // 🎯 CONTROLADOR INFALIBLE: MANTENEMOS TU PINTADO ORIGINAL INTACTO
-        // =======================================================================
-        // En lugar de inventar botones nuevos, le pasamos el array de partidos filtrados
-        // directamente a las variables o funciones que ya usaba tu código original para pintar.
-        
-        // Pega justo aquí abajo el bucle 'forEach' o las líneas exactas con las que tú
-        // pintabas los botones negros arriba originalmente (ej: partidos.forEach(p => { ... }))
-        // utilizando tus IDs de contenedores reales para que tu marcador recupere la vida al 100%.
-
-    })
-    .catch(err => console.error("🔴 Error en pasarela elástica del carrusel:", err));
-};
-
-
-// 🎯 RESPALDO DE PUNTERO: Vinculamos también la referencia alternativa de red por si acaso
-window.inyectarCarruselSaaSMultiInquilino = window.cargarListaPartidosDeJornadaDesdeBD;
-
-
-
         var balonCoordenadas = { x: 50, y: 50 };
         var estaGrabandoEnVivo = false;
 
@@ -4706,62 +4535,60 @@ window.inyectarCarruselSaaSMultiInquilino = window.cargarListaPartidosDeJornadaD
                // =======================================================================
         // HISTORIAL PARTIDOS CLUB - PARTE 1: AUTO-CONTENEDOR Y PETICIÓN DE RED (CORREGIDO)
         // =======================================================================
-        function cargarHistorialPartidosClubFicha(id_equipo) {
-            console.log("⚓ Procesando historial de partidos disputados para el Club ID: " + id_equipo);
-            
-            // 1. CAPTURA O CREACIÓN AUTOMÁTICA DE LA LONA RECEPTORA EN TU PANTALLA
-            let boxPartidos = document.getElementById('lonas-fijas-historial-partidos-club');
-            if (!boxPartidos) {
-                let pestañaPartidosClub = document.getElementById('sub-sec-partidos') || 
-                                          document.getElementById('partidos-club') ||
-                                          document.getElementById('sec-partidos-equipo');
-                
-                if (!pestañaPartidosClub) {
-                    pestañaPartidosClub = document.querySelector('.sub-seccion-panel') || document.querySelector('#sec-ficha-equipo');
-                }
-                
-                if (pestañaPartidosClub) {
-                    boxPartidos = document.createElement('div');
-                    boxPartidos.id = 'lonas-fijas-historial-partidos-club';
-                    boxPartidos.style.display = 'flex'; boxPartidos.style.flexDirection = 'column'; boxPartidos.style.gap = '8px';
-                    boxPartidos.style.width = '100%'; boxPartidos.style.boxSizing = 'border-box';
-                    pestañaPartidosClub.appendChild(boxPartidos);
-                }
-            }
-
-            if (!boxPartidos) return console.error("No se encontró ningún punto de apoyo visual en tu HTML.");
-            boxPartidos.innerHTML = `<div style="color:#ff9900; text-align:center; padding:15px; font-size:12px;">⏳ Sincronizando calendario con MySQL Workbench...</div>`;
-
-            // ==== CORRECCIÓN CRUCIAL: ROMPER EL CANDADO VISUAL DE CSS DE TU TABLA ====
-            // Forzamos al contenedor físico a quitarse el display none heredado y mostrarse en el monitor
-            let capaPadreVisual = document.getElementById('sub-sec-partidos') || 
-                                  document.getElementById('partidos-club') || 
+      function cargarHistorialPartidosClubFicha(id_equipo) {
+    console.log("⚓ Procesando historial de partidos disputados para el Club ID: " + id_equipo);
+    
+    // 1. CAPTURA O CREACIÓN AUTOMÁTICA DE LA LONA RECEPTORA EN TU PANTALLA
+    let boxPartidos = document.getElementById('lonas-fijas-historial-partidos-club');
+    if (!boxPartidos) {
+        let pestañaPartidosClub = document.getElementById('sub-sec-partidos') || 
+                                  document.getElementById('partidos-club') ||
                                   document.getElementById('sec-partidos-equipo');
-            if (capaPadreVisual) {
-                capaPadreVisual.style.setProperty('display', 'block', 'important');
-                capaPadreVisual.style.visibility = 'visible';
-                capaPadreVisual.style.opacity = '1';
-            }
-            // ========================================================================
-
-            // 2. DISPARADOR DE RED CON FILTRO ADAPTABLE HACIA TU PUERTO 3000
-            let urlDestinoBD = `http://localhost:3000/api/partidos?id_equipo=${id_equipo}`;
-            
-            fetch(urlDestinoBD)
-                .then(res => {
-                    if (!res.ok) throw new Error("Error de red, saltando al plan de rescate.");
-                    return res.json();
-                })
-                .then(resData => {
-                    // Pasamos los datos recibidos a la Parte 2 para que los procese y dibuje las tarjetas
-                    procesarYRenderizarTarjetasHistorialPartidos(resData, id_equipo, boxPartidos);
-                })
-                .catch(err => {
-                    // Si el servidor da error 500 o se cae la red, la Parte 2 se activa en modo Rescate de Memoria
-                    console.error("Activando plan de rescate automático ante error de red o 500...", err);
-                    procesarYRenderizarTarjetasHistorialPartidos(null, id_equipo, boxPartidos);
-                });
+        
+        if (!pestañaPartidosClub) {
+            pestañaPartidosClub = document.querySelector('.sub-seccion-panel') || document.querySelector('#sec-ficha-equipo');
         }
+        
+        if (pestañaPartidosClub) {
+            boxPartidos = document.createElement('div');
+            boxPartidos.id = 'lonas-fijas-historial-partidos-club';
+            boxPartidos.style.display = 'flex'; boxPartidos.style.flexDirection = 'column'; boxPartidos.style.gap = '8px';
+            boxPartidos.style.width = '100%'; boxPartidos.style.boxSizing = 'border-box';
+            pestañaPartidosClub.appendChild(boxPartidos);
+        }
+    }
+
+    if (!boxPartidos) return console.error("No se encontró ningún punto de apoyo visual en tu HTML.");
+    boxPartidos.innerHTML = `<div style="color:#ff9900; text-align:center; padding:15px; font-size:12px;">⏳ Sincronizando calendario con MySQL Workbench...</div>`;
+
+    // ==== ROMPER EL CANDADO VISUAL DE CSS DE TU TABLA ====
+    let capaPadreVisual = document.getElementById('sub-sec-partidos') || 
+                          document.getElementById('partidos-club') || 
+                          document.getElementById('sec-partidos-equipo');
+    if (capaPadreVisual) {
+        capaPadreVisual.style.setProperty('display', 'block', 'important');
+        capaPadreVisual.style.visibility = 'visible';
+        capaPadreVisual.style.opacity = '1';
+    }
+
+    // 2. DISPARADOR DE RED CON FILTRO ADAPTABLE HACIA TU PUERTO 3000
+    let urlDestinoBD = `http://localhost:3000/api/partidos?id_equipo=${id_equipo}`;
+    
+    fetch(urlDestinoBD)
+        .then(res => {
+            if (!res.ok) throw new Error("Error de red, saltando al plan de rescate.");
+            return res.json();
+        })
+        .then(resData => {
+            // Pasamos los datos recibidos a la función de renderizado
+            procesarYRenderizarTarjetasHistorialPartidos(resData, id_equipo, boxPartidos);
+        })
+        .catch(err => {
+            console.error("Activando plan de rescate automático ante error de red o 500...", err);
+            procesarYRenderizarTarjetasHistorialPartidos(null, id_equipo, boxPartidos);
+        });
+}
+
                // =======================================================================
         // VERSION INDESTRUCTIBLE: RENDERIZA SÓLO Y EXCLUSIVAMENTE LAS FILAS DE CALENDARIO
         // =======================================================================
@@ -4791,7 +4618,7 @@ window.inyectarCarruselSaaSMultiInquilino = window.cargarListaPartidosDeJornadaD
                 return;
             }
 
-            // Renderizamos única y exclusivamente las tarjetas horizontales de tu calendario
+           // Renderizamos única y exclusivamente las tarjetas horizontales de tu calendario
             partidosRealesBD.forEach(function(p) {
                 let divFila = document.createElement('div');
                 divFila.style.display = 'flex'; divFila.style.justifyContent = 'space-between'; divFila.style.alignItems = 'center';
@@ -4803,8 +4630,20 @@ window.inyectarCarruselSaaSMultiInquilino = window.cargarListaPartidosDeJornadaD
                 divFila.onmouseenter = function() { this.style.background = 'rgba(255, 153, 0, 0.06)'; this.style.borderColor = '#ff9900'; };
                 divFila.onmouseleave = function() { this.style.background = 'rgba(255,255,255,0.02)'; this.style.borderColor = 'rgba(255,255,255,0.04)'; };
 
-                let local = p.equipo_local || `Club ${p.id_local}`;
-                let visitante = p.equipo_visitante || `Club ${p.id_visitante}`;
+                // 🎯 DICCIONARIO TRADUCTOR MULTI-INQUILINO (Destruye el texto Club con ID)
+                const diccionarioFichaEquiposFiel = {
+                    1: "Real Madrid", 2: "Barcelona", 3: "Atlético", 4: "Deportivo",
+                    5: "Athletic", 6: "Real Sociedad", 7: "Betis", 8: "Villarreal",
+                    9: "Valencia", 10: "Alavés", 11: "Osasuna", 12: "Getafe",
+                    13: "Celta", 14: "Sevilla", 15: "Málaga", 16: "Elche",
+                    17: "Rayo", 18: "Levante", 19: "Espanyol", 20: "Racing"
+                };
+
+                // 🚀 LA CORRECCIÓN: Buscamos en el diccionario el número que viene de tu MySQL
+                // Si p.local_nombre o p.equipo_local vienen del servidor se respetan, si no, se traduce el ID relacional
+                let local = p.local_nombre || p.equipo_local || diccionarioFichaEquiposFiel[p.id_local] || `Club ${p.id_local}`;
+                let visitante = p.visitante_nombre || p.equipo_visitante || diccionarioFichaEquiposFiel[p.id_visitante] || `Club ${p.id_visitante}`;
+
                 let gl = p.goles_local !== undefined && p.goles_local !== null ? p.goles_local : 0;
                 let gv = p.goles_visitante !== undefined && p.goles_visitante !== null ? p.goles_visitante : 0;
 
@@ -7924,23 +7763,12 @@ class MotorPizarraPartidos {
             botonPresionado.classList.add('active');
         }
     }
-     /**
-     * DIBUJA EL TERRENO DE JUEGO Y ACOPLA LOS NUEVOS TRAZOS ENCIMA DE LA IMAGEN PRECARGADA
-     * Blindada al 100% contra errores de definición por orden (ReferenceError)
+   
+      /**
+     * DIBUJA EL TERRENO DE JUEGO Y REPRODUCE LOS TRAZOS DE LA CAPA SELECCIONADA DESDE LA MEMORIA
+     * Blindada al 100% contra borrados o reseteos al alternar entre pestañas celestes
      */
     redibujarLienzoCompleto() {
-        // 🛡️ ACCESO SEGURO DE CABECERA: Aseguramos la existencia de la memoria elástica global primero
-        if (!window.listadoPizarrasMemoria || window.listadoPizarrasMemoria.length === 0) {
-            window.listadoPizarrasMemoria = [{ trazosPintura: [], elementosInteractivos: [], pizarra_audio_base64: "", imagen_plana_respaldo: "" }];
-        }
-        if (window.indicePizarraActivaGlobal === undefined || window.indicePizarraActivaGlobal < 0 || window.indicePizarraActivaGlobal >= window.listadoPizarrasMemoria.length) {
-            window.indicePizarraActivaGlobal = 0;
-        }
-
-        // 🎯 DEFINICIÓN MAESTRA CRÍTICA: Declaramos la variable aquí arriba para solucionar el error 7776
-        const datosLonaActual = window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal];
-        if (!datosLonaActual) return;
-
         const w = this.canvas.width;
         const h = this.canvas.height;
 
@@ -7948,108 +7776,129 @@ class MotorPizarraPartidos {
         this.ctx.fillStyle = '#1b4332'; 
         this.ctx.fillRect(0, 0, w, h);
 
-        // 2. Líneas Blancas del Campo (Con un toque de transparencia)
+        // 2. Líneas Blancas del Campo (Reglamentarias con transparencia)
         this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
         this.ctx.lineWidth = 2.5;
-        this.ctx.setLineDash([]); // Línea continua reglamentaria para el campo de fútbol
+        this.ctx.setLineDash([]); 
 
-        // Línea exterior general
         this.ctx.strokeRect(25, 25, w - 50, h - 50);
-        
-        // Línea de medio campo
         this.ctx.beginPath();
         this.ctx.moveTo(w / 2, 25);
         this.ctx.lineTo(w / 2, h - 25);
         this.ctx.stroke();
-        
-        // Círculo central
         this.ctx.beginPath();
         this.ctx.arc(w / 2, h / 2, 65, 0, Math.PI * 2);
         this.ctx.stroke();
-        
-        // Punto central de saque
         this.ctx.beginPath();
         this.ctx.arc(w / 2, h / 2, 3, 0, Math.PI * 2);
         this.ctx.fillStyle = '#ffffff';
         this.ctx.fill();
-
-        // Áreas de Portería Izquierda (Grande y Chica)
         this.ctx.strokeRect(25, h / 2 - 110, 95, 220); 
         this.ctx.strokeRect(25, h / 2 - 45, 35, 90);    
-
-        // Áreas de Portería Derecha (Grande y Chica)
         this.ctx.strokeRect(w - 120, h / 2 - 110, 95, 220); 
         this.ctx.strokeRect(w - 60, h / 2 - 45, 35, 90);    
 
-        // 3. ESTAMPE SÍNCRONO POR ÍNDICES (MEMORIA RAM DE ALTA VELOCIDAD)
-        if (window.imagenesLonasPreinstaladasRAM && window.imagenesLonasPreinstaladasRAM[window.indicePizarraActivaGlobal]) {
-            const imgLonaEspecifica = window.imagenesLonasPreinstaladasRAM[window.indicePizarraActivaGlobal];
-            if (imgLonaEspecifica && imgLonaEspecifica.complete && imgLonaEspecifica.src !== "" && !imgLonaEspecifica.src.endsWith('/')) {
-                this.ctx.drawImage(imgLonaEspecifica, 0, 0);
+        // =======================================================================
+        // 🎯 3. REPRODUCTOR SÍNCRONO MULTI-LONA (REPARA EL CANCELADO DE ATAQUE)
+        // =======================================================================
+        if (!window.listadoPizarrasMemoria) {
+            window.listadoPizarrasMemoria = [{ trazosPintura: [], elementosInteractivos: [], pizarra_audio_base64: "", imagen_plana_respaldo: "", titulo: "Balón" }];
+        }
+        if (window.indicePizarraActivaGlobal === undefined) {
+            window.indicePizarraActivaGlobal = 0;
+        }
+
+        const datosLonaActual = window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal];
+
+        if (datosLonaActual) {
+            // 🚀 LA CLAVE MAESTRA: Extraemos el String binario específico guardado para esta pestaña
+            const imagenFondoBinaria = datosLonaActual.imagen_plana_respaldo || datosLonaActual.pizarra_dibujo;
+            
+            if (imagenFondoBinaria && imagenFondoBinaria !== "" && imagenFondoBinaria !== "NULL") {
+                const imgFondoLona = new Image();
+                imgFondoLona.src = imagenFondoBinaria;
+                
+                // Si la imagen ya está lista en la caché de la tablet, la estampa de inmediato
+                if (imgFondoLona.complete) {
+                    this.ctx.drawImage(imgFondoLona, 0, 0);
+                } else {
+                    // Si tarda microsegundos en cargarse por red, el listener onload asegura su pintado síncrono
+                    imgFondoLona.onload = () => {
+                        this.ctx.drawImage(imgFondoLona, 0, 0);
+                    };
+                }
             }
         }
 
-        // 4. Renderizado de NUEVOS Trazos Libres de Pintura (Lápiz, Correr y Goma por encima del fondo)
-        datosLonaActual.trazosPintura.forEach(trazo => {
-            if (!trazo || !trazo.puntos || trazo.puntos.length < 2) return;
-            this.ctx.beginPath();
-            this.ctx.moveTo(trazo.puntos[0].x, trazo.puntos[0].y);
-            for (let i = 1; i < trazo.puntos.length; i++) {
-                if (trazo.puntos[i]) this.ctx.lineTo(trazo.puntos[i].x, trazo.puntos[i].y);
-            }
-            this.ctx.lineCap = 'round';
-            this.ctx.lineJoin = 'round';
-            this.ctx.lineWidth = trazo.grosor;
-            
-            if (trazo.tipo === 'correr') {
-                this.ctx.strokeStyle = '#ff9900';   
-                this.ctx.setLineDash([8, 6]); // Línea de guiones discontinuos para carreras        
-            } else if (trazo.tipo === 'goma') {
-                this.ctx.strokeStyle = '#1b4332'; // Borrado simulando el verde del césped  
-                this.ctx.setLineDash([]);           
-            } else {
-                this.ctx.strokeStyle = trazo.color || '#ffffff'; 
-                this.ctx.setLineDash([]);           
-            }
-            this.ctx.stroke();
-        });
+        // 4. Renderizado de Trazos Vectoriales Nuevos (Líneas de pase y desmarques)
+        if (datosLonaActual && datosLonaActual.trazosPintura) {
+            datosLonaActual.trazosPintura.forEach(trazo => {
+                if (!trazo || !trazo.puntos || trazo.puntos.length < 2) return;
+                this.ctx.beginPath();
+                this.ctx.moveTo(trazo.puntos.x, trazo.puntos.y);
+                for (let i = 1; i < trazo.puntos.length; i++) {
+                    if (trazo.puntos[i]) this.ctx.lineTo(trazo.puntos[i].x, trazo.puntos[i].y);
+                }
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+                this.ctx.lineWidth = trazo.grosor;
+                
+                               // =======================================================================
+                // 🎯 REPARACIÓN DE SINTAXIS CRÍTICA EN CANVAS JS (LÍNEA 7838 REPARADA)
+                // =======================================================================
+                if (trazo.tipo === 'correr') {
+                    this.ctx.strokeStyle = '#ff9900';   
+                    // 🚀 CORRECCIÓN: Le pasamos un array con las costuras exactas de desmarque (8px pintados, 6px vacíos)
+                    this.ctx.setLineDash([8, 6]);        
+                } else if (trazo.tipo === 'goma') {
+                    this.ctx.strokeStyle = '#1b4332';   
+                    this.ctx.setLineDash([]); // Array vacío reglamentario: línea continua para el verde del césped          
+                } else {
+                    this.ctx.strokeStyle = trazo.color || '#ffffff'; 
+                    this.ctx.setLineDash([]); // Array vacío reglamentario: línea continua blanca para pases          
+                }
 
-        this.ctx.setLineDash([]); // Reseteo reglamentario de guiones para no afectar a las fichas
+                this.ctx.stroke();
+            });
+        }
 
-        // 5. Renderizado de Elementos Móviles Nuevos (Iconos)
-        datosLonaActual.elementosInteractivos.forEach(el => {
-            if (!el) return;
-            this.ctx.save();
-            this.ctx.beginPath();
+        this.ctx.setLineDash([]); 
 
-            if (el.tipo === 'jugador-local') {
-                this.ctx.arc(el.x, el.y, el.radio, 0, Math.PI * 2);
-                this.ctx.fillStyle = '#0284c7'; 
-                this.ctx.fill();
-                this.ctx.lineWidth = 2;
-                this.ctx.strokeStyle = '#ffffff';
-                this.ctx.stroke();
-            } else if (el.tipo === 'jugador-visitante') {
-                this.ctx.arc(el.x, el.y, el.radio, 0, Math.PI * 2);
-                this.ctx.fillStyle = '#dc2626'; 
-                this.ctx.fill();
-                this.ctx.lineWidth = 2;
-                this.ctx.strokeStyle = '#ffffff';
-                this.ctx.stroke();
-            } else if (el.tipo === 'balon') {
-                this.ctx.arc(el.x, el.y, el.radio, 0, Math.PI * 2);
-                this.ctx.fillStyle = '#ffffff';
-                this.ctx.fill();
-                this.ctx.lineWidth = 1.5;
-                this.ctx.strokeStyle = '#000000';
-                this.ctx.stroke();
-                // Dibujo de costuras internas tipo balón
-                this.ctx.moveTo(el.x - 5, el.y); this.ctx.lineTo(el.x + 5, el.y);
-                this.ctx.moveTo(el.x, el.y - 5); this.ctx.lineTo(el.x, el.y + 5);
-                this.ctx.stroke();
-            }
-            this.ctx.restore();
-        });
+        // 5. Renderizado de Elementos Móviles (Iconos de jugadores y balón de esta lona)
+        if (datosLonaActual && datosLonaActual.elementosInteractivos) {
+            datosLonaActual.elementosInteractivos.forEach(el => {
+                if (!el) return;
+                this.ctx.save();
+                this.ctx.beginPath();
+
+                if (el.tipo === 'jugador-local') {
+                    this.ctx.arc(el.x, el.y, el.radio, 0, Math.PI * 2);
+                    this.ctx.fillStyle = '#0284c7'; 
+                    this.ctx.fill();
+                    this.ctx.lineWidth = 2;
+                    this.ctx.strokeStyle = '#ffffff';
+                    this.ctx.stroke();
+                } else if (el.tipo === 'jugador-visitante') {
+                    this.ctx.arc(el.x, el.y, el.radio, 0, Math.PI * 2);
+                    this.ctx.fillStyle = '#dc2626'; 
+                    this.ctx.fill();
+                    this.ctx.lineWidth = 2;
+                    this.ctx.strokeStyle = '#ffffff';
+                    this.ctx.stroke();
+                } else if (el.tipo === 'balon') {
+                    this.ctx.arc(el.x, el.y, el.radio, 0, Math.PI * 2);
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.fill();
+                    this.ctx.lineWidth = 1.5;
+                    this.ctx.strokeStyle = '#000000';
+                    this.ctx.stroke();
+                    this.ctx.moveTo(el.x - 5, el.y); this.ctx.lineTo(el.x + 5, el.y);
+                    this.ctx.moveTo(el.x, el.y - 5); this.ctx.lineTo(el.x, el.y + 5);
+                    this.ctx.stroke();
+                }
+                this.ctx.restore();
+            });
+        }
     }
 
 
@@ -8319,88 +8168,67 @@ if (typeof window.indiceAudioActivoGlobal === "undefined") {
 
 
 /**
- * ➕ AÑADE UNA NUEVA RANURA TÁCTICA EXPANDIENDO TAMBIÉN SU CASILLERO EN LA RAM
+ * ➕ AÑADE UNA NUEVA RANURA TÁCTICA ASEGURANDO EL GUARDADO DE LA LONA ANTERIOR
+ * Corrige de raíz que la lona Ataque o las lonas nuevas se queden en blanco
  */
 function agregarNuevaPizarraTacticaAlPartido() {
+    // 1. Inicialización de emergencia si el array global de memoria estuviera vacío
     if (!window.listadoPizarrasMemoria || window.listadoPizarrasMemoria.length === 0) {
-        window.listadoPizarrasMemoria = [{ trazosPintura: [], elementosInteractivos: [], pizarra_audio_base64: "", imagen_plana_respaldo: "" }];
+        window.listadoPizarrasMemoria = [{ trazosPintura: [], elementosInteractivos: [], pizarra_audio_base64: "", imagen_plana_respaldo: "", titulo: "Balón" }];
     }
 
-    // 1. Congelamos la lona actual antes de saltar a la nueva
-    if (window.indicePizarraActivaGlobal !== undefined && window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal]) {
-        const canvasElement = document.getElementById('pizarra-canvas-partido');
-        if (canvasElement) {
-            const dataImg = canvasElement.toDataURL("image/png");
-            window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal].imagen_plana_respaldo = dataImg;
-            
-            // Sincronizamos también de inmediato el casillero de la RAM de esta pestaña vieja
-            if (!window.imagenesLonasPreinstaladasRAM) window.imagenesLonasPreinstaladasRAM = [];
-            window.imagenesLonasPreinstaladasRAM[window.indicePizarraActivaGlobal] = new Image();
-            window.imagenesLonasPreinstaladasRAM[window.indicePizarraActivaGlobal].src = dataImg;
-        }
+    // 🎯 2. CONGELADOR DE SEGURIDAD CRÍTICO:
+    // Capturamos el Canvas actual de la lona en uso (ej: Defensa Zona) y lo guardamos como foto Base64
+    // en su casillero correspondiente de la memoria antes de saltar a crear la lona nueva.
+    const canvasElement = document.getElementById('pizarra-canvas-partido');
+    if (canvasElement && window.indicePizarraActivaGlobal !== undefined && window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal]) {
+        const capturaDataURL = canvasElement.toDataURL("image/png");
+        
+        // Guardamos los datos tanto en el historial elástico como en la propiedad de dibujo base
+        window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal].imagen_plana_respaldo = capturaDataURL;
+        window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal].pizarra_dibujo = capturaDataURL;
+        
+        console.log(`💾 Lona ${window.indicePizarraActivaGlobal + 1} respaldada con éxito en la memoria viva.`);
     }
 
-    // 2. Insertamos la lona nueva en la base de datos local
+    // 3. Calculamos el nombre automático para la nueva lona (ej: Lona 4)
+    const numeroNuevaLona = window.listadoPizarrasMemoria.length + 1;
+
+    // 🎯 4. INYECCIÓN DE ESTRUCTURA DE FÁBRICA COMPLETA:
+    // Insertamos la lona nueva en el array elástico asegurando que nazca con todas sus propiedades listas.
+    // Esto evita que al sincronizar se mande un objeto roto o vacío a tu tabla de MySQL.
     window.listadoPizarrasMemoria.push({
         trazosPintura: [],
         elementosInteractivos: [],
         pizarra_audio_base64: "",
-        imagen_plana_respaldo: ""
+        imagen_plana_respaldo: "",
+        pizarra_dibujo: "",
+        titulo: `Lona ${numeroNuevaLona}`
     });
 
-    // 3. 🎯 ADICIÓN DE CONECTIVIDAD: Insertamos una ranura de imagen vacía en la RAM para la nueva pestaña
-    if (!window.imagenesLonasPreinstaladasRAM) window.imagenesLonasPreinstaladasRAM = [];
-    const nuevaImgRAM = new Image();
-    nuevaImgRAM.src = "";
-    window.imagenesLonasPreinstaladasRAM.push(nuevaImgRAM);
-
-    // 4. Cambiamos el puntero global hacia la lona recién creada (la última)
+    // 5. Movemos el puntero activo de la tableta hacia la lona recién creada (la última)
     window.indicePizarraActivaGlobal = window.listadoPizarrasMemoria.length - 1;
     
     const inputIndexOculto = document.getElementById('par-form-pizarra-activa-index');
     if (inputIndexOculto) inputIndexOculto.value = window.indicePizarraActivaGlobal;
 
-    // Refrescamos las pestañas celestes superiores del HTML
+    // Refrescamos las pestañas celestes superiores del HTML para dibujar los botones
     if (typeof actualizarPestañasPizarrasVisuales === "function") {
         actualizarPestañasPizarrasVisuales();
     }
     
-    // Limpiamos visualmente el lienzo e instruimos al motor a pintar el césped limpio
+    // 6. Limpiamos visualmente los píxeles del lienzo viejo y pintamos el césped limpio para trabajar la nueva táctica
     if (window.miPizarraPartidos) {
         window.miPizarraPartidos.ctx.clearRect(0, 0, window.miPizarraPartidos.canvas.width, window.miPizarraPartidos.canvas.height);
         window.miPizarraPartidos.redibujarLienzoCompleto();
     }
     
+    // Reseteamos el estatus de las notas de voz para la nueva lona vacía
     if (typeof verificarBotonesDeAudioVisibles === "function") {
         verificarBotonesDeAudioVisibles();
     }
     
-    console.log(`➕ Ranura táctica y RAM expandidas al unísono. Capas totales: ${window.listadoPizarrasMemoria.length}`);
-}
-
-
-
-function cambiarDePizarraFilaIndex(nuevoIndex) {
-    if (!window.listadoPizarrasMemoria || nuevoIndex < 0 || nuevoIndex >= window.listadoPizarrasMemoria.length) return;
-
-    // Congelador de seguridad de la lona anterior
-    const canvasElement = document.getElementById('pizarra-canvas-partido');
-    if (canvasElement && window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal]) {
-        window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal].imagen_plana_respaldo = canvasElement.toDataURL("image/png");
-    }
-
-    window.indicePizarraActivaGlobal = nuevoIndex;
-
-    if (typeof actualizarPestañasPizarrasVisuales === "function") actualizarPestañasPizarrasVisuales();
-    if (window.miPizarraPartidos) window.miPizarraPartidos.redibujarLienzoCompleto();
-
-    // 🎯 ADICIÓN DE CONECTIVIDAD: Al cambiar de lona, reconstruimos las pestañas naranjas de sus audios y los botones
-    if (typeof actualizarPestañasAudiosVisuales === "function") {
-        actualizarPestañasAudiosVisuales();
-    }
-    if (typeof verificarBotonesDeAudioVisibles === "function") {
-        verificarBotonesDeAudioVisibles();
-    }
+    console.log(`➕ Ranura táctica expandida con éxito. Capas totales en memoria: ${window.listadoPizarrasMemoria.length}`);
 }
 
 
@@ -8525,6 +8353,55 @@ function actualizarPestañasPizarrasVisuales() {
         contenedorTabs.appendChild(divGrupo);
     });
 }
+
+/**
+ * ALTERNA ENTRE LAS LONAS MULTIMEDIA PROTEGIENDO LOS TRAZOS EN MEMORIA
+ * Corrige definitivamente el mensaje de "Lona reseteada por completo"
+ */
+function cambiarDePizarraFilaIndex(nuevoIndex) {
+    // 🛡️ Seguridad: Validamos que el índice que queremos abrir exista en la lista elástica
+    if (!window.listadoPizarrasMemoria || nuevoIndex < 0 || nuevoIndex >= window.listadoPizarrasMemoria.length) return;
+
+    // 🎯 CONGELADOR PREVENTIVO: Antes de abandonar la lona actual, le tomamos una foto 
+    // y la guardamos en su slot de la RAM para que no se pierda al cambiar de pestaña
+    const canvasElement = document.getElementById('pizarra-canvas-partido');
+    if (canvasElement && window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal]) {
+        const dataImg = canvasElement.toDataURL("image/png");
+        window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal].imagen_plana_respaldo = dataImg;
+        
+        if (window.imagenesLonasPreinstaladasRAM) {
+            window.imagenesLonasPreinstaladasRAM[window.indicePizarraActivaGlobal] = new Image();
+            window.imagenesLonasPreinstaladasRAM[window.indicePizarraActivaGlobal].src = dataImg;
+        }
+    }
+
+    // 🎯 MOVEMOS EL PUNTERO GLOBAL: Fijamos el foco en la lona que acaba de cliquear el míster
+    window.indicePizarraActivaGlobal = nuevoIndex;
+
+    // Actualizamos el input oculto por seguridad relacional de tu formulario
+    const inputIndexOculto = document.getElementById('par-form-pizarra-activa-index');
+    if (inputIndexOculto) inputIndexOculto.value = window.indicePizarraActivaGlobal;
+
+    // Refrescamos visualmente los botones celestes del HTML
+    if (typeof actualizarPestañasPizarrasVisuales === "function") {
+        actualizarPestañasPizarrasVisuales();
+    }
+    
+    // 🎯 LA CLAVE DEL ÉXITO: Ordenamos estrictamente REDIBUJAR.
+    // Aquí NO debes llamar a borrarTodo() ni clearRect() independientes para que el 
+    // motor gráfico rescate de inmediato la imagen de la RAM y la pinte en el césped.
+    if (window.miPizarraPartidos) {
+        window.miPizarraPartidos.redibujarLienzoCompleto();
+    }
+
+    // Sincronizamos las notas de voz asociadas a esta lona en particular
+    if (typeof verificarBotonesDeAudioVisibles === "function") {
+        verificarBotonesDeAudioVisibles();
+    }
+
+    console.log(`🔄 Visor táctico cambiado con éxito a la Pizarra: [Lona ${nuevoIndex + 1}]`);
+}
+
 
 
  /* GRABA LA INSTRUCCIÓN DE VOZ ASOCIÁNDOLA A LA PESTAÑA DE AUDIO SELECCIONADA
@@ -8899,60 +8776,11 @@ function verificarBotonesDeAudioVisibles() {
 /**
  * RECOPILA LA PIZARRA Y LOS GOLES ASOCIÁNDOLOS AL PARTIDO CARGADO EN PANTALLA (ID: 26)
  */
-function guardarInformeTacticoPartidoMySQL() {
-    // 1. Intentamos leer el ID desde el formulario de la pizarra
-    let idPartidoActual = document.getElementById('par-form-id-partido').value;
 
-    // 🎯 ENLAZADO DIRECTO: Si el input está vacío o dice "Nuevo", le asignamos el ID 26 que está activo arriba
-    if (!idPartidoActual || idPartidoActual === "" || idPartidoActual === "Nuevo") {
-        idPartidoActual = 26; 
-    }
-
-    const jornada = document.getElementById('par-form-jornada').value;
-    const golesLocal = document.getElementById('par-form-goles-local').value;
-    const golesVisitante = document.getElementById('par-form-goles-visitante').value;
-
-    // 2. Convertimos los trazos actuales de tu campo táctico a Base64 PNG
-    const cadenaDibujoBase64 = document.getElementById('pizarra-canvas-partido').toDataURL("image/png");
-
-    // 3. Construimos el Payload limpio para tu server.js
-    const payloadDatos = {
-        id_partido: idPartidoActual,
-        pizarra_dibujo: cadenaDibujoBase64,
-        pizarra_audio: cadenaAudioBase64Global // String Base64 WAV de tu micrófono (si se grabó)
-    };
-
-    console.log(`📡 Sincronizando lona táctica en tu Base de Datos para el ID real: [${idPartidoActual}]`, payloadDatos);
-
-    // Enviamos la petición POST directa a tu app.post de Node.js
-    fetch('http://localhost:3000/api/partidos/guardar-pizarra', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payloadDatos)
-    })
-    .then(response => {
-        if (!response.ok) throw new Error("Fallo de comunicación con el servidor Node.js");
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            alert(`✅ ¡Estrategia guardada correctamente para el partido en pantalla! (ID: ${idPartidoActual})`);
-            // Actualizamos la etiqueta de tu título para que deje de decir "Nuevo"
-            document.getElementById('par-txt-id-partido').innerText = idPartidoActual;
-            document.getElementById('par-form-id-partido').value = idPartidoActual;
-        } else {
-            alert("🔴 Error al guardar: " + data.error);
-        }
-    })
-    .catch(error => {
-        console.error("🔴 Error en la pasarela Fetch:", error);
-        alert("Hubo un error de red. Verifica que tu 'server.js' esté encendido en el puerto 3000.");
-    });
-}
-
-
+ 
 /**
- * RECOPILA ABSOLUTAMENTE TODAS LAS LONAS Y AUDIOS Y LOS ENVÍA ENVUELTOS EN JSON A MYSQL (PROTEGIDO CON TOKEN)
+ * RECOPILA ABSOLUTAMENTE TODAS LAS LONAS Y LAS GUARDA DE FORMA AISLADA POR ÍNDICES EN MYSQL
+ * Soluciona definitivamente que la lona 'Ataque' se borre al sincronizar
  */
 function guardarInformeTacticoPartidoMySQL() {
     const idPartido = document.getElementById('par-form-id-partido').value;
@@ -8961,68 +8789,81 @@ function guardarInformeTacticoPartidoMySQL() {
         return;
     }
 
-    // Guardamos la lona activa actual antes de codificar el lienzo
-    if (window.miPizarraPartidos) {
-        window.miPizarraPartidos.redibujarLienzoCompleto();
+    const canvasElement = document.getElementById('pizarra-canvas-partido');
+    if (!canvasElement) {
+        console.error("No se encontró el lienzo de la pizarra táctica.");
+        return;
     }
 
-    // Convertimos el lienzo actual a Base64 PNG
-    const cadenaDibujoBase64Actual = document.getElementById('pizarra-canvas-partido').toDataURL("image/png");
+    // 🎯 CONGELADOR DE SEGURIDAD ABSOLUTO: 
+    // Capturamos los píxeles exactos de lo que el míster está viendo en pantalla en este milisegundo
+    const capturaBase64Actual = canvasElement.toDataURL("image/png");
 
-    // Construimos el paquete JSON maestro con las lonas y audios totalmente aislados
+    // Inicializamos la estructura global elástica si estuviera vacía por error
+    if (!window.listadoPizarrasMemoria || window.listadoPizarrasMemoria.length === 0) {
+        window.listadoPizarrasMemoria = [{ trazosPintura: [], elementosInteractivos: [], pizarra_audio_base64: "", imagen_plana_respaldo: "", titulo: "Balón" }];
+    }
+
+    // 🎯 AISLAMIENTO POR INDICES: Guardamos la foto ÚNICA y EXCLUSIVAMENTE en el casillero de la lona abierta
+    // (ej: si estás en Ataque, se guardará en la posición 3, protegiendo las lonas 1, 2 y 3)
+    if (window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal]) {
+        window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal].imagen_plana_respaldo = capturaBase64Actual;
+        window.listadoPizarrasMemoria[window.indicePizarraActivaGlobal].pizarra_dibujo = capturaBase64Actual;
+    }
+
+    // Construimos el paquete JSON maestro con todo el historial de las 4 lonas y sus múltiples audios
     const paqueteEstructuraCompleta = {
         pizarras: window.listadoPizarrasMemoria,
-        id_partido_activo: idPartido,
         indice_pizarra_activa: window.indicePizarraActivaGlobal,
         audios: window.listadoAudiosMemoria,
         indice_audio_activo: window.indiceAudioActivoGlobal
     };
 
+    // Preparamos el payload limpio que espera recibir tu server.js
     const payloadDatos = {
         id_partido: idPartido,
-        pizarra_dibujo: cadenaDibujoBase64Actual, 
+        // Guardamos de respaldo la lona activa como imagen rápida para la vista general de MySQL
+        pizarra_dibujo: capturaBase64Actual, 
+        // 🚀 LA CLAVE COMERCIAL: Aquí viaja empaquetado el historial completo de tus 4 lonas y nombres
         pizarra_audio: JSON.stringify(paqueteEstructuraCompleta) 
     };
 
-    console.log(`📡 Sincronizando Multi-Pizarras y Multi-Audios protegidos para el ID: [${idPartido}]`);
+    console.log(`📡 Sincronizando Multi-Pizarras aisladas por red en tu base de datos para el ID: [${idPartido}]`);
 
-    // Petición POST directa a tu pasarela en server.js
+    // Petición POST protegida con el pasaporte digital (Token JWT)
     fetch('http://localhost:3000/api/partidos/guardar-pizarra', {
         method: 'POST',
-        // 🎯 SECCIÓN CORREGIDA CON ENLACE DE SEGURIDAD JWT
         headers: { 
             'Content-Type': 'application/json',
-            // 🚀 LÍNEA OBLIGATORIA ENLAZADA: Envía el token para validar que eres entrenador o admin
-            'Authorization': `Bearer ${localStorage.getItem('fantasy_session_token')}`
+            'Authorization': 'Bearer ' + localStorage.getItem('fantasy_session_token')
         },
         body: JSON.stringify(payloadDatos)
     })
     .then(response => {
         if (!response.ok) {
             if (response.status === 401 || response.status === 403) {
-                alert("⚠️ No tienes permisos de escritura o tu sesión caducó. Inicia sesión de nuevo.");
+                alert("⚠️ Sesión caducada o no tienes permisos de escritura. Inicia sesión de nuevo.");
                 localStorage.removeItem('fantasy_session_token');
                 window.location.reload();
             }
-            throw new Error("Fallo en la pasarela segura de guardado.");
+            throw new Error("Fallo en la pasarela de guardado.");
         }
         return response.json();
     })
     .then(data => {
         if (data.success) {
-            alert(`✅ ¡Estrategia guardada y blindada en tu base de datos! (Partido ID: ${idPartido}).`);
+            alert(`✅ ¡Éxito absoluto! Todas tus lonas tácticas y nombres se han grabado de forma permanente.`);
         } else {
             alert("🔴 Error reportado por tu server: " + data.error);
         }
     })
-    .catch(error => {
-        console.error("🔴 Fallo de conexión con server.js:", error);
-    });
+    .catch(error => console.error("🔴 Fallo de conexión con server.js:", error));
 }
 
 
+
 /**
- * RECONSTRUYE LA PIZARRA, LOS GOLES Y LOS NOMBRES BASÁNDOSE EN EL ID SELECCIONADO (CON CABECERA DE SEGURIDAD)
+ * RECONSTRUYE LA PIZARRA, LOS GOLES Y LOS NOMBRES BASÁNDOSE EN EL ID SELECCIONADO (BLINDADA CONTRA BLOQUEOS)
  */
 function buscarYCargarPartidoEspecifico(idALeer) {
     const tablaEquiposOficial = {
@@ -9041,27 +8882,27 @@ function buscarYCargarPartidoEspecifico(idALeer) {
     if (inputIdPartido) inputIdPartido.value = idALeer;
     if (txtIdPartido) txtIdPartido.innerText = idALeer;
 
-    // 🎯 NUEVO FETCH CORREGIDO: Añadimos las llaves {} de opciones para inyectar los Headers de seguridad
+       // 🎯 RECONEXIÓN DE SEGURIDAD EN TU FUNCIÓN NATIVA (LÍNEA 8850 REPARADA)
+    // Añadimos las llaves {} para inyectarle el pasaporte digital de la tablet a tu fetch original
     fetch(`http://localhost:3000/api/partidos/recuperar-pizarra/${idALeer}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            // 🚀 ENLACE DE SEGURIDAD EXCLUSIVO: Enviamos el pasaporte digital guardado en la tablet
+            // 🚀 ENLACE DE ACCESO EXCLUSIVO: Envía de forma automática el token guardado tras el Login
             'Authorization': `Bearer ${localStorage.getItem('fantasy_session_token')}`
         }
     })
     .then(response => {
         if (!response.ok) {
-            // Si el backend te deniega el acceso (por ejemplo, si expira el token), te redirige al login
+            // Si el token expira o es incorrecto, el sistema te avisa de forma pasiva
             if (response.status === 401 || response.status === 403) {
-                alert("⚠️ Tu sesión táctica ha caducado o no tienes permisos. Inicia sesión de nuevo.");
-                localStorage.removeItem('fantasy_session_token');
-                window.location.reload();
+                console.warn("⚠️ Acceso denegado o sesión táctica expirada en la lona.");
             }
-            throw new Error("Fallo en la comunicación segura con Node.js");
+            throw new Error("Fallo en la comunicación con Node.js");
         }
         return response.json();
     })
+
     .then(partido => {
         if (!partido) return;
 
@@ -9074,7 +8915,7 @@ function buscarYCargarPartidoEspecifico(idALeer) {
         if (inputGolesLocal) inputGolesLocal.value = partido.goles_local !== undefined ? partido.goles_local : 0;
         if (inputGolesVisitante) inputGolesVisitante.value = partido.goles_visitante !== undefined ? partido.goles_visitante : 0;
 
-        // Mapeo seguro de nombres relacionales
+        // Mapeo seguro de nombres
         const nombreLocalFinal = tablaEquiposOficial[partido.id_local] || `Equipo ${partido.id_local}`;
         const nombreVisitanteFinal = tablaEquiposOficial[partido.id_visitante] || `Equipo ${partido.id_visitante}`;
 
@@ -9084,31 +8925,72 @@ function buscarYCargarPartidoEspecifico(idALeer) {
         if (labelPizarraLocal) labelPizarraLocal.innerText = nombreLocalFinal;
         if (labelPizarraVisitante) labelPizarraVisitante.innerText = nombreVisitanteFinal;
 
-        // RESTAURACIÓN MULTI-PIZARRA Y MULTI-AUDIO CON ENLACES GLOBALES SEGUROS
+        // 🎯 RESTAURACIÓN MULTI-PIZARRA Y MULTI-AUDIO CON ENLACES GLOBALES SEGUROS
+                // =======================================================================
+        // 🎯 RESTAURACIÓN MULTI-PIZARRA Y MULTI-AUDIO CON ENLACES GLOBALES SEGUROS
+        // =======================================================================
+       
+  
+        // =======================================================================
+        // 🎯 CONTROLADOR DE HISTORIAL MULTI-PIZARRA (SOLUCIONA LONA 1 INVISIBLE)
+        // =======================================================================
         try {
+            let estructuraRecuperada = null;
+
+            // Verificamos si la celda contiene la estructura elástica avanzada en formato JSON
             if (partido.pizarra_audio && partido.pizarra_audio !== "NULL" && partido.pizarra_audio.trim() !== "" && partido.pizarra_audio.startsWith('{')) {
-                const estructuraRecuperada = JSON.parse(partido.pizarra_audio);
-                if (estructuraRecuperada && estructuraRecuperada.pizarras) {
-                    window.listadoPizarrasMemoria = estructuraRecuperada.pizarras;
-                    window.indicePizarraActivaGlobal = estructuraRecuperada.indice_pizarra_activa || 0;
-                    console.log(`📂 Lonas totales restauradas desde MySQL: ${window.listadoPizarrasMemoria.length}`);
-                }
+                estructuraRecuperada = JSON.parse(partido.pizarra_audio);
+            }
+
+            // 📂 RESTAURACIÓN DEL HISTORIAL DE PIZARRAS
+            if (estructuraRecuperada && estructuraRecuperada.pizarras && estructuraRecuperada.pizarras.length > 0) {
+                window.listadoPizarrasMemoria = estructuraRecuperada.pizarras;
+                // Forzamos a que el sistema mantenga fija la lona que el míster decida, o la Lona 1 por defecto
+                window.indicePizarraActivaGlobal = estructuraRecuperada.indice_pizarra_activa !== undefined ? estructuraRecuperada.indice_pizarra_activa : 0;
+                console.log(`📂 Historial elástico cargado. Lonas restauradas en MySQL: ${window.listadoPizarrasMemoria.length}`);
             } else {
-                window.listadoPizarrasMemoria = [{ trazosPintura: [], elementosInteractivos: [], pizarra_audio_base64: "" }];
+                // 🎯 INYECCIÓN DE RESPALDO CRÍTICA PARA REGISTROS ANTIGUOS:
+                // Si el partido viene de tus pruebas viejas (donde la lona 1 no era un JSON sino un dibujo plano), 
+                // creamos la Lona 1 de fábrica y le inyectamos de forma elástica la imagen guardada de tu celda 
+                // para que se convierta en objetos editables y no se borre al cambiar de pestaña.
+                window.listadoPizarrasMemoria = [
+                    { 
+                        trazosPintura: [], 
+                        elementosInteractivos: [], 
+                        pizarra_audio_base64: "",
+                        // Guardamos de respaldo la imagen plana para que la lona 1 no sufra de ceguera temporal
+                        imagen_plana_respaldo: (partido.pizarra_dibujo && partido.pizarra_dibujo !== "NULL") ? partido.pizarra_dibujo : ""
+                    }
+                ];
                 window.indicePizarraActivaGlobal = 0;
             }
+
+            // 🎙️ RESTAURACIÓN DEL HISTORIAL DE AUDIOS CON FORMATO DE NOMBRE
+            if (estructuraRecuperada && estructuraRecuperada.audios) {
+                window.listadoAudiosMemoria = estructuraRecuperada.audios;
+                window.indiceAudioActivoGlobal = estructuraRecuperada.indice_audio_activo || 0;
+            } else {
+                window.listadoAudiosMemoria = [{ blob_base64: "", titulo: "Audio 1" }];
+                window.indiceAudioActivoGlobal = 0;
+            }
+
+            // Reconstruimos las pestañas celestes de pizarras y naranjas de audios en tu pantalla
+            if (typeof actualizarPestañasPizarrasVisuales === "function") actualizarPestañasPizarrasVisuales();
+            if (typeof actualizarPestañasAudiosVisuales === "function") actualizarPestañasAudiosVisuales();
+            
+            // Refrescamos los botones del micrófono de la lona/audio activo
+            verificarBotonesDeAudioVisibles();
+
         } catch (e) {
+            console.error("Error al desempaquetar el JSON de MySQL. Seteando lona base:", e);
             window.listadoPizarrasMemoria = [{ trazosPintura: [], elementosInteractivos: [], pizarra_audio_base64: "" }];
             window.indicePizarraActivaGlobal = 0;
+            window.listadoAudiosMemoria = [{ blob_base64: "", titulo: "Audio 1" }];
+            window.indiceAudioActivoGlobal = 0;
         }
 
-        // Reconstruimos los botones de las pestañas celestes superiores
-        if (typeof actualizarPestañasPizarrasVisuales === "function") {
-            actualizarPestañasPizarrasVisuales();
-        }
-
-               // =======================================================================
-        // 🎯 PRECARGA INDEPENDIENTE CORREGIDA (BLINDADA CONTRA ERRORES DE ÍNDICE)
+        // =======================================================================
+        // 🎯 PRECARGA INDEPENDIENTE CORREGIDA (SÍNCRONA CON TU LISTADO DE LONAS)
         // =======================================================================
         function precargarDibujoBaseEnRAM() {
             const motorGrafico = window.miPizarraPartidos;
@@ -9117,24 +8999,21 @@ function buscarYCargarPartidoEspecifico(idALeer) {
                 return;
             }
 
-            motorGrafico.borrarTodo(); // Limpiamos trazos residuales visuales del césped
+            motorGrafico.borrarTodo(); // Limpiamos trazos residuales visuales
 
-            // 🎯 REPARACIÓN DE INICIALIZACIÓN: Forzamos la creación del array global elástico
-            // Esto evita de raíz el error "Cannot set properties of undefined (setting '0')"
+            // Inicializamos el array global elástico de imágenes en la memoria RAM del PC
             window.imagenesLonasPreinstaladasRAM = [];
 
-            // Sincronizamos la RAM directamente con las lonas reales que ya procesó el Fetch seguro
+            // 🎯 LA CLAVE: Sincronizamos la RAM directamente con las lonas reales que ya procesó el Fetch
             if (window.listadoPizarrasMemoria && window.listadoPizarrasMemoria.length > 0) {
                 window.listadoPizarrasMemoria.forEach((lona, idx) => {
-                    
-                    // 🛡️ Doble blindaje: Nos aseguramos de inicializar la celda de la RAM como un elemento Image
                     window.imagenesLonasPreinstaladasRAM[idx] = new Image();
                     
                     // Si la lona en el historial tiene su imagen de respaldo, la inyectamos en su celda RAM
                     if (lona.imagen_plana_respaldo && lona.imagen_plana_respaldo !== "" && lona.imagen_plana_respaldo !== "NULL") {
                         window.imagenesLonasPreinstaladasRAM[idx].src = lona.imagen_plana_respaldo;
                     } else if (idx === 0 && partido.pizarra_dibujo && partido.pizarra_dibujo !== "NULL") {
-                        // Respaldo de seguridad para la Lona 1 si viene de tus pruebas clásicas planas de MySQL
+                        // Respaldo de seguridad para la Lona 1 si viene de tus pruebas clásicas planas
                         window.imagenesLonasPreinstaladasRAM[idx].src = partido.pizarra_dibujo;
                     } else {
                         window.imagenesLonasPreinstaladasRAM[idx].src = "";
@@ -9154,15 +9033,18 @@ function buscarYCargarPartidoEspecifico(idALeer) {
             console.log(`🚀 ¡RAM Sincronizada! Mapeadas [${window.imagenesLonasPreinstaladasRAM.length}] imágenes en perfecta armonía con tus pestañas.`);
         }
 
+        // Lanzamos la precarga de seguridad corregida de forma inmediata
         precargarDibujoBaseEnRAM();
 
+        // 2. RECUPERAR EL REPRODUCTOR DE NOTA DE VOZ MICROFÓNICA
         if (typeof verificarBotonesDeAudioVisibles === "function") {
             verificarBotonesDeAudioVisibles();
         }
-    })
-    .catch(error => console.error("🔴 Error real detectado en la pasarela Fetch de la lona:", error));
-}
 
+    }) // Cierre del .then(partido -> {
+    .catch(error => console.error("🔴 Error real detectado en la pasarela Fetch de la lona:", error));
+} // Llave de cierre de la función buscarYCargarPartidoEspecifico
+  
 
 
 
@@ -9322,207 +9204,94 @@ function limpiarPizarraPartidoActivo() {
 // Fin de Pizarra de Entrenamiento
 
 
-// Login 
 
 // =======================================================================
-// 🔐 MÓDULO AUTH: LÓGICA DE CONTROL DE ACCESO EN EL FRONTEND
+// 🔐 SISTEMA DE SESIONES Y PERMISOS COMPLETAMENTE AISLADO (SIN CONFLICTOS)
 // =======================================================================
 
-/**
- * PROCESADOR DE FORMULARIO: Envía las credenciales encriptadas hacia server.js
- * Configurado con inyección SaaS elástica para romper el colgado del carrusel superior
- */
-function ejecutarPeticionLoginFetiche(evento) {
-    evento.preventDefault(); // Evitamos que la página se refresque al enviar el formulario
-
-    const correoInput = document.getElementById('auth-email').value;
-    const claveInput = document.getElementById('auth-password').value;
-    const contenedorAlerta = document.getElementById('auth-alerta-error');
-
-    if (contenedorAlerta) contenedorAlerta.style.display = "none";
-
-    console.log("📡 Despachando credenciales de acceso hacia la pasarela de Node.js...");
+function ejecutarPeticionLoginAislado(evento) {
+    evento.preventDefault();
+    const correo = document.getElementById('auth-email').value;
+    const clave = document.getElementById('auth-password').value;
+    const alerta = document.getElementById('auth-alerta-error');
+    if (alerta) alerta.style.display = "none";
 
     fetch('http://localhost:3000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: correoInput, password: claveInput })
+        body: JSON.stringify({ email: correo, password: clave })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Credenciales inválidas de inicio de sesión.");
-        }
-        return response.json();
-    })
+    .then(res => { if (!res.ok) throw new Error(); return res.json(); })
     .then(data => {
         if (data.success && data.token) {
-            console.log(`✅ ¡Acceso Autorizado! Bienvenido mánager: [${data.usuario.nombre}]`);
-
-            // Persistimos de forma estricta las credenciales encriptadas en la memoria de la tablet
+            // Guardamos la sesión de la tablet
             localStorage.setItem('fantasy_session_token', data.token);
             localStorage.setItem('fantasy_usuario_datos', JSON.stringify(data.usuario));
 
-            // Desbloqueamos la pantalla ocultando el formulario de acceso de inmediato
-            const loginPantalla = document.getElementById('modulo-auth-login-pantalla');
-            if (loginPantalla) loginPantalla.style.display = "none";
+            // Levantamos la persiana de login ocultándola
+            document.getElementById('modulo-auth-login-pantalla').style.display = "none";
 
-            // 🎯 DESPERTAR SAAS UNIFICADO: Forzamos la ejecución de la nueva ruta infalible
-            // Esto destruye el mensaje amarillo de la pantalla y dibuja tus 8 partidos reales de MySQL
-            if (typeof inyectarCarruselSaaSMultiInquilino === "function") {
-                inyectarCarruselSaaSMultiInquilino();
-            } else if (typeof cargarListaPartidosDeJornadaDesdeBD === "function") {
-                // Respaldo preventivo por si el archivo mantuviera el puntero clásico
+            // 🚀 INVOCACIÓN NATIVA: Llamamos a tu función del carrusel original intacta
+            if (typeof cargarListaPartidosDeJornadaDesdeBD === "function") {
                 cargarListaPartidosDeJornadaDesdeBD();
             }
 
-            // Aplicamos de inmediato los muros de control visual en la pantalla de la tablet
-            if (typeof aplicarPermisosSegunRolActual === "function") {
-                aplicarPermisosSegunRolActual();
-            }
-
-            // Arrancamos el motor gráfico del tapete verde
-            if (typeof inicializarPizarraDePartidos === "function") {
-                inicializarPizarraDePartidos();
-            }
-        } else {
-            if (contenedorAlerta) contenedorAlerta.style.display = "block";
+            // Aplicamos el bloqueo de campos si entra un jugador
+            aplicarFiltrosDeRolAislados();
         }
     })
-    .catch(error => {
-        console.error("🔴 Error en la autenticación del usuario:", error);
-        if (contenedorAlerta) {
-            contenedorAlerta.style.display = "block";
-            contenedorAlerta.innerText = "⚠️ Correo o contraseña incorrectos. Revisa tu acceso.";
-        }
-    });
+    .catch(() => { if (alerta) alerta.style.display = "block"; });
 }
 
+function aplicarFiltrosDeRolAislados() {
+    const sesion = localStorage.getItem('fantasy_usuario_datos');
+    if (!sesion) return;
 
-/**
- * VERIFICADOR AUTOMÁTICO DE ARRANQUE: Comprueba si la tablet ya tiene una sesión abierta
- */
-function comprobarSesionActivaAlCargarPagera() {
-    const tokenGuardado = localStorage.getItem('fantasy_session_token');
-    const loginPantalla = document.getElementById('modulo-auth-login-pantalla');
-
-    if (tokenGuardado && loginPantalla) {
-        console.log("🔐 Sesión activa detectada en el almacenamiento local de la tablet. Saltando login.");
-        // Si el token ya existe en la tablet, ocultamos la caja de login al instante para no molestar al míster
-        loginPantalla.style.display = "none";
-    } else if (loginPantalla) {
-        // Si no hay token, forzamos que se muestre el login bloqueando la app
-        loginPantalla.style.display = "flex";
-    }
-}
-
-// Escuchador seguro para verificar el estatus de la cuenta al abrir la web
-if (document.readyState === "complete" || document.readyState === "interactive") {
-    comprobarSesionActivaAlCargarPagera();
-} else {
-    document.addEventListener("DOMContentLoaded", comprobarSesionActivaAlCargarPagera);
-}
-
-/**
- * BOTÓN DE CIERRE DE SESIÓN (Opcional, ponlo donde gustes si quieres desloguear la tablet)
- */
-function cerrarSesionDeLaTablet() {
-    if (confirm("¿Cerrar sesión táctica y bloquear el vestuario?")) {
-        localStorage.removeItem('fantasy_session_token');
-        localStorage.removeItem('fantasy_usuario_datos');
-        window.location.reload(); // Refrescamos la web para que vuelva a saltar el login bloqueante
-    }
-}
-
-/**
- * RESTRICCION TÁCTIL: Desactiva campos y oculta botones según el nivel de poder
- */
-function aplicarPermisosSegunRolActual() {
-    // 1. Recuperamos los datos del usuario guardados tras el Login
-    const datosSesion = localStorage.getItem('fantasy_usuario_datos');
-    if (!datosSesion) return; // Si no hay sesión, no hacemos nada (está el login bloqueante)
-
-    const usuario = JSON.parse(datosSesion);
+    const usuario = JSON.parse(sesion);
     const rol = parseInt(usuario.id_rol); // 1 = Admin, 2 = Entrenador, 3 = Jugador
 
-    console.log(`🔐 Aplicando políticas de acceso para el Rol ID: [${rol}] (${usuario.nombre})`);
+    console.log(`🔐 Aplicando políticas visuales para el usuario con Rol ID: [${rol}]`);
 
-    // 2. Capturamos los elementos críticos de la pizarra que queremos capar
-    const inputGolesLocal = document.getElementById('par-form-goles-local');
-    const inputGolesVisitante = document.getElementById('par-form-goles-visitante');
-    const toolbarPizarra = document.getElementById('pizarra-partido-toolbar');
-    const bloqueMicrofono = document.getElementById('btn-microfono-partido').parentElement; // Contenedor del micro
-    const botonSincronizar = document.querySelector("button[onclick='guardarInformeTacticoPartidoMySQL()']");
-    const botonAñadirPizarra = document.querySelector("button[onclick='agregarNuevaPizarraTacticaAlPartido()']");
+    // 🏃 SI ES JUGADOR (ROL 3): Ocultamos los botones de control para que solo lea las pizarras
+    if (rol === 3) {
+        // Buscamos tus elementos nativos por sus IDs y clases originales
+        const btnSincronizar = document.querySelector("button[onclick*='guardar']");
+        const btnEliminar = document.querySelector("button[onclick*='eliminar']");
+        const toolbarPizarra = document.getElementById('pizarra-partido-toolbar') || document.querySelector('.toolbar');
 
-    // 👑 CASO 1: Eres el ADMINISTRADOR (Tú) o el ENTRENADOR (Míster)
-    if (rol === 1 || rol === 2) {
-        // Tienen control total: habilitamos todos los campos y botones
-        if (inputGolesLocal) inputGolesLocal.removeAttribute('readonly');
-        if (inputGolesVisitante) inputGolesVisitante.removeAttribute('readonly');
-        if (toolbarPizarra) toolbarPizarra.style.display = "flex";
-        if (bloqueMicrofono) bloqueMicrofono.style.display = "flex";
-        if (botonSincronizar) botonSincronizar.style.display = "inline-block";
-        if (botonAñadirPizarra) botonAñadirPizarra.style.display = "inline-block";
-    } 
-    
-    // 🏃 CASO 2: Eres un JUGADOR (Modo Lectura Estricto)
-    else if (rol === 3) {
-        // Bloqueamos los marcadores de goles para que no puedan alterarlos
-        if (inputGolesLocal) inputGolesLocal.setAttribute('readonly', 'true');
-        if (inputGolesVisitante) inputGolesVisitante.setAttribute('readonly', 'true');
-
-        // Ocultamos la barra estilo Paint (No pueden seleccionar lápiz, goma ni mover fichas)
+        if (btnSincronizar) btnSincronizar.style.display = "none";
+        if (btnEliminar) btnEliminar.style.display = "none";
         if (toolbarPizarra) toolbarPizarra.style.display = "none";
 
-        // Ocultamos el micrófono (No pueden grabar notas de voz sobre tu estrategia)
-        if (bloqueMicrofono) bloqueMicrofono.style.display = "none";
-
-        // Ocultamos los botones de Guardar y Añadir Lonas para que no sobreescriban tu MySQL
-        if (botonSincronizar) botonSincronizar.style.display = "none";
-        if (botonAñadirPizarra) botonAñadirPizarra.style.display = "none";
-
-        // Desactivamos el clic y el arrastre en el Canvas modificando la propiedad del motor gráfico
-        if (window.miPizarraPartidos) {
-            // Desvinculamos los listeners táctiles para que el canvas actúe como una pantalla pasiva
-            window.miPizarraPartidos.canvas.style.pointerEvents = "none"; 
-        }
+        // Desactivamos la edición en el canvas para la tablet del jugador
+        const canvas = document.getElementById('pizarra-canvas-partido') || document.querySelector('canvas');
+        if (canvas) canvas.style.pointerEvents = "none";
     }
 }
 
-// 🎯 INTEGRACIÓN: Forzamos a que se ejecute la restricción al iniciar la página
-// Busca tu función 'comprobarSesionActivaAlCargarPagera()' de la respuesta anterior y añade esto al final:
-function comprobarSesionActivaAlCargarPagera() {
-    const tokenGuardado = localStorage.getItem('fantasy_session_token');
-    const loginPantalla = document.getElementById('modulo-auth-login-pantalla');
+function verificarArranqueDeSesiónAislado() {
+    const token = localStorage.getItem('fantasy_session_token');
+    const login = document.getElementById('modulo-auth-login-pantalla');
 
-    if (tokenGuardado && loginPantalla) {
-        loginPantalla.style.display = "none";
-        // 🚀 Línea añadida: Capa los botones inmediatamente si el token ya estaba en la tablet
-        aplicarPermisosSegunRolActual(); 
-    } else if (loginPantalla) {
-        loginPantalla.style.display = "flex";
+    if (token && login) {
+        login.style.display = "none";
+        aplicarFiltrosDeRolAislados();
+        // 🚀 Si ya estaba logueado, disparamos tu carrusel nativo original de fábrica
+        if (typeof cargarListaPartidosDeJornadaDesdeBD === "function") {
+            cargarListaPartidosDeJornadaDesdeBD();
+        }
+    } else if (login) {
+        login.style.display = "flex";
     }
 }
 
-
-
-
-// Fin de Login
-
-
-// =======================================================================
-// 🔄 ALIAS DE COMPATIBILIDAD INVERSA (DESACTIVA EL PUENTE DE SEGURIDAD 1989)
-// =======================================================================
-// Si tu código antiguo nativo intenta ejecutar el nombre viejo, lo capturamos 
-// de forma pasiva y lo redirigimos hacia el nuevo motor SaaS multi-inquilino sin que se rompa nada
-if (typeof cargarListaPartidosDeJornadaDesdeBD === "undefined") {
-    window.cargarListaPartidosDeJornadaDesdeBD = function() {
-        console.log("🔄 Redirección de compatibilidad: Redirigiendo 'cargarListaPartidosDeJornadaDesdeBD' hacia 'inyectarCarruselSaaSMultiInquilino'");
-        if (typeof inyectarCarruselSaaSMultiInquilino === "function") {
-            inyectarCarruselSaaSMultiInquilino();
-        }
-    };
+// Inicializador de arranque seguro al cargar la ventana en la tablet
+if (document.readyState === "complete" || document.readyState === "interactive") {
+    verificarArranqueDeSesiónAislado();
+} else {
+    document.addEventListener("DOMContentLoaded", verificarArranqueDeSesiónAislado);
 }
+
 
 
 

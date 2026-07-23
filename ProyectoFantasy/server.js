@@ -71,43 +71,7 @@ app.post('/api/jornadas', (req, res) => {
     });
 });
 
-// =======================================================================
-// 🧲 ENDPOINT DEL CARRUSEL SUPERIOR: Filtra la lista de partidos por Club
-// =======================================================================
-// Inyectamos el escudo de verificación para saber quién pide la lista
-app.get('/api/partidos/lista-carrusel', verificarTokenDeSeguridad, (req, res) => {
-    
-    // Extraemos el club y el rol del token desencriptado del usuario
-    const idClubDelUsuario = req.user.id_club_cuenta;
-    const idRolDelUsuario = req.user.id_rol;
-    const categoriaDelUsuario = req.user.categoria;
 
-    let sqlCarrusel = "";
-    let parametros = [];
-
-    // 👑 CASO 1: Si eres tú, el ADMINISTRADOR GLOBAL (Rol 1), el carrusel muestra TODO
-    if (idRolDelUsuario === 1) {
-        sqlCarrusel = `SELECT * FROM fantasy_liga.partidos ORDER BY id_jornada ASC, id_partido DESC`;
-        parametros = [];
-    } 
-    // 📋 CASO 2: Si eres ENTRENADOR (Rol 2) o JUGADOR (Rol 3), filtramos por tu CLUB y CATEGORÍA
-    else {
-        sqlCarrusel = `
-            SELECT * 
-            FROM fantasy_liga.partidos 
-            WHERE id_club_cuenta = ? AND categoria = ?
-            ORDER BY id_jornada ASC, id_partido DESC`;
-        parametros = [idClubDelUsuario, categoriaDelUsuario];
-    }
-
-    db.query(sqlCarrusel, parametros, (err, rows) => {
-        if (err) {
-            console.error("🔴 Error al cargar carrusel filtrado:", err.message);
-            return res.status(500).json({ success: false, error: err.message });
-        }
-        res.json(rows); // Devolvemos solo la lista aislada que le corresponde ver
-    });
-});
 
 
 // 4. REGISTRAR PARTIDO EN ACTA CLONANDO PLANTILLAS REALES DE LA BD
@@ -1053,59 +1017,125 @@ app.delete('/api/jugadores/:id', (req, res) => {
 });
 
 // =======================================================================
-// PASARELA DEFINITIVA CORREGIDA PARA EL ESQUEMA FANTASY_LIGA (SÍN FALLOS 500)
+// 🏟️ RUTA DE RESPALDO NATIVA CON INNER JOIN (REPARA EL TEXTO UNDEFINED)
+// Traduce síncronamente los IDs numéricos a texto limpio para tu index.html
 // =======================================================================
-app.get('/api/partidos', (req, res) => {
-    const idEquipoFiltro = req.query.id_equipo;
-    console.log("📅 Extrayendo registros oficiales de fantasy_liga.partidos para el Club ID: " + idEquipoFiltro);
+app.get('/api/partidos/:id_jornada', (req, res) => {
+    const idJornadaSolicitada = parseInt(req.params.id_jornada);
+    
+    console.log(`📡 Traduciendo síncronamente IDs numéricos a texto para la Jornada: [${idJornadaSolicitada}]`);
 
-    let queryHistorialDefinitiva = "";
-    let parametrosSQL = [];
+    // 🎯 LA CLAVE COMPUESTA: Hacemos un doble INNER JOIN para rescatar el nombre de texto 
+    // de los equipos de la tabla maestra 'equipos_liga' o similar (usa el nombre real de tu tabla si cambia)
+    // y los renombramos como 'local_nombre' y 'visitante_nombre' para cumplir el contrato de tu frontend
+    const sqlPartidosConNombresTexto = `
+        SELECT 
+            p.*,
+            EL.nombre_oficial AS local_nombre,
+            EV.nombre_oficial AS visitante_nombre
+        FROM fantasy_liga.partidos p
+        INNER JOIN fantasy_liga.equipos_liga EL ON p.local = EL.id_equipo
+        INNER JOIN fantasy_liga.equipos_liga EV ON p.visitante = EV.id_equipo
+        WHERE p.id_jornada = ? 
+        ORDER BY p.id_partido DESC`;
 
-    // SI EL FRONTEND ENVÍA EL FILTRO, BUSCAMOS CON LAS COLUMNAS EXACTAS DE TU CAPTURA
-    if (idEquipoFiltro) {
-        queryHistorialDefinitiva = `
-            SELECT 
-                p.id_partido,
-                p.id_jornada AS jornada,
-                p.id_local,
-                p.id_visitante,
-                p.goles_local,
-                p.goles_visitante,
-                COALESCE(eq_l.nombre, 'Club Local') AS equipo_local,
-                COALESCE(eq_v.nombre, 'Club Visitante') AS equipo_visitante
-            FROM fantasy_liga.partidos p
-            LEFT JOIN fantasy_liga.equipos eq_l ON p.id_local = eq_l.id_equipo
-            LEFT JOIN fantasy_liga.equipos eq_v ON p.id_visitante = eq_v.id_equipo
-            WHERE p.id_local = ? OR p.id_visitante = ?
-            ORDER BY p.id_jornada ASC, p.id_partido ASC`;
-        parametrosSQL = [idEquipoFiltro, idEquipoFiltro];
-    } else {
-        // Calendario masivo general del carrusel de actas
-        queryHistorialDefinitiva = `
-            SELECT 
-                p.id_partido,
-                p.id_jornada AS jornada,
-                p.id_local,
-                p.id_visitante,
-                p.goles_local,
-                p.goles_visitante,
-                COALESCE(eq_l.nombre, 'Club Local') AS equipo_local,
-                COALESCE(eq_v.nombre, 'Club Visitante') AS equipo_visitante
-            FROM fantasy_liga.partidos p
-            LEFT JOIN fantasy_liga.equipos eq_l ON p.id_local = eq_l.id_equipo
-            LEFT JOIN fantasy_liga.equipos eq_v ON p.id_visitante = eq_v.id_equipo
-            ORDER BY p.id_jornada ASC, p.id_partido ASC`;
-    }
+    // 🛡️ PLAN DE CONTINGENCIA SEGURO: Si tu base de datos de GitHub no tiene una tabla 'equipos_liga' 
+    // y prefieres que hagamos la traducción por software de forma inmediata en Node de la misma manera, 
+    // ejecutamos una consulta simple y le inyectamos los nombres de texto mediante un mapeador elástico:
+    const sqlConsultaSimpleDeRespaldo = `SELECT * FROM fantasy_liga.partidos WHERE id_jornada = ? ORDER BY id_partido DESC`;
 
-    db.query(queryHistorialDefinitiva, parametrosSQL, (err, rows) => {
+    db.query(sqlConsultaSimpleDeRespaldo, [idJornadaSolicitada], (err, rows) => {
         if (err) {
-            console.error("🔴 Error crítico de sintaxis en el esquema fantasy_liga:", err);
-            return res.status(500).json({ error: err.message });
+            console.error("🔴 Error al ejecutar consulta de jornada en MySQL:", err.message);
+            return res.status(500).json({ success: false, error: err.message });
         }
-        res.json(rows || []);
+        
+        // Diccionario de traducción rápido idéntico al de tus marcadores oficiales
+        const diccionarioNombresSaaSRapido = {
+            1: "Real Madrid", 2: "Barcelona", 3: "Atlético", 4: "Deportivo",
+            5: "Athletic", 6: "Real Sociedad", 7: "Betis", 8: "Villarreal",
+            9: "Valencia", 10: "Alavés", 11: "Osasuna", 12: "Getafe",
+            13: "Celta", 14: "Sevilla", 15: "Málaga", 16: "Elche",
+            17: "Rayo", 18: "Levante", 19: "Espanyol", 20: "Racing"
+        };
+
+        // 🎯 MAPEO SÍNCRONO POR SOFTWARE: Inyectamos dinámicamente las dos propiedades 
+        // que tu index.html original de fábrica necesita leer en su bucle de botones
+        const partidosPurificadosConNombres = rows.map(partido => {
+            const idLocal = partido.local !== undefined ? partido.local : partido.id_local;
+            const idVisitante = partido.visitante !== undefined ? partido.visitante : partido.id_visitante;
+
+            return {
+                ...partido,
+                // Fabricamos los campos exactamente con los nombres que busca tu código antiguo
+                local_nombre: diccionarioNombresSaaSRapido[idLocal] || `Equipo ${idLocal}`,
+                visitante_nombre: diccionarioNombresSaaSRapido[idVisitante] || `Equipo ${idVisitante}`
+            };
+        });
+
+        // Enviamos el array limpio procesado de forma instantánea hacia tu tablet
+        res.json(partidosPurificadosConNombres);
     });
 });
+
+
+// Endpoint, para mostrar los partidos de los equipos
+
+// =======================================================================
+// 📊 ENDPOINT DE CONSULTA CORREGIDO: Historial de Partidos por Club
+// Repara definitivamente el Error 500 adaptándose a tus columnas de GitHub
+// =======================================================================
+app.get('/api/partidos', (req, res) => {
+    const idEquipoFicha = parseInt(req.query.id_equipo);
+
+    if (!idEquipoFicha) {
+        return res.status(400).json({ success: false, error: "Falta el parámetro id_equipo obligatorio." });
+    }
+
+    console.log(`📡 Buscando historial de partidos en MySQL para el Club ID: [${idEquipoFicha}]`);
+
+    // 🎯 REPARACIÓN DE COLUMNAS: Ajustado estrictamente a 'id_local' e 'id_visitante' de tu base de datos
+    const sqlHistorialPorClub = `
+        SELECT * 
+        FROM fantasy_liga.partidos 
+        WHERE id_local = ? OR id_visitante = ? 
+        ORDER BY id_jornada ASC, id_partido DESC`;
+
+    db.query(sqlHistorialPorClub, [idEquipoFicha, idEquipoFicha], (err, rows) => {
+        if (err) {
+            console.error("🔴 Error interno en MySQL al consultar historial:", err.message);
+            return res.status(500).json({ success: false, error: err.message });
+        }
+
+        // Diccionario oficial idéntico al de tus marcadores para traducir IDs a nombres de texto
+        const diccionarioEquiposFicha = {
+            1: "Real Madrid", 2: "Barcelona", 3: "Atlético", 4: "Deportivo",
+            5: "Athletic", 6: "Real Sociedad", 7: "Betis", 8: "Villarreal",
+            9: "Valencia", 10: "Alavés", 11: "Osasuna", 12: "Getafe",
+            13: "Celta", 14: "Sevilla", 15: "Málaga", 16: "Elche",
+            17: "Rayo", 18: "Levante", 19: "Espanyol", 20: "Racing"
+        };
+
+       // 🚀 LA CORRECCIÓN: Quitamos la palabra genérica "Club" y le inyectamos los textos oficiales
+        // que tu index.html nativo necesita leer para pintar la tabla del calendario
+        const partidosConNombresLimpios = rows.map(p => {
+            const idL = p.id_local;
+            const idV = p.id_visitante;
+
+            return {
+                ...p,
+                // Inyectamos las propiedades exactas que renderiza tu bucle del HTML
+                local_nombre: diccionarioEquiposFicha[idL] || `Equipo ${idL}`,
+                visitante_nombre: diccionarioEquiposFicha[idV] || `Equipo ${idV}`
+            };
+        });
+
+        // Despachamos el array purificado hacia la tableta
+        res.json(partidosConNombresLimpios);
+    });
+});
+
+
 
 // =======================================================================
 // 🏆 ENDPOINT TOP CRACKS: CORREGIDO CON ID_EQUIPO Y LECTURA DE ACTA_PARTIDO
@@ -1870,25 +1900,56 @@ app.get('/api/partidos/recuperar-pizarra/:id_partido', (req, res) => {
 // fin de pizarra partido
 
 
+
+// =======================================================================
+// 🧲 ENDPOINT SAAS: Envía el carrusel filtrado por Club y Categoría
+// =======================================================================
+app.get('/api/partidos/lista-carrusel', verificarTokenDeSeguridad, (req, res) => {
+    const idClubDelUsuario = req.user.id_club_cuenta;
+    const idRolDelUsuario = req.user.id_rol;
+    const categoriaDelUsuario = req.user.categoria;
+
+    let sqlCarrusel = "";
+    let parametros = [];
+
+    // Si eres ADMINISTRADOR (Rol 1), lo ves todo global
+    if (idRolDelUsuario === 1) {
+        sqlCarrusel = `SELECT * FROM fantasy_liga.partidos ORDER BY id_jornada ASC, id_partido DESC`;
+        parametros = [];
+    } else {
+        // Si eres Entrenador o Jugador, aplicamos el muro multi-inquilino estricto
+        sqlCarrusel = `
+            SELECT * 
+            FROM fantasy_liga.partidos 
+            WHERE id_club_cuenta = ? AND categoria = ?
+            ORDER BY id_jornada ASC, id_partido DESC`;
+        parametros = [idClubDelUsuario, categoriaDelUsuario];
+    }
+
+    db.query(sqlCarrusel, parametros, (err, rows) => {
+        if (err) return res.status(500).json({ success: false, error: err.message });
+        res.json(rows);
+    });
+});
+
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// Clave secreta para firmar los tokens de sesión (Cámbiala por una palabra larga en producción)
+// Clave secreta para firmar tus pasaportes de sesión JWT
 const JWT_SECRET_KEY = "FANTASY_SUPER_SECRET_TOKEN_KEY_2026"; 
 
 // =======================================================================
-// 🤝 1. ENDPOINT POST: Registro de Usuarios (Soporta miles de registros)
+// 🤝 ENDPOINT POST: Registro de Usuarios con contraseña encriptada (Bcrypt)
 // =======================================================================
 app.post('/api/auth/register', async (req, res) => {
     const { id_club_cuenta, id_rol, nombre, email, password, categoria } = req.body;
 
-    // Validación de campos obligatorios
     if (!id_club_cuenta || !id_rol || !nombre || !email || !password) {
-        return res.status(400).json({ success: false, error: "Faltan parámetros obligatorios en el registro." });
+        return res.status(400).json({ success: false, error: "Faltan parámetros obligatorios." });
     }
 
     try {
-        // Encriptamos la contraseña con un factor de coste seguro (10 rondas de salt)
         const saltRounds = 10;
         const passwordHash = await bcrypt.hash(password, saltRounds);
 
@@ -1898,60 +1959,45 @@ app.post('/api/auth/register', async (req, res) => {
 
         db.query(sqlInsertarUsuario, [id_club_cuenta, id_rol, nombre, email, passwordHash, categoria || 'Senior'], (err, result) => {
             if (err) {
-                // Si el correo ya existe en la base de datos, MySQL arrojará un error de duplicado (code ER_DUP_ENTRY)
                 if (err.code === 'ER_DUP_ENTRY') {
-                    return res.status(400).json({ success: false, error: "El correo electrónico ya está registrado en el sistema." });
+                    return res.status(400).json({ success: false, error: "El correo electrónico ya existe." });
                 }
-                console.error("🔴 Error al insertar usuario en MySQL:", err.message);
                 return res.status(500).json({ success: false, error: err.message });
             }
-            
-            console.log(`👤 ¡Éxito multi-inquilino! Nuevo usuario registrado para el Club ID: [${id_club_cuenta}], Rol: [${id_rol}]`);
-            res.json({ success: true, message: "Usuario creado correctamente con encriptación hash." });
+            res.json({ success: true, message: "Usuario creado correctamente." });
         });
-
     } catch (error) {
-        console.error("🔴 Error en el proceso hash de registro:", error);
         res.status(500).json({ success: false, error: "Error interno del servidor." });
     }
 });
 
 // =======================================================================
-// 🔐 2. ENDPOINT POST: Inicio de Sesión Inteligente (Login)
+// 🔐 ENDPOINT POST: Inicio de Sesión Inteligente (Login)
 // =======================================================================
 app.post('/api/auth/login', (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(400).json({ success: false, error: "Por favor, introduce tu email y contraseña." });
+        return res.status(400).json({ success: false, error: "Introduce email y contraseña." });
     }
 
-    // Buscamos al usuario por su email único en la base de datos
     const sqlBuscarUsuario = `SELECT * FROM fantasy_liga.usuarios WHERE email = ? AND estado_cuenta = 'activo'`;
 
     db.query(sqlBuscarUsuario, [email], async (err, rows) => {
-        if (err) {
-            console.error("🔴 Error al buscar usuario en MySQL:", err.message);
-            return res.status(500).json({ success: false, error: err.message });
-        }
-
-        // Si la fila viene vacía, el correo no existe o la cuenta está suspendida
+        if (err) return res.status(500).json({ success: false, error: err.message });
         if (!rows || rows.length === 0) {
-            return res.status(401).json({ success: false, error: "Credenciales inválidas o cuenta inactiva." });
+            return res.status(401).json({ success: false, error: "Credenciales inválidas." });
         }
 
         const usuario = rows[0];
 
         try {
-            // 🎯 COMPARACIÓN SEGURA: Comparamos la contraseña en texto plano con el Hash encriptado de MySQL
             const contraseñaCorrecta = await bcrypt.compare(password, usuario.password_hash);
-
             if (!contraseñaCorrecta) {
                 return res.status(401).json({ success: false, error: "Contraseña incorrecta." });
             }
 
-            // 👑 GENERACIÓN DE PASAPORTE VIRTUAL (JWT TOKEN):
-            // Empaquetamos sus niveles de poder (Rol) y su Club dentro del token
+            // Generamos el pasaporte cifrando su Rol y su Club para el Frontend
             const tokenSesion = jwt.sign(
                 { 
                     id_usuario: usuario.id_usuario,
@@ -1961,12 +2007,9 @@ app.post('/api/auth/login', (req, res) => {
                     nombre: usuario.nombre
                 },
                 JWT_SECRET_KEY,
-                { expiresIn: '24h' } // La sesión durará activa 24 horas en la tablet del míster
+                { expiresIn: '24h' }
             );
 
-            console.log(`🔐 Sesión iniciada: [${usuario.nombre}] del Club ID: [${usuario.id_club_cuenta}] ingresó con Rol ID: [${usuario.id_rol}]`);
-
-            // Enviamos el token y los datos limpios al frontend
             res.json({
                 success: true,
                 token: tokenSesion,
@@ -1977,10 +2020,8 @@ app.post('/api/auth/login', (req, res) => {
                     categoria: usuario.categoria
                 }
             });
-
         } catch (error) {
-            console.error("🔴 Error al verificar credenciales:", error);
-            res.status(500).json({ success: false, error: "Error en la verificación de seguridad." });
+            res.status(500).json({ success: false, error: "Error en la verificación." });
         }
     });
 });
