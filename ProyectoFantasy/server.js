@@ -2011,7 +2011,13 @@ app.post('/api/auth/login', (req, res) => {
         return res.status(400).json({ success: false, error: "Introduce email y contraseña." });
     }
 
-    const sqlBuscarUsuario = `SELECT * FROM fantasy_liga.usuarios WHERE email = ? AND estado_cuenta = 'activo'`;
+    
+    // =======================================================================
+// 🔐 REPARACIÓN DE CONSULTA DE ACCESO EN LA NUBE (RENDER)
+// Quitamos el prefijo 'fantasy_liga.' para que busque en tu base de datos de Clever Cloud
+// =======================================================================
+    const sqlBuscarUsuario = `SELECT * FROM usuarios WHERE email = ? AND estado_cuenta = 'activo'`;
+    
 
     db.query(sqlBuscarUsuario, [email], async (err, rows) => {
         if (err) return res.status(500).json({ success: false, error: err.message });
