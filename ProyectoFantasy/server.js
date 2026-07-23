@@ -18,10 +18,14 @@ const path = require('path'); // Pon esta línea arriba del todo si no la tienes
 // Reemplaza 'ProyectoFantasy' por el nombre real de tu carpeta si tus archivos están en la raíz
 app.use(express.static(path.join(__dirname, 'ProyectoFantasy')));
 
-// 🎯 3. EL ENTRANTE MAESTRO: Cuando una tablet entre a tu enlace, le entregamos el index.html
-app.get('*', (req, res) => {
+// =======================================================================
+// 🚀 ENTRADA MAESTRA UNIFICADA OPTIMIZADA PARA EXPRESS 5 / NODE V24
+// Repara el PathError del comodín '*' entregando el archivo de forma elástica
+// =======================================================================
+app.get('(.*)', (req, res) => {
     res.sendFile(path.join(__dirname, 'ProyectoFantasy', 'index.html'));
 });
+
 // 🎯 1. RUTA RELATIVA INTERNA: Obligamos al servidor a entenderse a sí mismo
 // Esto hace que todas tus consultas apunten al hosting sin importar el nombre de la URL
 app.use('/api', (req, res, next) => {
